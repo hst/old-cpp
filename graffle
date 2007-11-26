@@ -1,0 +1,4 @@
+#!/bin/bash
+
+graffle.sh pdf "$1.graffle" "$1.pdf"
+graffle.sh eps "$1.graffle" "$1.eps"

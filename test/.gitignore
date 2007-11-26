@@ -1,0 +1,7 @@
+.deps
+.dirstamp
+.libs
+*.a
+*.la
+*.o
+*.lo

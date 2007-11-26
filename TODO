@@ -1,0 +1,17 @@
+LTS/CSP
+
+  * Normalization of LTSs
+    * Prenormal form will be fairly easy
+    * Bisimulation won't
+
+  * Allow states to be created separately from the CSP transition
+    functions
+
+  * Add more descriptive names for CSP process states
+
+
+CSP0
+
+  * Define file format
+
+  * Write parser in terms of underlying LTS construction methods

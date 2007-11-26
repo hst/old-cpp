@@ -1,0 +1,14 @@
+I'll write more later.  For now, to compile this package, you need:
+
+ * autoconf >= 2.59
+ * automake 1.9
+ * libtool
+ * libjudy
+
+After a fresh checkout, run "autoreconf -i --force" to generate all of
+the autotools files.  Then run the usual
+
+  ./configure
+  make
+
+and you're set.  Good luck!
