@@ -7,13 +7,16 @@ lib_LTLIBRARIES = src/libhst.la
 
 hstincludedir = $(includedir)/hst
 hstinclude_HEADERS = \
+  include/hst/zobrist.hh \
   include/hst/intset.hh \
   include/hst/io.hh
 
 src_libhst_la_SOURCES = \
+  include/hst/zobrist.hh \
   include/hst/intset.hh \
   include/hst/io.hh \
   include/hst/io-macros.hh \
+  src/zobrist.cc \
   src/intset.cc \
   src/io-basic.cc
 

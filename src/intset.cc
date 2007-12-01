@@ -30,6 +30,8 @@
 
 namespace hst
 {
+    zobrist_t intset_t::hash_keys;
+
     /**
      * Union with another set
      */

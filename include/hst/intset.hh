@@ -30,6 +30,12 @@
 
 #include <Judy.h>
 
+#include <hst/zobrist.hh>
+
+#ifndef HST_INTSET_DEBUG
+#define HST_INTSET_DEBUG 0
+#endif
+
 using namespace std;
 using namespace std::tr1;
 
@@ -39,6 +45,10 @@ namespace hst
     {
     private:
         Pvoid_t  set;
+
+        unsigned long  _hash;
+
+        static zobrist_t  hash_keys;
 
     public:
         /**
@@ -72,6 +82,7 @@ namespace hst
         intset_t()
         {
             set = NULL;
+            _hash = 0L;
         }
 
         /**
@@ -80,6 +91,7 @@ namespace hst
         intset_t(const intset_t &other)
         {
             set = NULL;
+            _hash = 0L;
             *this |= other;
         }
 
@@ -90,6 +102,7 @@ namespace hst
         {
             Word_t  size;
             J1FA(size, set);
+            _hash = 0L;
         }
 
         /**
@@ -98,6 +111,7 @@ namespace hst
         void swap(intset_t &other)
         {
             std::swap(set, other.set);
+            std::swap(_hash, other._hash);
         }
 
         /**
@@ -124,12 +138,34 @@ namespace hst
         }
 
         /**
+         * Return the hash value for this set.
+         */
+        unsigned long hash() const
+        {
+            return _hash;
+        }
+
+        /**
          * Add a single element
          */
         intset_t &operator += (const unsigned long element)
         {
             int  rc_int;
             J1S(rc_int, set, element);
+
+            if (rc_int == 1)
+            {
+                // Only update the hash if the element wasn't already
+                // in the set.
+
+                _hash ^= hash_keys.get_key(element);
+            }
+
+#if HST_INTSET_DEBUG
+            cerr << "  Adding element " << element << ", hash now ";
+            print_zobrist_key(cerr, _hash);
+            cerr << endl;
+#endif
 
             // TODO: If there was a malloc error adding this element,
             // we should throw an exception.
@@ -144,6 +180,20 @@ namespace hst
         {
             int  rc_int;
             J1U(rc_int, set, element);
+
+            if (rc_int == 1)
+            {
+                // Only update the hash if the element wasn't already
+                // out of the set.
+
+                _hash ^= hash_keys.get_key(element);
+            }
+
+#if HST_INTSET_DEBUG
+            cerr << "  Removing element " << element << ", hash now ";
+            print_zobrist_key(cerr, _hash);
+            cerr << endl;
+#endif
 
             // TODO: If there was a malloc error removing this
             // element, we should throw an exception.
@@ -176,6 +226,20 @@ namespace hst
          */
         bool operator == (const intset_t &other) const
         {
+            // A set is trivially equal to itself.
+
+            if (this == &other)
+                return true;
+
+            // If the sets' hashes mismatch, they can't be equal.
+
+            if (this->_hash != other._hash)
+                return false;
+
+            // The hashes match, and the sets are distinct — they're
+            // likely equal, but we still have to check the individual
+            // elements to be certain.
+
             return (*this >= other) && (other >= *this);
         }
 
@@ -195,10 +259,10 @@ namespace hst
             void print()
             {
                 if (finished)
-                    cerr << ((void*) this) << " Iterator finished\n";
+                    cerr << ((void*) this) << " Iterator finished" << endl;
                 else
                     cerr << ((void*) this) <<
-                        " Iterator now at " << last_read << "\n";
+                        " Iterator now at " << last_read << endl;
             }
 
             void advance_first()
@@ -308,6 +372,14 @@ namespace hst
     };
 
     typedef shared_ptr<intset_t>  intset_p;
+
+    struct intset_t_hasher
+    {
+        unsigned long operator () (const intset_t &intset) const
+        {
+            return intset.hash();
+        }
+    };
 
     // Input and output operators for streams
     istream &operator >> (istream &stream, intset_t &intset);
