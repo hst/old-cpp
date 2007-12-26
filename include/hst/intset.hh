@@ -24,11 +24,12 @@
 #ifndef HST_INTSET_HH
 #define HST_INTSET_HH
 
+#include <assert.h>
 #include <iostream>
-#include <iterator>
 #include <tr1/memory>
 
-#include <Judy.h>
+#include <judyarray/judy_funcs_wrappers.h>
+#include <judy_set_cell.h>
 
 #include <hst/zobrist.hh>
 
@@ -41,11 +42,12 @@ using namespace std::tr1;
 
 namespace hst
 {
+    typedef judy_set_cell<const unsigned long>  ulong_set;
+
     class intset_t
     {
     private:
-        Pvoid_t  set;
-
+        ulong_set      _set;
         unsigned long  _hash;
 
         static zobrist_t  hash_keys;
@@ -79,20 +81,19 @@ namespace hst
         /**
          * Create a new, empty set
          */
-        intset_t()
+        intset_t():
+            _set(),
+            _hash(0L)
         {
-            set = NULL;
-            _hash = 0L;
         }
 
         /**
          * Create a copy of an existing set
          */
-        intset_t(const intset_t &other)
+        intset_t(const intset_t &other):
+            _set(other._set),
+            _hash(other._hash)
         {
-            set = NULL;
-            _hash = 0L;
-            *this |= other;
         }
 
         /**
@@ -100,8 +101,7 @@ namespace hst
          */
         void clear()
         {
-            Word_t  size;
-            J1FA(size, set);
+            _set.clear();
             _hash = 0L;
         }
 
@@ -110,7 +110,7 @@ namespace hst
          */
         void swap(intset_t &other)
         {
-            std::swap(set, other.set);
+            std::swap(_set, other._set);
             std::swap(_hash, other._hash);
         }
 
@@ -150,10 +150,13 @@ namespace hst
          */
         intset_t &operator += (const unsigned long element)
         {
-            int  rc_int;
-            J1S(rc_int, set, element);
+            size_t  before, after;
 
-            if (rc_int == 1)
+            before = _set.size();
+            _set.insert(element);
+            after = _set.size();
+
+            if (after > before)
             {
                 // Only update the hash if the element wasn't already
                 // in the set.
@@ -167,9 +170,6 @@ namespace hst
             cerr << endl;
 #endif
 
-            // TODO: If there was a malloc error adding this element,
-            // we should throw an exception.
-
             return *this;
         }
 
@@ -178,10 +178,13 @@ namespace hst
          */
         intset_t &operator -= (const unsigned long element)
         {
-            int  rc_int;
-            J1U(rc_int, set, element);
+            size_t  before, after;
 
-            if (rc_int == 1)
+            before = _set.size();
+            _set.erase(element);
+            after = _set.size();
+
+            if (after < before)
             {
                 // Only update the hash if the element wasn't already
                 // out of the set.
@@ -195,9 +198,6 @@ namespace hst
             cerr << endl;
 #endif
 
-            // TODO: If there was a malloc error removing this
-            // element, we should throw an exception.
-
             return *this;
         }
 
@@ -206,19 +206,15 @@ namespace hst
          */
         bool contains(const unsigned long element) const
         {
-            int  rc_int;
-            J1T(rc_int, set, element);
-            return rc_int;
+            return (_set.count(element) > 0);
         }
 
         /**
          * Find cardinality of set
          */
-        unsigned long cardinality() const
+        unsigned long size() const
         {
-            Word_t  result;
-            J1C(result, set, 0, (Word_t) -1);
-            return result;
+            return _set.size();
         }
 
         /**
@@ -243,113 +239,7 @@ namespace hst
             return (*this >= other) && (other >= *this);
         }
 
-        /**
-         * Iterator
-         */
-
-        class iterator:
-            public std::iterator<forward_iterator_tag,
-                                 unsigned long>
-        {
-        private:
-            const intset_t  &intset;
-            unsigned long   last_read;
-            bool            finished;
-
-            void print()
-            {
-                if (finished)
-                    cerr << ((void*) this) << " Iterator finished" << endl;
-                else
-                    cerr << ((void*) this) <<
-                        " Iterator now at " << last_read << endl;
-            }
-
-            void advance_first()
-            {
-                int  rc_int;
-                J1F(rc_int, intset.set, last_read);
-                finished = (rc_int == 0);
-            }
-
-            void advance()
-            {
-                int  rc_int;
-                J1N(rc_int, intset.set, last_read);
-                finished = (rc_int == 0);
-            }
-
-        public:
-            iterator(const intset_t &_intset):
-                intset(_intset)
-            {
-                last_read = 0;
-                advance_first();
-            }
-
-            iterator(const intset_t &_intset, unsigned long initial):
-                intset(_intset)
-            {
-                last_read = initial;
-                advance_first();
-            }
-
-            iterator(const intset_t &_intset, bool _finished):
-                intset(_intset)
-            {
-                last_read = 0;
-                finished = _finished;
-                if (!finished)
-                {
-                    advance_first();
-                }
-            }
-
-            ~iterator()
-            {
-            }
-
-            iterator &operator = (const iterator &other)
-            {
-                last_read = other.last_read;
-                finished = other.finished;
-            }
-
-            bool operator == (const iterator &other) const
-            {
-                // If both are finished, then they're equal.
-                if (finished && other.finished) return true;
-
-                // If one is finished and the other not, they're
-                // unequal.
-                if (finished != other.finished) return false;
-
-                // If neither is finished, then they must be at the
-                // same location.
-                return (last_read == other.last_read);
-            }
-
-            bool operator != (const iterator &other) const
-            {
-                return !(*this == other);
-            }
-
-            iterator &operator ++ ()
-            {
-                advance();
-            }
-
-            iterator &operator ++ (int)
-            {
-                advance();
-            }
-
-            unsigned long operator * ()
-            {
-                return last_read;
-            }
-
-        };
+        typedef ulong_set::iterator  iterator;
 
         /**
          * Begin iterator
@@ -357,7 +247,7 @@ namespace hst
 
         iterator begin() const
         {
-            return iterator(*this);
+            return _set.begin();
         }
 
         /**
@@ -366,7 +256,7 @@ namespace hst
 
         iterator end() const
         {
-            return iterator(*this, true);
+            return _set.end();
         }
 
     };

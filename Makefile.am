@@ -1,9 +1,31 @@
+JUDYHASH_DIR = $(srcdir)/libs/judyhash/src_lib
+
 AUTOMAKE_OPTIONS = subdir-objects
-AM_CPPFLAGS = -I$(srcdir)/include $(JUDY_CPPFLAGS)
+AM_CPPFLAGS = -I$(srcdir)/include -I$(JUDYHASH_DIR) $(JUDY_CPPFLAGS)
 AM_LDFLAGS = $(JUDY_LDFLAGS)
 AM_LIBS = -lJudy
 
 lib_LTLIBRARIES = src/libhst.la
+
+include_HEADERS = \
+  $(JUDYHASH_DIR)/judy_map.h \
+  $(JUDYHASH_DIR)/judy_map_kdcell.h \
+  $(JUDYHASH_DIR)/judy_map_l.h \
+  $(JUDYHASH_DIR)/judy_map_m.h \
+  $(JUDYHASH_DIR)/judy_set.h \
+  $(JUDYHASH_DIR)/judy_set_cell.h \
+  $(JUDYHASH_DIR)/judy_set_l.h \
+  $(JUDYHASH_DIR)/judy_set_m.h
+
+judyarrayincludedir = $(includedir)/judyarray
+judyarrayinclude_HEADERS = \
+  $(JUDYHASH_DIR)/judyarray/judy_common.h \
+  $(JUDYHASH_DIR)/judyarray/judy_funcs_wrappers.h \
+  $(JUDYHASH_DIR)/judyarray/judy_map_common.h \
+  $(JUDYHASH_DIR)/judyarray/judy_mapset_common.h \
+  $(JUDYHASH_DIR)/judyarray/judy_mapset_list.h \
+  $(JUDYHASH_DIR)/judyarray/judy_mapset_map.h \
+  $(JUDYHASH_DIR)/judyarray/judy_set_common.h
 
 hstincludedir = $(includedir)/hst
 hstinclude_HEADERS = \
