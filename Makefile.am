@@ -31,15 +31,18 @@ hstincludedir = $(includedir)/hst
 hstinclude_HEADERS = \
   include/hst/zobrist.hh \
   include/hst/intset.hh \
+  include/hst/intsetset.hh \
   include/hst/io.hh
 
 src_libhst_la_SOURCES = \
   include/hst/zobrist.hh \
   include/hst/intset.hh \
+  include/hst/intsetset.hh \
   include/hst/io.hh \
   include/hst/io-macros.hh \
   src/zobrist.cc \
   src/intset.cc \
+  src/intsetset.cc \
   src/io-basic.cc
 
 EXTRA_DIST=\
@@ -47,19 +50,32 @@ EXTRA_DIST=\
   test/intset/test-all-difference.sh \
   test/intset/test-all-intersection.sh \
   test/intset/test-all-overlap.sh \
-  test/intset/test-all-union.sh
+  test/intset/test-all-union.sh \
+  test/intsetset/test-all-difference.sh \
+  test/intsetset/test-all-intersection.sh \
+  test/intsetset/test-all-overlap.sh \
+  test/intsetset/test-all-union.sh
 
 LDADD=src/libhst.la -lJudy
 check_PROGRAMS=\
   test/intset/test-difference \
   test/intset/test-intersection \
   test/intset/test-overlap \
-  test/intset/test-union
+  test/intset/test-union \
+  test/intsetset/test-difference \
+  test/intsetset/test-intersection \
+  test/intsetset/test-overlap \
+  test/intsetset/test-union
 
 test_intset_test_difference_SOURCES = test/intset/test-difference.cc
 test_intset_test_intersection_SOURCES = test/intset/test-intersection.cc
 test_intset_test_overlap_SOURCES = test/intset/test-overlap.cc
 test_intset_test_union_SOURCES = test/intset/test-union.cc
+
+test_intsetset_test_difference_SOURCES = test/intsetset/test-difference.cc
+test_intsetset_test_intersection_SOURCES = test/intsetset/test-intersection.cc
+test_intsetset_test_overlap_SOURCES = test/intsetset/test-overlap.cc
+test_intsetset_test_union_SOURCES = test/intsetset/test-union.cc
 
 check-PROGRAMS: $(check_PROGRAMS)
 
@@ -67,4 +83,8 @@ TESTS=\
   test/intset/test-all-difference.sh \
   test/intset/test-all-intersection.sh \
   test/intset/test-all-overlap.sh \
-  test/intset/test-all-union.sh
+  test/intset/test-all-union.sh \
+  test/intsetset/test-all-difference.sh \
+  test/intsetset/test-all-intersection.sh \
+  test/intsetset/test-all-overlap.sh \
+  test/intsetset/test-all-union.sh
