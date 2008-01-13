@@ -24,7 +24,6 @@
 #ifndef HST_IO_BASIC_CC
 #define HST_IO_BASIC_CC
 
-#include <exception>
 #include <iostream>
 #include <cctype>
 
@@ -41,10 +40,23 @@ namespace hst
                               const bool skip_space)
     {
         ch = stream.get();
+
+#if HST_IO_DEBUG
+        cerr << "  read '" << ch << "'";
+#endif
+
         while (skip_space && stream.good() && isspace(ch))
         {
             ch = stream.get();
+
+#if HST_IO_DEBUG
+            cerr << ", '" << ch << "'";
+#endif
         }
+
+#if HST_IO_DEBUG
+        cerr << endl;
+#endif
     }
 
     void require_char(istream &stream, const char expected,
@@ -56,14 +68,26 @@ namespace hst
         // return successfully.  If it's any other character, it's a
         // parse error.
 
+#if HST_IO_DEBUG
+        cerr << "Require '" << expected << "'" << endl;
+#endif
+
         read_char_skip_space(stream, ch, skip_space);
         PROPAGATE_ANY_ERROR(NOTHING);
 
         if (stream.good() && ch != expected)
         {
+#if HST_IO_DEBUG
+            cerr << "  unsuccessful." << endl;
+#endif
+
             stream.putback(ch);
             PARSE_ERROR(NOTHING);
         }
+
+#if HST_IO_DEBUG
+        cerr << "  successful." << endl;
+#endif
     }
 
     void require_string(istream &stream, const char *str,
@@ -71,6 +95,10 @@ namespace hst
     {
         const char  *start;
         bool        first = true;
+
+#if HST_IO_DEBUG
+        cerr << "Require \"" << str << "\"" << endl;
+#endif
 
         while (*str != '\0')
         {
@@ -92,6 +120,10 @@ namespace hst
             str++;
         }
 
+#if HST_IO_DEBUG
+        cerr << "  successful." << endl;
+#endif
+
         return;
 
       error:
@@ -99,6 +131,10 @@ namespace hst
         // there could be some initial characters that we've already
         // matched correctly.  If so, we should put them back into the
         // stream before returning.
+
+#if HST_IO_DEBUG
+        cerr << "  unsuccessful." << endl;
+#endif
 
         if (stream.fail())
         {
@@ -123,6 +159,10 @@ namespace hst
         unsigned long  result = 0;
         char           ch;
 
+#if HST_IO_DEBUG
+        cerr << "Require integer" << endl;
+#endif
+
         // Read the first character, possibly skipping over any
         // preceding whitespace.  If there's an error condition,
         // return.  If the character isn't a digit, it's a parse
@@ -130,6 +170,9 @@ namespace hst
         // word we're reading.
 
         read_char_skip_space(stream, ch, skip_space);
+#if HST_IO_DEBUG
+        cerr << "  ch = '" << ch << "'" << endl;
+#endif
         PROPAGATE_IO_ERROR(NOTHING);
 
         if (isdigit(ch))
@@ -154,6 +197,9 @@ namespace hst
 
             if (stream.eof())
             {
+#if HST_IO_DEBUG
+                cerr << "  got " << result << endl;
+#endif
                 // Keep the EOF flag set, but do *not* set the fail
                 // flag, since we've successfully read a value.
 
@@ -163,11 +209,92 @@ namespace hst
                 result *= 10;
                 result += (ch - '0');
             } else {
+#if HST_IO_DEBUG
+                cerr << "  got " << result << endl;
+#endif
                 stream.putback(ch);
                 value = result;
                 return;
             }
         } 
+    }
+
+    void read_event_arrow(istream &stream, unsigned long &value,
+                          const bool skip_space)
+    {
+        unsigned long  result = 0;
+
+        /*
+         * The first two characters must be '-'...
+         */
+
+        require_string(stream, "--", skip_space);
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * ...followed by an integer literal (with no intervening
+         * spaces)...
+         */
+
+        read_word(stream, result, false);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * ...followed by "-->"
+         */
+
+        require_string(stream, "-->", false);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * The parse succeeded, so let's return it.
+         */
+
+        value = result;
+        return;
+    }
+
+    void read_lts_link(istream &stream,
+                       unsigned long &from_state,
+                       unsigned long &event,
+                       unsigned long &to_state,
+                       const bool skip_space)
+    {
+        unsigned long  from_result, to_result;
+        unsigned long  event_result;
+
+        /*
+         * An LTS link should start with an integer...
+         */
+
+        read_word(stream, from_result, skip_space);
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * ...followed by an event arrow...
+         */
+
+        read_event_arrow(stream, event_result, true);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * ...and then another integer.
+         */
+        read_word(stream, to_result, true);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * Right, we've parsed a valid LTS link, so let's return it.
+         */
+
+        from_state = from_result;
+        event = event_result;
+        to_state = to_result;
+        return;
     }
 
 } // namespace hst

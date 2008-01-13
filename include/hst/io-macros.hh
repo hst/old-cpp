@@ -40,7 +40,7 @@
 #define PARSE_ERROR(ret)                        \
     {                                           \
         stream.setstate(ios_base::failbit);     \
-        return (ret);                   \
+        return (ret);                           \
     }
 
 /*
@@ -65,7 +65,7 @@
     {                                           \
         if (!stream.good())                     \
         {                                       \
-            return (ret);               \
+            return (ret);                       \
         }                                       \
     }
 
@@ -78,7 +78,7 @@
     {                                           \
         if (stream.eof() || stream.bad())       \
         {                                       \
-            return (ret);               \
+            return (ret);                       \
         }                                       \
     }
 
@@ -90,7 +90,7 @@
     {                                           \
         if (stream.eof())                       \
         {                                       \
-            return (ret);               \
+            return (ret);                       \
         }                                       \
     }
 
@@ -103,7 +103,7 @@
     {                                           \
         if (stream.bad())                       \
         {                                       \
-            return (ret);               \
+            return (ret);                       \
         }                                       \
     }
 

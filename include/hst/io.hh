@@ -26,6 +26,10 @@
 
 #include <iostream>
 
+#ifndef HST_IO_DEBUG
+#define HST_IO_DEBUG 0
+#endif
+
 using namespace std;
 
 namespace hst
@@ -63,6 +67,30 @@ namespace hst
 
     void read_word(istream &stream, unsigned long &value,
                    const bool skip_space);
+
+    /*
+     * Reads an event arrow, ignoring any initial whitespace.  An
+     * event arrow must match the regexp "--[0-9]+-->".  If we find an
+     * arrow, the value of its integer literal is placed into the
+     * «value» reference.  Sets the stream's fail flag otherwise.
+     */
+
+    void read_event_arrow(istream &stream, unsigned long &value,
+                          const bool skip_space);
+
+
+    /*
+     * Read in an LTS link, which consists of two integer literals
+     * separated by an event arrow ("--[event]-->").  If we find a
+     * link, its value is placed into the «from_state», «event», and
+     * «to_state» references.  Sets the stream's fail flag otherwise.
+     */
+
+    void read_lts_link(istream &stream,
+                       unsigned long &from_state,
+                       unsigned long &event,
+                       unsigned long &to_state,
+                       const bool skip_space);
 
 }
 

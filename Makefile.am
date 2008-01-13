@@ -32,18 +32,21 @@ hstinclude_HEADERS = \
   include/hst/zobrist.hh \
   include/hst/intset.hh \
   include/hst/intsetset.hh \
+  include/hst/lts.hh \
   include/hst/io.hh
 
 src_libhst_la_SOURCES = \
   include/hst/zobrist.hh \
   include/hst/intset.hh \
   include/hst/intsetset.hh \
+  include/hst/lts.hh \
   include/hst/io.hh \
   include/hst/io-macros.hh \
   src/zobrist.cc \
   src/intset.cc \
   src/intsetset.cc \
-  src/io-basic.cc
+  src/io-basic.cc \
+  src/lts.cc
 
 EXTRA_DIST=\
   src/dirstamp \
@@ -54,7 +57,8 @@ EXTRA_DIST=\
   test/intsetset/test-all-difference.sh \
   test/intsetset/test-all-intersection.sh \
   test/intsetset/test-all-overlap.sh \
-  test/intsetset/test-all-union.sh
+  test/intsetset/test-all-union.sh \
+  test/lts/test-all-lts.sh
 
 LDADD=src/libhst.la -lJudy
 check_PROGRAMS=\
@@ -65,7 +69,8 @@ check_PROGRAMS=\
   test/intsetset/test-difference \
   test/intsetset/test-intersection \
   test/intsetset/test-overlap \
-  test/intsetset/test-union
+  test/intsetset/test-union \
+  test/lts/test-lts
 
 test_intset_test_difference_SOURCES = test/intset/test-difference.cc
 test_intset_test_intersection_SOURCES = test/intset/test-intersection.cc
@@ -77,6 +82,8 @@ test_intsetset_test_intersection_SOURCES = test/intsetset/test-intersection.cc
 test_intsetset_test_overlap_SOURCES = test/intsetset/test-overlap.cc
 test_intsetset_test_union_SOURCES = test/intsetset/test-union.cc
 
+test_lts_test_lts_SOURCES = test/lts/test-lts.cc
+
 check-PROGRAMS: $(check_PROGRAMS)
 
 TESTS=\
@@ -87,4 +94,5 @@ TESTS=\
   test/intsetset/test-all-difference.sh \
   test/intsetset/test-all-intersection.sh \
   test/intsetset/test-all-overlap.sh \
-  test/intsetset/test-all-union.sh
+  test/intsetset/test-all-union.sh \
+  test/lts/test-all-lts.sh
