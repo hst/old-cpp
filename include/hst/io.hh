@@ -26,6 +26,10 @@
 
 #include <iostream>
 
+#include <hst/types.hh>
+#include <hst/eventmap.hh>
+#include <hst/lts.hh>
+
 #ifndef HST_IO_DEBUG
 #define HST_IO_DEBUG 0
 #endif
@@ -67,6 +71,16 @@ namespace hst
 
     void read_word(istream &stream, unsigned long &value,
                    const bool skip_space);
+
+    /*
+     * Reads in an event pair, which consists of two integer literals
+     * separated by an arrow ("->").  If we find a pair, its value is
+     * placed into the «pair» pointer.  Sets the stream's fail flag
+     * otherwise.
+     */
+
+    void read_eventpair(istream &stream, eventpair_t &pair,
+                        const bool skip_space);
 
     /*
      * Reads an event arrow, ignoring any initial whitespace.  An

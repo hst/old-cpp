@@ -33,48 +33,16 @@
 #include <judy_set_cell.h>
 #include <judy_map_l.h>
 
-#include <hst/intset.hh>
+#include <hst/types.hh>
 
 #ifndef HST_LTS_DEBUG
 #define HST_LTS_DEBUG 0
 #endif
 
-/*
- * We will treat -1 (0xFFFFFFFF) as an error code, and will never
- * create a state or event with this number.
- */
-
-#define HST_ERROR_STATE  ((hst::state_t) (-1))
-#define HST_ERROR_EVENT  ((hst::event_t) (-1))
-
 using namespace std;
 
 namespace hst
 {
-    typedef unsigned long           state_t;
-    typedef intset_t                stateset_t;
-    typedef shared_ptr<stateset_t>  stateset_p;
-
-    struct state_t_hasher
-    {
-        unsigned long operator () (const state_t state) const
-        {
-            return state;
-        }
-    };
-
-    typedef unsigned long           event_t;
-    typedef intset_t                alphabet_t;
-    typedef shared_ptr<alphabet_t>  alphabet_p;
-
-    struct event_t_hasher
-    {
-        unsigned long operator () (const event_t event) const
-        {
-            return event;
-        }
-    };
-
     struct lts_edge_t
     {
         state_t  from;

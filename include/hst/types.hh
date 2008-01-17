@@ -1,0 +1,68 @@
+/*----------------------------------------------------------------------
+ *
+ *  Copyright (C) 2007 Douglas Creager
+ *
+ *    This library is free software; you can redistribute it and/or
+ *    modify it under the terms of the GNU Lesser General Public
+ *    License as published by the Free Software Foundation; either
+ *    version 2.1 of the License, or (at your option) any later
+ *    version.
+ *
+ *    This library is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU Lesser General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Lesser General Public
+ *    License along with this library; if not, write to the Free
+ *    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+ *    MA 02111-1307 USA
+ *
+ *----------------------------------------------------------------------
+ */
+
+#ifndef HST_TYPES_HH
+#define HST_TYPES_HH
+
+#include <tr1/memory>
+
+#include <hst/intset.hh>
+
+/*
+ * We will treat -1 (0xFFFFFFFF) as an error code, and will never
+ * create a state or event with this number.
+ */
+
+#define HST_ERROR_STATE  ((hst::state_t) (-1))
+#define HST_ERROR_EVENT  ((hst::event_t) (-1))
+
+using namespace std;
+
+namespace hst
+{
+    typedef unsigned long           state_t;
+    typedef intset_t                 stateset_t;
+    typedef shared_ptr<stateset_t>  stateset_p;
+
+    struct state_t_hasher
+    {
+        unsigned long operator () (const state_t state) const
+        {
+            return state;
+        }
+    };
+
+    typedef unsigned long           event_t;
+    typedef intset_t                alphabet_t;
+    typedef shared_ptr<alphabet_t>  alphabet_p;
+
+    struct event_t_hasher
+    {
+        unsigned long operator () (const event_t event) const
+        {
+            return event;
+        }
+    };
+}
+
+#endif // HST_TYPES_H

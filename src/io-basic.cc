@@ -27,6 +27,8 @@
 #include <iostream>
 #include <cctype>
 
+#include <hst/types.hh>
+#include <hst/eventmap.hh>
 #include <hst/io.hh>
 #include <hst/io-macros.hh>
 
@@ -217,6 +219,41 @@ namespace hst
                 return;
             }
         } 
+    }
+
+    void read_eventpair(istream &stream, eventpair_t &pair,
+                        const bool skip_space)
+    {
+        unsigned long  from, to;
+
+        /*
+         * An event pair should start with an integer...
+         */
+
+        read_word(stream, from, skip_space);
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * ...followed by an arrow...
+         */
+
+        require_string(stream, "->", true);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * ...and then another integer.
+         */
+        read_word(stream, to, true);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        /*
+         * Right, we've parsed a valid pair, so let's return it.
+         */
+
+        pair = make_pair(from, to);
+        return;
     }
 
     void read_event_arrow(istream &stream, unsigned long &value,

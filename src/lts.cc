@@ -24,6 +24,7 @@
 #ifndef LTS_CC
 #define LTS_CC
 
+#include <hst/types.hh>
 #include <hst/lts.hh>
 #include <hst/io.hh>
 #include <hst/io-macros.hh>
