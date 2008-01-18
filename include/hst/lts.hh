@@ -80,6 +80,15 @@ namespace hst
         judy_map_l<event_t, string, event_t_hasher>  event_names;
 
         /**
+         * We keep track of which states have been “finalized”.
+         * Before a state is finalized, you cannot rely on having an
+         * accurate view of its outgoing edges; afterwards, you cannot
+         * add any more outgoing edges to it.
+         */
+
+        stateset_t  finalized_states;
+
+        /**
          * The LTS graph represented as a mapping between (state,
          * event) pairs and sets of events.
          */
@@ -247,6 +256,7 @@ namespace hst
             state_names(other.state_names),
             num_events(other.num_events),
             event_names(other.event_names),
+            finalized_states(other.finalized_states),
             graph(other.graph)
         {
         }
@@ -257,6 +267,7 @@ namespace hst
             num_events = 0;
             state_names.clear();
             event_names.clear();
+            finalized_states.clear();
             graph.clear();
         }
 
@@ -266,6 +277,7 @@ namespace hst
             state_names.swap(other.state_names);
             std::swap(num_events, other.num_events);
             event_names.swap(other.event_names);
+            finalized_states.swap(other.finalized_states);            
             graph.swap(other.graph);
         }
 
@@ -293,6 +305,16 @@ namespace hst
             event_t  event = num_events++;
             event_names.insert(make_pair(event, name));
             return event;
+        }
+
+        bool is_finalized(state_t state) const
+        {
+            return finalized_states.contains(state);
+        }
+
+        void finalize(state_t state)
+        {
+            finalized_states += state;
         }
 
         typedef proxy_iterator<graph_t::const_iterator,

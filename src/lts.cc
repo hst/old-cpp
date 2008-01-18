@@ -214,6 +214,9 @@ namespace hst
                          const event_t event,
                          const state_t to)
     {
+        if (is_finalized(from))
+            return;
+
 #if HST_LTS_DEBUG
         cerr << "Adding edge ("
              << from << "," << event << "," << to << ")" << endl;
