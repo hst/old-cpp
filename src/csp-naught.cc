@@ -167,22 +167,47 @@ namespace hst
         }
     }
 
+#define READ_IDENTIFIER(id)                      \
+    {                                            \
+        read_identifier(stream, (id), true);     \
+        EOF_IS_ERROR;                            \
+        PROPAGATE_ANY_ERROR(NOTHING);            \
+    }
+
+#define REQUIRE_CHAR(ch)                        \
+    {                                           \
+        require_char(stream, (ch), true);       \
+        EOF_IS_ERROR;                           \
+        PROPAGATE_ANY_ERROR(NOTHING);           \
+    }
+
+#define REQUIRE_STRING(str)                     \
+    {                                           \
+        require_string(stream, (str), true);    \
+        EOF_IS_ERROR;                           \
+        PROPAGATE_ANY_ERROR(NOTHING);           \
+    }
+
     static
     void read_process_definition(istream &stream, csp_t &csp)
     {
         string  id;
 
-        // Read the identifier
-        read_identifier(stream, id, true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        // and finally a trailing semicolon.
-        require_char(stream, ';', true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
+        READ_IDENTIFIER(id);
+        REQUIRE_CHAR(';');
 
         csp.add_process(id);
+    }
+
+    static
+    void read_event_definition(istream &stream, csp_t &csp)
+    {
+        string  id;
+
+        READ_IDENTIFIER(id);
+        REQUIRE_CHAR(';');
+
+        csp.add_event(id);
     }
 
     static
@@ -191,31 +216,18 @@ namespace hst
     {
         string  id;
 
-        read_identifier(stream, id, true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
+        READ_IDENTIFIER(id);
 
         state = csp.get_process(id);
         if (state == HST_ERROR_STATE)
             PARSE_ERROR(NOTHING);
     }
 
-    static
-    void read_event_definition(istream &stream, csp_t &csp)
-    {
-        string  id;
-
-        // Read the identifier
-        read_identifier(stream, id, true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        // and finally a trailing semicolon.
-        require_char(stream, ';', true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        csp.add_event(id);
+#define READ_PROCESS(P)                         \
+    {                                           \
+        read_process(stream, csp, (P));         \
+        EOF_IS_ERROR;                           \
+        PROPAGATE_ANY_ERROR(NOTHING);           \
     }
 
     static
@@ -224,13 +236,18 @@ namespace hst
     {
         string  id;
 
-        read_identifier(stream, id, true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
+        READ_IDENTIFIER(id);
 
         event = csp.get_event(id);
         if (event == HST_ERROR_EVENT)
             PARSE_ERROR(NOTHING);
+    }
+
+#define READ_EVENT(event)                       \
+    {                                           \
+        read_event(stream, csp, (event));       \
+        EOF_IS_ERROR;                           \
+        PROPAGATE_ANY_ERROR(NOTHING);           \
     }
 
     static
@@ -243,29 +260,12 @@ namespace hst
         // prefix [dest] = [a] -> [P];
         // (Initial keyword will have been read already)
 
-        read_process(stream, csp, dest);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_char(stream, '=', true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        read_event(stream, csp, a);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_string(stream, "->", true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        read_process(stream, csp, P);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_char(stream, ';', true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
+        READ_PROCESS(dest);
+        REQUIRE_CHAR('=');
+        READ_EVENT(a);
+        REQUIRE_STRING("->")
+        READ_PROCESS(P);
+        REQUIRE_CHAR(';');
 
         csp.prefix(dest, a, P);
     }
@@ -279,29 +279,12 @@ namespace hst
         // extchoice [dest] = [P] [] [Q];
         // (Initial keyword will have been read already)
 
-        read_process(stream, csp, dest);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_char(stream, '=', true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        read_process(stream, csp, P);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_string(stream, "[]", true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        read_process(stream, csp, Q);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_char(stream, ';', true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
+        READ_PROCESS(dest);
+        REQUIRE_CHAR('=');
+        READ_PROCESS(P);
+        REQUIRE_STRING("[]")
+        READ_PROCESS(Q);
+        REQUIRE_CHAR(';');
 
         csp.extchoice(dest, P, Q);
     }
@@ -315,29 +298,12 @@ namespace hst
         // intchoice [dest] = [P] |~| [Q];
         // (Initial keyword will have been read already)
 
-        read_process(stream, csp, dest);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_char(stream, '=', true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        read_process(stream, csp, P);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_string(stream, "|~|", true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        read_process(stream, csp, Q);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
-
-        require_char(stream, ';', true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(NOTHING);
+        READ_PROCESS(dest);
+        REQUIRE_CHAR('=');
+        READ_PROCESS(P);
+        REQUIRE_STRING("|~|")
+        READ_PROCESS(Q);
+        REQUIRE_CHAR(';');
 
         csp.intchoice(dest, P, Q);
     }
