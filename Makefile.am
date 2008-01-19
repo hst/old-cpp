@@ -35,6 +35,7 @@ hstinclude_HEADERS = \
   include/hst/types.hh \
   include/hst/eventmap.hh \
   include/hst/lts.hh \
+  include/hst/csp.hh \
   include/hst/io.hh
 
 src_libhst_la_SOURCES = \
@@ -44,6 +45,8 @@ src_libhst_la_SOURCES = \
   include/hst/types.hh \
   include/hst/eventmap.hh \
   include/hst/lts.hh \
+  include/hst/csp.hh \
+  include/hst/csp-macros.hh \
   include/hst/io.hh \
   include/hst/io-macros.hh \
   src/zobrist.cc \
@@ -51,7 +54,10 @@ src_libhst_la_SOURCES = \
   src/intsetset.cc \
   src/eventmap.cc \
   src/io-basic.cc \
-  src/lts.cc
+  src/lts.cc \
+  src/csp-basic.cc \
+  src/csp-prefix.cc \
+  src/csp-naught.cc
 
 EXTRA_DIST=\
   src/dirstamp \
@@ -65,7 +71,8 @@ EXTRA_DIST=\
   test/intsetset/test-all-union.sh \
   test/eventmap/test-all-eventmap-count.sh \
   test/eventmap/test-all-eventmap-pairs.sh \
-  test/lts/test-all-lts.sh
+  test/lts/test-all-lts.sh \
+  test/csp/test-all-csp0.sh
 
 LDADD=src/libhst.la -lJudy
 check_PROGRAMS=\
@@ -79,7 +86,8 @@ check_PROGRAMS=\
   test/intsetset/test-union \
   test/eventmap/test-eventmap-count \
   test/eventmap/test-eventmap-pairs \
-  test/lts/test-lts
+  test/lts/test-lts \
+  test/csp/test-csp0
 
 test_intset_test_difference_SOURCES = test/intset/test-difference.cc
 test_intset_test_intersection_SOURCES = test/intset/test-intersection.cc
@@ -96,6 +104,8 @@ test_eventmap_test_eventmap_pairs_SOURCES = test/eventmap/test-eventmap-pairs.cc
 
 test_lts_test_lts_SOURCES = test/lts/test-lts.cc
 
+test_csp_test_csp0_SOURCES = test/csp/test-csp0.cc
+
 check-PROGRAMS: $(check_PROGRAMS)
 
 TESTS=\
@@ -109,4 +119,5 @@ TESTS=\
   test/intsetset/test-all-union.sh \
   test/eventmap/test-all-eventmap-count.sh \
   test/eventmap/test-all-eventmap-pairs.sh \
-  test/lts/test-all-lts.sh
+  test/lts/test-all-lts.sh \
+  test/csp/test-all-csp0.sh

@@ -92,6 +92,36 @@ namespace hst
 #endif
     }
 
+    void require_any_char(istream &stream, char &ch,
+                          const string &expected,
+                          const bool skip_space)
+    {
+        // Read the next character.  If it's one we expected, return
+        // successfully.  If it's any other character, it's a parse
+        // error.
+
+#if HST_IO_DEBUG
+        cerr << "Require any of \"" << expected << "\"" << endl;
+#endif
+
+        read_char_skip_space(stream, ch, skip_space);
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        if (stream.good() && expected.find(ch) == string::npos)
+        {
+#if HST_IO_DEBUG
+            cerr << "  unsuccessful." << endl;
+#endif
+
+            stream.putback(ch);
+            PARSE_ERROR(NOTHING);
+        }
+
+#if HST_IO_DEBUG
+        cerr << "  successful." << endl;
+#endif
+    }
+
     void require_string(istream &stream, const char *str,
                         const bool skip_space)
     {

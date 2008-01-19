@@ -29,6 +29,7 @@
 #include <hst/types.hh>
 #include <hst/eventmap.hh>
 #include <hst/lts.hh>
+#include <hst/csp.hh>
 
 #ifndef HST_IO_DEBUG
 #define HST_IO_DEBUG 0
@@ -53,6 +54,16 @@ namespace hst
 
     void require_char(istream &stream, const char expected,
                       const bool skip_space);
+
+    /*
+     * Requires that the next character in the input stream be any of
+     * the characters in «expected».  Sets the stream's fail flag
+     * otherwise.
+     */
+
+    void require_any_char(istream &stream, char &ch,
+                          const string &expected,
+                          const bool skip_space);
 
     /*
      * Requires that the next token in the input stream be the «str»

@@ -1,0 +1,6 @@
+event a;
+event b;
+process P;
+process Q;
+prefix Q = b -> STOP;
+prefix P = a -> Q;

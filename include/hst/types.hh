@@ -63,6 +63,27 @@ namespace hst
             return event;
         }
     };
+
+    struct string_hasher
+    {
+        unsigned long operator () (const string &str) const
+        {
+            unsigned long  hash = 0L;
+            for (string::const_iterator it = str.begin();
+                 it != str.end(); ++it)
+            {
+                hash += *it;
+                hash += (hash << 10);
+                hash ^= (hash >> 6);
+            }
+
+            hash += (hash << 3);
+            hash ^= (hash >> 11);
+            hash += (hash << 15);
+
+            return hash;
+        }
+    };
 }
 
 #endif // HST_TYPES_H

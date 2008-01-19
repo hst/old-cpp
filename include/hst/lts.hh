@@ -70,14 +70,22 @@ namespace hst
         /// The number of states in the LTS
         state_t  num_states;
 
+        typedef judy_map_l<state_t, string,
+                           state_t_hasher>    state_name_map_t;
+        typedef shared_ptr<state_name_map_t>  state_name_map_p;
+
         /// The name of each LTS state
-        judy_map_l<state_t, string, state_t_hasher>  state_names;
+        state_name_map_t  state_names;
 
         /// The number of events in the LTS
         event_t  num_events;
 
+        typedef judy_map_l<event_t, string,
+                           event_t_hasher>    event_name_map_t;
+        typedef shared_ptr<event_name_map_t>  event_name_map_p;
+
         /// The name of each LTS event
-        judy_map_l<event_t, string, event_t_hasher>  event_names;
+        event_name_map_t  event_names;
 
         /**
          * We keep track of which states have been “finalized”.
@@ -300,11 +308,47 @@ namespace hst
             return state;
         }
 
+        unsigned long state_count() const
+        {
+            return num_states;
+        }
+
+        string get_state_name(state_t state) const
+        {
+            state_name_map_t::const_iterator  it =
+                state_names.find(state);
+
+            if (it == state_names.end())
+            {
+                return "unknown state";
+            } else {
+                return it->second;
+            }
+        }
+
         event_t add_event(string name)
         {
             event_t  event = num_events++;
             event_names.insert(make_pair(event, name));
             return event;
+        }
+
+        unsigned long event_count() const
+        {
+            return num_events;
+        }
+
+        string get_event_name(event_t event) const
+        {
+            event_name_map_t::const_iterator  it =
+                event_names.find(event);
+
+            if (it == event_names.end())
+            {
+                return "unknown event";
+            } else {
+                return it->second;
+            }
         }
 
         bool is_finalized(state_t state) const
