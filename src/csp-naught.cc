@@ -309,6 +309,25 @@ namespace hst
     }
 
     static
+    void read_interrupt(istream &stream, csp_t &csp)
+    {
+        state_t  dest;
+        state_t  P, Q;
+
+        // interrupt [dest] = [P] /\ [Q];
+        // (Initial keyword will have been read already)
+
+        READ_PROCESS(dest);
+        REQUIRE_CHAR('=');
+        READ_PROCESS(P);
+        REQUIRE_STRING("/\\")
+        READ_PROCESS(Q);
+        REQUIRE_CHAR(';');
+
+        csp.interrupt(dest, P, Q);
+    }
+
+    static
     void read_statement(istream &stream, csp_t &csp)
     {
         string  keyword;
@@ -327,6 +346,8 @@ namespace hst
             read_extchoice(stream, csp);
         else if (keyword == "intchoice")
             read_intchoice(stream, csp);
+        else if (keyword == "interrupt")
+            read_interrupt(stream, csp);
 
         PROPAGATE_ANY_ERROR(NOTHING);
     }

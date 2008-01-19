@@ -44,7 +44,8 @@ namespace hst
     {
         PREFIX = 1,
         EXTCHOICE,
-        INTCHOICE
+        INTCHOICE,
+        INTERRUPT
     };
 
     class csp_t
@@ -259,6 +260,10 @@ namespace hst
 
         /// [P⊓Q]
         void intchoice(state_t dest,
+                       state_t P, state_t Q);
+
+        /// [P▵Q]
+        void interrupt(state_t dest,
                        state_t P, state_t Q);
     };
 
