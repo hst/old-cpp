@@ -420,6 +420,109 @@ namespace hst
             return event_target_iterator(it);
         }
 
+        class state_pairs_iterator
+        {
+        protected:
+            graph_inner_map_t::const_iterator  se, se_end;
+            stateset_t::iterator               et, et_end;
+
+            event_state_t  current;
+
+            void load_current()
+            {
+                if (se != se_end)
+                    current.first = se->first;
+                if (et != et_end)
+                    current.second = *et;
+            }
+
+            void load_event_target()
+            {
+                if (se == se_end)
+                    et = stateset_t::iterator();
+                else
+                    et = se->second->begin();
+            }
+
+            void advance()
+            {
+                // First find the next event target.
+                ++et;
+
+                // ...but if we've reached the last one, then we move
+                // on to the next event.
+                if (et == et_end)
+                {
+                    ++se;
+                    load_event_target();
+                }
+
+                load_current();
+            }
+
+        public:
+            state_pairs_iterator()
+            {
+            }
+
+            state_pairs_iterator(graph_inner_map_t::const_iterator _se):
+                se(_se)
+            {
+                load_event_target();
+                load_current();
+            }
+
+            event_state_t operator * ()
+            {
+                return current;
+            }
+
+            event_state_t *operator -> ()
+            {
+                return &current;
+            }
+
+            state_pairs_iterator operator ++ (int)
+            {
+                state_pairs_iterator  ret = *this;
+                this->operator ++ ();
+                return ret;
+            }
+
+            state_pairs_iterator operator ++ ()
+            {
+                advance();
+                return *this;
+            }
+
+            bool operator == (const state_pairs_iterator &other)
+            {
+                return
+                    (this->se == other.se) &&
+                    (this->et == other.et);
+            }
+
+            bool operator != (const state_pairs_iterator &other)
+            {
+                return
+                    (this->se != other.se) ||
+                    (this->et != other.et);
+            }
+        };
+
+        state_pairs_iterator state_pairs_begin(state_t from) const
+        {
+            graph_inner_map_p  inner_map = graph_deref1(from);
+            graph_inner_map_t::const_iterator  it =
+                inner_map->begin();
+
+            return state_pairs_iterator(it);
+        }
+
+        state_pairs_iterator state_pairs_end(state_t from) const
+        {
+            return state_pairs_iterator();
+        }
     };
 
     // Input and output operators for streams

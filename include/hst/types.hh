@@ -64,6 +64,9 @@ namespace hst
         }
     };
 
+    typedef pair<event_t, state_t>     event_state_t;
+    typedef shared_ptr<event_state_t>  event_state_p;
+
     struct string_hasher
     {
         unsigned long operator () (const string &str) const

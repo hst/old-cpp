@@ -33,7 +33,6 @@ using namespace std;
 
 namespace hst
 {
-    inline
     lts_t::graph_inner_map_p lts_t::graph_deref1(state_t state)
     {
         graph_inner_map_p  inner_map;
@@ -81,7 +80,6 @@ namespace hst
         return insert_result.first->second;
     }
 
-    inline
     stateset_p lts_t::graph_deref2(state_t state, event_t event)
     {
         // Dereference the state first to get an inner map.
@@ -140,7 +138,6 @@ namespace hst
         return insert_result.first->second;
     }
 
-    inline
     lts_t::graph_inner_map_p lts_t::graph_deref1(state_t state) const
     {
 #if HST_LTS_DEBUG
@@ -165,7 +162,6 @@ namespace hst
         }
     }
 
-    inline
     stateset_p lts_t::graph_deref2(state_t state, event_t event) const
     {
 #if HST_LTS_DEBUG
@@ -308,9 +304,8 @@ namespace hst
 
     ostream &operator << (ostream &stream, const lts_t &lts)
     {
-        lts_t::from_state_iterator    fs_it, fs_end;
-        lts_t::state_events_iterator  se_it, se_end;
-        lts_t::event_target_iterator  et_it, et_end;
+        lts_t::from_state_iterator   fs_it, fs_end;
+        lts_t::state_pairs_iterator  sp_it, sp_end;
 
         bool  first = true;
 
@@ -320,28 +315,22 @@ namespace hst
              fs_it != fs_end; ++fs_it)
         {
             state_t  from_state = *fs_it;
-            se_end = lts.state_events_end(from_state);
+            sp_end = lts.state_pairs_end(from_state);
 
-            for (se_it = lts.state_events_begin(from_state);
-                 se_it != se_end; ++se_it)
+            for (sp_it = lts.state_pairs_begin(from_state);
+                 sp_it != sp_end; ++sp_it)
             {
-                event_t  event = *se_it;
-                et_end = lts.event_targets_end(from_state, event);
+                event_t  event    = sp_it->first;
+                state_t  to_state = sp_it->second;
 
-                for (et_it = lts.event_targets_begin(from_state, event);
-                     et_it != et_end; ++et_it)
-                {
-                    state_t  to_state = *et_it;
+                if (first)
+                    first = false;
+                else
+                    stream << ",";
 
-                    if (first)
-                        first = false;
-                    else
-                        stream << ",";
-
-                    stream << from_state << "--"
-                           << event << "-->"
-                           << to_state;
-                }
+                stream << from_state << "--"
+                       << event << "-->"
+                       << to_state;
             }
         }
 

@@ -69,47 +69,41 @@ namespace hst
          * τ or not.
          */
 
-        lts_t::state_events_iterator  se_it;
+        lts_t::state_pairs_iterator  sp_it;
 
         /*
          * First walk through P's outgoing edges.
          */
 
-        for (se_it = _lts.state_events_begin(P);
-             se_it != _lts.state_events_end(P); ++se_it)
+        for (sp_it = _lts.state_pairs_begin(P);
+             sp_it != _lts.state_pairs_end(P); ++sp_it)
         {
-            event_t  E = *se_it;
-            lts_t::event_target_iterator  et_it;
+            event_t  E       = sp_it->first;
+            state_t  P_prime = sp_it->second;
 
-            for (et_it = _lts.event_targets_begin(P, E);
-                 et_it != _lts.event_targets_end(P, E); ++et_it)
+            if (E == _tau)
             {
-                state_t  P_prime = *et_it;
+                /*
+                 * If the event is a τ, then it does *not* resolve the
+                 * choice; P' is available, but so is Q.  This means
+                 * we need to create a transition for
+                 *
+                 *   P □ Q =τ=> P' □ Q
+                 */
 
-                if (E == _tau)
-                {
-                    /*
-                     * If the event is a τ, then it does *not* resolve
-                     * the choice; P' is available, but so is Q.  This
-                     * means we need to create a transition for
-                     *
-                     *   P □ Q =τ=> P' □ Q
-                     */
+                state_t  P_prime_extchoice_Q = add_temp_process();
+                extchoice(P_prime_extchoice_Q, P_prime, Q);
+                _lts.add_edge(dest, E, P_prime_extchoice_Q);
+            } else {
+                /*
+                 * If the event is not τ, then it resolves the choice;
+                 * the alternative is no longer available.  We need to
+                 * create a transition for
+                 *
+                 *   P □ Q =E=> P'
+                 */
 
-                    state_t  P_prime_extchoice_Q = add_temp_process();
-                    extchoice(P_prime_extchoice_Q, P_prime, Q);
-                    _lts.add_edge(dest, E, P_prime_extchoice_Q);
-                } else {
-                    /*
-                     * If the event is not τ, then it resolves the
-                     * choice; the alternative is no longer available.
-                     * We need to create a transition for
-                     *
-                     *   P □ Q =E=> P'
-                     */
-
-                    _lts.add_edge(dest, E, P_prime);
-                }
+                _lts.add_edge(dest, E, P_prime);
             }
         }
 
@@ -117,41 +111,35 @@ namespace hst
          * Now repeat the same process for Q's outgoing edges.
          */
 
-        for (se_it = _lts.state_events_begin(Q);
-             se_it != _lts.state_events_end(Q); ++se_it)
+        for (sp_it = _lts.state_pairs_begin(Q);
+             sp_it != _lts.state_pairs_end(Q); ++sp_it)
         {
-            event_t  E = *se_it;
-            lts_t::event_target_iterator  et_it;
+            event_t  E       = sp_it->first;
+            state_t  Q_prime = sp_it->second;
 
-            for (et_it = _lts.event_targets_begin(Q, E);
-                 et_it != _lts.event_targets_end(Q, E); ++et_it)
+            if (E == _tau)
             {
-                state_t  Q_prime = *et_it;
+                /*
+                 * If the event is a τ, then it does *not* resolve the
+                 * choice; Q' is available, but so is P.  This means
+                 * we need to create a transition for
+                 *
+                 *   P □ Q =τ=> P □ Q'
+                 */
 
-                if (E == _tau)
-                {
-                    /*
-                     * If the event is a τ, then it does *not* resolve
-                     * the choice; Q' is available, but so is P.  This
-                     * means we need to create a transition for
-                     *
-                     *   P □ Q =τ=> P □ Q'
-                     */
+                state_t  P_extchoice_Q_prime = add_temp_process();
+                extchoice(P_extchoice_Q_prime, P, Q_prime);
+                _lts.add_edge(dest, E, P_extchoice_Q_prime);
+            } else {
+                /*
+                 * If the event is not τ, then it resolves the choice;
+                 * the alternative is no longer available.  We need to
+                 * create a transition for
+                 *
+                 *   P □ Q =E=> Q'
+                 */
 
-                    state_t  P_extchoice_Q_prime = add_temp_process();
-                    extchoice(P_extchoice_Q_prime, P, Q_prime);
-                    _lts.add_edge(dest, E, P_extchoice_Q_prime);
-                } else {
-                    /*
-                     * If the event is not τ, then it resolves the
-                     * choice; the alternative is no longer available.
-                     * We need to create a transition for
-                     *
-                     *   P □ Q =E=> Q'
-                     */
-
-                    _lts.add_edge(dest, E, Q_prime);
-                }
+                _lts.add_edge(dest, E, Q_prime);
             }
         }
 
