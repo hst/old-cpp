@@ -1,0 +1,13 @@
+event a;
+event b;
+event c;
+process $t1;
+prefix $t1 = a -> STOP;
+process $t2;
+prefix $t2 = b -> STOP;
+process $t3;
+prefix $t3 = c -> STOP;
+process $t4;
+extchoice $t4 = $t2 [] $t3;
+process P;
+extchoice P = $t1 [] $t4;

@@ -25,6 +25,7 @@
 #define HST_CSP_HH
 
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <tr1/memory>
 
@@ -41,7 +42,8 @@ namespace hst
 {
     enum csp_operator_t
     {
-        PREFIX = 1
+        PREFIX = 1,
+        EXTCHOICE
     };
 
     class csp_t
@@ -67,6 +69,8 @@ namespace hst
 
         event_name_map_t  _event_symbol_table;
 
+        unsigned long  _next_temp_index;
+
         void define_standard_ops()
         {
             /*
@@ -83,7 +87,8 @@ namespace hst
         }
 
     public:
-        csp_t()
+        csp_t():
+            _next_temp_index(0L)
         {
             define_standard_ops();
         }
@@ -95,7 +100,8 @@ namespace hst
             _tau(other._tau),
             _tick(other._tick),
             _state_symbol_table(other._state_symbol_table),
-            _event_symbol_table(other._event_symbol_table)
+            _event_symbol_table(other._event_symbol_table),
+            _next_temp_index(0L)
         {
         }
 
@@ -104,6 +110,7 @@ namespace hst
             _lts.clear();
             _state_symbol_table.clear();
             _event_symbol_table.clear();
+            _next_temp_index = 0L;
             define_standard_ops();
         }
 
@@ -116,6 +123,7 @@ namespace hst
             std::swap(_tick, other._tick);
             _state_symbol_table.swap(other._state_symbol_table);
             _event_symbol_table.swap(other._event_symbol_table);
+            std::swap(_next_temp_index, other._next_temp_index);
         }
 
         csp_t &operator = (const csp_t &other)
@@ -153,6 +161,13 @@ namespace hst
         event_t tick() const
         {
             return _tick;
+        }
+
+        state_t add_temp_process()
+        {
+            ostringstream  name;
+            name << "%" << _next_temp_index++;
+            return add_process(name.str());
         }
 
         state_t add_process(const string &name)
@@ -236,6 +251,10 @@ namespace hst
         /// [a→P]
         void prefix(state_t dest,
                     event_t a, state_t P);
+
+        /// [P□Q]
+        void extchoice(state_t dest,
+                       state_t P, state_t Q);
     };
 
     typedef shared_ptr<csp_t>  csp_p;

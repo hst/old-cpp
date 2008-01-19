@@ -25,20 +25,39 @@
 #define HST_CSP_MACROS_HH
 
 #if HST_CSP_DEBUG
+
+#define REQUIRE_FINALIZED(P)                        \
+    if (!_lts.is_finalized(P))                      \
+    {                                               \
+        cerr << "  *** " << (P)                     \
+             << " NOT FINALIZED!" << endl;          \
+                                                    \
+        return;                                     \
+    }
+
 #define REQUIRE_NOT_FINALIZED(P)                    \
     if (_lts.is_finalized(P))                       \
     {                                               \
         cerr << "  *** " << (P)                     \
-             << " ALREADY DEFINED!" << endl;        \
+             << " ALREADY FINALIZED!" << endl;      \
                                                     \
         return;                                     \
     }
+
 #else
+
+#define REQUIRE_FINALIZED(P)                        \
+    if (!_lts.is_finalized(P))                      \
+    {                                               \
+        return;                                     \
+    }
+
 #define REQUIRE_NOT_FINALIZED(P)                    \
     if (_lts.is_finalized(P))                       \
     {                                               \
         return;                                     \
     }
+
 #endif
 
 #endif // HST_CSP_MACROS_HH
