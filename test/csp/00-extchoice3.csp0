@@ -1,0 +1,5 @@
+event a;
+process $t1;
+prefix $t1 = a -> STOP;
+process P;
+extchoice P = STOP [] $t1;

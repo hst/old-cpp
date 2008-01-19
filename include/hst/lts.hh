@@ -386,17 +386,31 @@ namespace hst
         state_events_iterator state_events_begin(state_t from) const
         {
             graph_inner_map_p  inner_map = graph_deref1(from);
-            graph_inner_map_t::const_iterator  it =
-                inner_map->begin();
-            return state_events_iterator(it);
+
+            if (inner_map.get() == NULL)
+            {
+                graph_inner_map_t::const_iterator  it;
+                return state_events_iterator(it);
+            } else {
+                graph_inner_map_t::const_iterator  it =
+                    inner_map->begin();
+                return state_events_iterator(it);
+            }
         }
 
         state_events_iterator state_events_end(state_t from) const
         {
             graph_inner_map_p  inner_map = graph_deref1(from);
-            graph_inner_map_t::const_iterator  it =
-                inner_map->end();
-            return state_events_iterator(it);
+
+            if (inner_map.get() == NULL)
+            {
+                graph_inner_map_t::const_iterator  it;
+                return state_events_iterator(it);
+            } else {
+                graph_inner_map_t::const_iterator  it =
+                    inner_map->end();
+                return state_events_iterator(it);
+            }
         }
 
         typedef proxy_iterator<stateset_t::iterator,
@@ -408,16 +422,30 @@ namespace hst
                                                   event_t event) const
         {
             stateset_p  stateset = graph_deref2(from, event);
-            stateset_t::iterator  it = stateset->begin();
-            return event_target_iterator(it);
+
+            if (stateset.get() == NULL)
+            {
+                stateset_t::iterator  it;
+                return event_target_iterator(it);
+            } else {
+                stateset_t::iterator  it = stateset->begin();
+                return event_target_iterator(it);
+            }
         }
 
         event_target_iterator event_targets_end(state_t from,
                                                 event_t event) const
         {
             stateset_p  stateset = graph_deref2(from, event);
-            stateset_t::iterator  it = stateset->end();
-            return event_target_iterator(it);
+
+            if (stateset.get() == NULL)
+            {
+                stateset_t::iterator  it;
+                return event_target_iterator(it);
+            } else {
+                stateset_t::iterator  it = stateset->end();
+                return event_target_iterator(it);
+            }
         }
 
         class state_pairs_iterator
@@ -513,10 +541,15 @@ namespace hst
         state_pairs_iterator state_pairs_begin(state_t from) const
         {
             graph_inner_map_p  inner_map = graph_deref1(from);
-            graph_inner_map_t::const_iterator  it =
-                inner_map->begin();
 
-            return state_pairs_iterator(it);
+            if (inner_map == NULL)
+            {
+                return state_pairs_iterator();
+            } else {
+                graph_inner_map_t::const_iterator  it =
+                    inner_map->begin();
+                return state_pairs_iterator(it);
+            }
         }
 
         state_pairs_iterator state_pairs_end(state_t from) const
