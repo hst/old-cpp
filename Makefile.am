@@ -58,6 +58,7 @@ src_libhst_la_SOURCES = \
   src/csp-basic.cc \
   src/csp-prefix.cc \
   src/csp-extchoice.cc \
+  src/csp-intchoice.cc \
   src/csp-naught.cc
 
 EXTRA_DIST=\

@@ -1,3 +1,7 @@
 00-prefix
 00-extchoice1
 00-extchoice2
+00-intchoice1
+00-intchoice2
+10-extchoice-intchoice
+10-intchoice-extchoice

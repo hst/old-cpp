@@ -307,6 +307,42 @@ namespace hst
     }
 
     static
+    void read_intchoice(istream &stream, csp_t &csp)
+    {
+        state_t  dest;
+        state_t  P, Q;
+
+        // intchoice [dest] = [P] |~| [Q];
+        // (Initial keyword will have been read already)
+
+        read_process(stream, csp, dest);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        require_char(stream, '=', true);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        read_process(stream, csp, P);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        require_string(stream, "|~|", true);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        read_process(stream, csp, Q);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        require_char(stream, ';', true);
+        EOF_IS_ERROR;
+        PROPAGATE_ANY_ERROR(NOTHING);
+
+        csp.intchoice(dest, P, Q);
+    }
+
+    static
     void read_statement(istream &stream, csp_t &csp)
     {
         string  keyword;
@@ -323,6 +359,8 @@ namespace hst
             read_prefix(stream, csp);
         else if (keyword == "extchoice")
             read_extchoice(stream, csp);
+        else if (keyword == "intchoice")
+            read_intchoice(stream, csp);
 
         PROPAGATE_ANY_ERROR(NOTHING);
     }

@@ -43,7 +43,8 @@ namespace hst
     enum csp_operator_t
     {
         PREFIX = 1,
-        EXTCHOICE
+        EXTCHOICE,
+        INTCHOICE
     };
 
     class csp_t
@@ -254,6 +255,10 @@ namespace hst
 
         /// [P□Q]
         void extchoice(state_t dest,
+                       state_t P, state_t Q);
+
+        /// [P⊓Q]
+        void intchoice(state_t dest,
                        state_t P, state_t Q);
     };
 
