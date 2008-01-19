@@ -45,7 +45,8 @@ namespace hst
         PREFIX = 1,
         EXTCHOICE,
         INTCHOICE,
-        INTERRUPT
+        INTERRUPT,
+        SEQCOMP
     };
 
     class csp_t
@@ -83,6 +84,8 @@ namespace hst
             _skip = add_process("SKIP");
             _tau  = add_event("TAU");
             _tick = add_event("TICK");
+
+            _lts.add_edge(_skip, _tick, _stop);
 
             _lts.finalize(_stop);
             _lts.finalize(_skip);
@@ -265,6 +268,10 @@ namespace hst
         /// [P▵Q]
         void interrupt(state_t dest,
                        state_t P, state_t Q);
+
+        /// [P;Q]
+        void seqcomp(state_t dest,
+                     state_t P, state_t Q);
     };
 
     typedef shared_ptr<csp_t>  csp_p;

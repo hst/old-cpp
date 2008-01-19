@@ -6,5 +6,7 @@
 00-intchoice2
 00-interrupt1
 00-interrupt2
+00-seqcomp1
+00-seqcomp2
 10-extchoice-intchoice
 10-intchoice-extchoice

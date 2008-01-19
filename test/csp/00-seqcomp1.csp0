@@ -1,0 +1,8 @@
+event a;
+event b;
+process $t1;
+prefix $t1 = a -> SKIP;
+process $t2;
+prefix $t2 = b -> STOP;
+process P;
+seqcomp P = $t1 ; $t2;
