@@ -35,8 +35,27 @@ using namespace std;
 
 namespace hst
 {
-    void csp_t::interrupt(state_t dest,
-                          state_t P, state_t Q)
+    state_t csp_t::add_interrupt(state_t P, state_t Q)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Create the memoization key.
+        key << P << "/\\" << Q;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            interrupt(dest, P, Q);
+            save_memoized_process(key.str(), dest);
+        }
+
+        return dest;
+    }
+
+    void csp_t::interrupt(state_t dest, state_t P, state_t Q)
     {
 #if HST_CSP_DEBUG
         cerr << "Interrupt " << dest
@@ -87,8 +106,8 @@ namespace hst
                  *   P ▵ Q =τ=> P' ▵ Q
                  */
 
-                state_t  P_prime_interrupt_Q = add_temp_process();
-                interrupt(P_prime_interrupt_Q, P_prime, Q);
+                state_t  P_prime_interrupt_Q =
+                    add_interrupt(P_prime, Q);
                 _lts.add_edge(dest, E, P_prime_interrupt_Q);
             } else {
                 /*

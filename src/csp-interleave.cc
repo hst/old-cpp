@@ -25,6 +25,7 @@
 #define HST_CSP_INTERLEAVE_CC
 
 #include <iostream>
+#include <sstream>
 
 #include <hst/types.hh>
 #include <hst/lts.hh>
@@ -35,8 +36,31 @@ using namespace std;
 
 namespace hst
 {
-    void csp_t::interleave(state_t dest,
-                           state_t P, state_t Q)
+    state_t csp_t::add_interleave(state_t P, state_t Q)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Interleaving is commutative, so always memoize with the
+        // lower-numbered process first.
+        if (Q < P) std::swap(P,Q);
+
+        // Create the memoization key.
+        key << P << "|||" << Q;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            interleave(dest, P, Q);
+            save_memoized_process(key.str(), dest);
+        }
+
+        return dest;
+    }
+
+    void csp_t::interleave(state_t dest, state_t P, state_t Q)
     {
 #if HST_CSP_DEBUG
         cerr << "Interleave " << dest
@@ -87,8 +111,8 @@ namespace hst
              *   P ||| Q =event=> P' ||| Q
              */
 
-            state_t  P_prime_interleave_Q = add_temp_process();
-            interleave(P_prime_interleave_Q, P_prime, Q);
+            state_t  P_prime_interleave_Q =
+                add_interleave(P_prime, Q);
             _lts.add_edge(dest, E, P_prime_interleave_Q);
         }
 
@@ -110,8 +134,8 @@ namespace hst
              *   P ||| Q =event=> P ||| Q'
              */
 
-            state_t  P_interleave_Q_prime = add_temp_process();
-            interleave(P_interleave_Q_prime, P, Q_prime);
+            state_t  P_interleave_Q_prime =
+                add_interleave(P, Q_prime);
             _lts.add_edge(dest, E, P_interleave_Q_prime);
         }
 

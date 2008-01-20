@@ -75,6 +75,8 @@ namespace hst
 
         unsigned long  _next_temp_index;
 
+        state_name_map_t  _memoized_processes;
+
         void define_standard_ops()
         {
             /*
@@ -107,7 +109,8 @@ namespace hst
             _tick(other._tick),
             _state_symbol_table(other._state_symbol_table),
             _event_symbol_table(other._event_symbol_table),
-            _next_temp_index(0L)
+            _next_temp_index(0L),
+            _memoized_processes(other._memoized_processes)
         {
         }
 
@@ -117,6 +120,7 @@ namespace hst
             _state_symbol_table.clear();
             _event_symbol_table.clear();
             _next_temp_index = 0L;
+            _memoized_processes.clear();
             define_standard_ops();
         }
 
@@ -130,6 +134,7 @@ namespace hst
             _state_symbol_table.swap(other._state_symbol_table);
             _event_symbol_table.swap(other._event_symbol_table);
             std::swap(_next_temp_index, other._next_temp_index);
+            _memoized_processes.swap(other._memoized_processes);
         }
 
         csp_t &operator = (const csp_t &other)
@@ -254,29 +259,47 @@ namespace hst
             }
         }
 
+        state_t lookup_memoized_process(const string &name) const
+        {
+            state_name_map_t::const_iterator  it =
+                _memoized_processes.find(name);
+
+            if (it == _memoized_processes.end())
+            {
+                return HST_ERROR_STATE;
+            } else {
+                return it->second;
+            }
+        }
+
+        void save_memoized_process(const string &name, state_t state)
+        {
+            _memoized_processes.insert(make_pair(name, state));
+        }
+
         /// [a→P]
-        void prefix(state_t dest,
-                    event_t a, state_t P);
+        state_t add_prefix(event_t a, state_t P);
+        void prefix(state_t dest, event_t a, state_t P);
 
         /// [P□Q]
-        void extchoice(state_t dest,
-                       state_t P, state_t Q);
+        state_t add_extchoice(state_t P, state_t Q);
+        void extchoice(state_t dest, state_t P, state_t Q);
 
         /// [P⊓Q]
-        void intchoice(state_t dest,
-                       state_t P, state_t Q);
+        state_t add_intchoice(state_t P, state_t Q);
+        void intchoice(state_t dest, state_t P, state_t Q);
 
         /// [P▵Q]
-        void interrupt(state_t dest,
-                       state_t P, state_t Q);
+        state_t add_interrupt(state_t P, state_t Q);
+        void interrupt(state_t dest, state_t P, state_t Q);
 
         /// [P;Q]
-        void seqcomp(state_t dest,
-                     state_t P, state_t Q);
+        state_t add_seqcomp(state_t P, state_t Q);
+        void seqcomp(state_t dest, state_t P, state_t Q);
 
         /// [P ||| Q]
-        void interleave(state_t dest,
-                        state_t P, state_t Q);
+        state_t add_interleave(state_t P, state_t Q);
+        void interleave(state_t dest, state_t P, state_t Q);
     };
 
     typedef shared_ptr<csp_t>  csp_p;

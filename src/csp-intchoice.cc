@@ -35,8 +35,31 @@ using namespace std;
 
 namespace hst
 {
-    void csp_t::intchoice(state_t dest,
-                          state_t P, state_t Q)
+    state_t csp_t::add_intchoice(state_t P, state_t Q)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Intchoice is commutative, so always memoize with the
+        // lower-numbered process first.
+        if (Q < P) std::swap(P,Q);
+
+        // Create the memoization key.
+        key << P << "|~|" << Q;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            intchoice(dest, P, Q);
+            save_memoized_process(key.str(), dest);
+        }
+
+        return dest;
+    }
+
+    void csp_t::intchoice(state_t dest, state_t P, state_t Q)
     {
 #if HST_CSP_DEBUG
         cerr << "Intchoice " << dest

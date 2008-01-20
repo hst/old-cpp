@@ -35,8 +35,27 @@ using namespace std;
 
 namespace hst
 {
-    void csp_t::prefix(state_t dest,
-                       event_t a, state_t P)
+    state_t csp_t::add_prefix(event_t a, state_t P)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Create the memoization key.
+        key << a << "->" << P;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            prefix(dest, a, P);
+            save_memoized_process(key.str(), dest);
+        }
+
+        return dest;
+    }
+
+    void csp_t::prefix(state_t dest, event_t a, state_t P)
     {
 #if HST_CSP_DEBUG
         cerr << "Prefix " << dest
