@@ -48,7 +48,8 @@ namespace hst
         INTERRUPT,
         SEQCOMP,
         INTERLEAVE,
-        INTERFACE_PARALLEL
+        INTERFACE_PARALLEL,
+        ALPHABETIZED_PARALLEL
     };
 
     class csp_t
@@ -307,6 +308,13 @@ namespace hst
         (state_t P, alphabet_t &alpha, state_t Q);
         void interface_parallel
         (state_t dest, state_t P, alphabet_t &alpha, state_t Q);
+
+        /// [P [αP‖αQ] Q]
+        state_t add_alphabetized_parallel
+        (state_t P, alphabet_t &alphaP, alphabet_t &alphaQ, state_t Q);
+        void alphabetized_parallel
+        (state_t dest,
+         state_t P, alphabet_t &alphaP, alphabet_t &alphaQ, state_t Q);
     };
 
     typedef shared_ptr<csp_t>  csp_p;

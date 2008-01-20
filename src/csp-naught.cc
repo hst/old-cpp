@@ -395,6 +395,30 @@ namespace hst
     }
 
     static
+    void read_aparallel(istream &stream, csp_t &csp)
+    {
+        state_t     dest;
+        state_t     P, Q;
+        alphabet_t  alphaP, alphaQ;
+
+        // aparallel [dest] = [P] [ [αP] || [αQ] ] [Q];
+        // (Initial keyword will have been read already)
+
+        READ_PROCESS(dest);
+        REQUIRE_CHAR('=');
+        READ_PROCESS(P);
+        REQUIRE_CHAR('[');
+        READ_ALPHABET(alphaP);
+        REQUIRE_STRING("||");
+        READ_ALPHABET(alphaQ);
+        REQUIRE_CHAR(']');
+        READ_PROCESS(Q);
+        REQUIRE_CHAR(';');
+
+        csp.alphabetized_parallel(dest, P, alphaP, alphaQ, Q);
+    }
+
+    static
     void read_statement(istream &stream, csp_t &csp)
     {
         string  keyword;
@@ -421,6 +445,8 @@ namespace hst
             read_interleave(stream, csp);
         else if (keyword == "iparallel")
             read_iparallel(stream, csp);
+        else if (keyword == "aparallel")
+            read_aparallel(stream, csp);
 
         PROPAGATE_ANY_ERROR(NOTHING);
     }
