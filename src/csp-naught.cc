@@ -347,6 +347,25 @@ namespace hst
     }
 
     static
+    void read_interleave(istream &stream, csp_t &csp)
+    {
+        state_t  dest;
+        state_t  P, Q;
+
+        // interleave [dest] = [P] ||| [Q];
+        // (Initial keyword will have been read already)
+
+        READ_PROCESS(dest);
+        REQUIRE_CHAR('=');
+        READ_PROCESS(P);
+        REQUIRE_STRING("|||")
+        READ_PROCESS(Q);
+        REQUIRE_CHAR(';');
+
+        csp.interleave(dest, P, Q);
+    }
+
+    static
     void read_statement(istream &stream, csp_t &csp)
     {
         string  keyword;
@@ -369,6 +388,8 @@ namespace hst
             read_interrupt(stream, csp);
         else if (keyword == "seqcomp")
             read_seqcomp(stream, csp);
+        else if (keyword == "interleave")
+            read_interleave(stream, csp);
 
         PROPAGATE_ANY_ERROR(NOTHING);
     }

@@ -46,7 +46,8 @@ namespace hst
         EXTCHOICE,
         INTCHOICE,
         INTERRUPT,
-        SEQCOMP
+        SEQCOMP,
+        INTERLEAVE
     };
 
     class csp_t
@@ -272,6 +273,10 @@ namespace hst
         /// [P;Q]
         void seqcomp(state_t dest,
                      state_t P, state_t Q);
+
+        /// [P ||| Q]
+        void interleave(state_t dest,
+                        state_t P, state_t Q);
     };
 
     typedef shared_ptr<csp_t>  csp_p;

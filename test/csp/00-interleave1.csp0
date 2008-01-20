@@ -1,0 +1,14 @@
+event a1;
+event b1;
+event a2;
+event b2;
+process $t1;
+prefix $t1 = b1 -> STOP;
+process $t2;
+prefix $t2 = a1 -> $t1;
+process $t3;
+prefix $t3 = b2 -> STOP;
+process $t4;
+prefix $t4 = a2 -> $t3;
+process P;
+interleave P = $t2 ||| $t4;

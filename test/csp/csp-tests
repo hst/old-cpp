@@ -8,5 +8,8 @@
 00-interrupt2
 00-seqcomp1
 00-seqcomp2
+00-interleave1
+00-interleave2
+00-interleave3
 10-extchoice-intchoice
 10-intchoice-extchoice
