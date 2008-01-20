@@ -41,7 +41,7 @@ using namespace std;
 namespace hst
 {
     typedef unsigned long           state_t;
-    typedef intset_t                 stateset_t;
+    typedef intset_t                stateset_t;
     typedef shared_ptr<stateset_t>  stateset_p;
 
     struct state_t_hasher

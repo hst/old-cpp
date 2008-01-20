@@ -62,6 +62,7 @@ src_libhst_la_SOURCES = \
   src/csp-interrupt.cc \
   src/csp-seqcomp.cc \
   src/csp-interleave.cc \
+  src/csp-interface-parallel.cc \
   src/csp-naught.cc
 
 EXTRA_DIST=\

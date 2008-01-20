@@ -250,6 +250,13 @@ namespace hst
         PROPAGATE_ANY_ERROR(NOTHING);           \
     }
 
+#define READ_ALPHABET(alpha)                    \
+    {                                           \
+        stream >> (alpha);                      \
+        EOF_IS_ERROR;                           \
+        PROPAGATE_ANY_ERROR(NOTHING);           \
+    }
+
     static
     void read_prefix(istream &stream, csp_t &csp)
     {
@@ -366,6 +373,28 @@ namespace hst
     }
 
     static
+    void read_iparallel(istream &stream, csp_t &csp)
+    {
+        state_t     dest;
+        state_t     P, Q;
+        alphabet_t  alpha;
+
+        // iparallel [dest] = [P] [| [alpha] |] [Q];
+        // (Initial keyword will have been read already)
+
+        READ_PROCESS(dest);
+        REQUIRE_CHAR('=');
+        READ_PROCESS(P);
+        REQUIRE_STRING("[|");
+        READ_ALPHABET(alpha);
+        REQUIRE_STRING("|]");
+        READ_PROCESS(Q);
+        REQUIRE_CHAR(';');
+
+        csp.interface_parallel(dest, P, alpha, Q);
+    }
+
+    static
     void read_statement(istream &stream, csp_t &csp)
     {
         string  keyword;
@@ -390,6 +419,8 @@ namespace hst
             read_seqcomp(stream, csp);
         else if (keyword == "interleave")
             read_interleave(stream, csp);
+        else if (keyword == "iparallel")
+            read_iparallel(stream, csp);
 
         PROPAGATE_ANY_ERROR(NOTHING);
     }

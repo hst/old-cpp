@@ -47,7 +47,8 @@ namespace hst
         INTCHOICE,
         INTERRUPT,
         SEQCOMP,
-        INTERLEAVE
+        INTERLEAVE,
+        INTERFACE_PARALLEL
     };
 
     class csp_t
@@ -300,6 +301,12 @@ namespace hst
         /// [P ||| Q]
         state_t add_interleave(state_t P, state_t Q);
         void interleave(state_t dest, state_t P, state_t Q);
+
+        /// [P〚A〛Q]
+        state_t add_interface_parallel
+        (state_t P, alphabet_t &alpha, state_t Q);
+        void interface_parallel
+        (state_t dest, state_t P, alphabet_t &alpha, state_t Q);
     };
 
     typedef shared_ptr<csp_t>  csp_p;
