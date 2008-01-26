@@ -1,39 +1,49 @@
-# Copy the test scripts from the source directory to the build
-# directory.
-
-set(TEST_FILES
-  test-all-csp0.sh
-  csp-tests
+set(TESTS
+  00-prefix
+  00-extchoice1
+  00-extchoice2
+  00-extchoice3
+  00-intchoice1
+  00-intchoice2
+  00-interrupt1
+  00-interrupt2
+  00-seqcomp1
+  00-seqcomp2
+  00-interleave1
+  00-interleave2
+  00-interleave3
+  00-interleave4
+  00-interleave5
+  00-iparallel1
+  00-iparallel2
+  00-iparallel3
+  00-iparallel4
+  00-aparallel1
+  00-aparallel2
+  00-aparallel3
+  10-extchoice-intchoice
+  10-intchoice-extchoice
 )
 
-foreach(_test_file ${TEST_FILES})
-  configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/${_test_file}
-    ${CMAKE_CURRENT_BINARY_DIR}/${_test_file}
-    COPYONLY
-  )
-endforeach(_test_file)
+# Copy the test data from the source directory to the build directory.
 
-# Copy the test data files over.  We already have a file that defines
-# all of the tests, so we can just read it in and loop through it to
-# perform the copy.  (First we have to convert the newlines into
-# semicolons to turn it into a proper CMake list.)
-
-file(READ csp-tests TEST_DATA_FILES)
-string(REGEX REPLACE "\n" ";" TEST_DATA_FILES ${TEST_DATA_FILES})
-
-foreach(_test_data_file ${TEST_DATA_FILES})
+foreach(_test ${TESTS})
   foreach(_ext csp0 output)
     configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/${_test_data_file}.${_ext}
-      ${CMAKE_CURRENT_BINARY_DIR}/${_test_data_file}.${_ext}
+      ${CMAKE_CURRENT_SOURCE_DIR}/${_test}.${_ext}
+      ${CMAKE_CURRENT_BINARY_DIR}/${_test}.${_ext}
       COPYONLY
     )
   endforeach(_ext)
-endforeach(_test_data_file)
+endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
 add_executable(test-csp0 test-csp0.cc)
 target_link_libraries(test-csp0 hst)
-add_test(csp0:compile test-all-csp0.sh)
+foreach(_test ${TESTS})
+  add_test(
+    csp:compile:${_test}
+    bash -c "./test-csp0 < ${_test}.csp0 | cmp - ${_test}.output"
+  )
+endforeach(_test)

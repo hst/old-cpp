@@ -19,6 +19,7 @@ set(LIBHST_SOURCES
 
 add_library(hst SHARED ${LIBHST_SOURCES})
 target_link_libraries(hst ${JUDY_LIBRARIES})
+
 install(
   TARGETS hst
   LIBRARY DESTINATION lib
