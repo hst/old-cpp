@@ -1,14 +1,14 @@
 I'll write more later.  For now, to compile this package, you need:
 
- * autoconf >= 2.59
- * automake 1.9
- * libtool
+ * cmake
  * libjudy
 
-After a fresh checkout, run "autoreconf -i --force" to generate all of
-the autotools files.  Then run the usual
+It's highly recommended that you perform an out-of-source build.
+Create a directory to hold the build results:
 
-  ./configure
+  mkdir ${BUILD_DIR}
+  cd ${BUILD_DIR}
+  cmake ${PATH_TO_LIBHST_SOURCE}
   make
-
-and you're set.  Good luck!
+  make test
+  make install
