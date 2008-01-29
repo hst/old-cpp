@@ -25,8 +25,6 @@
 #define INTSET_CC
 
 #include <hst/intset.hh>
-#include <hst/io.hh>
-#include <hst/io-macros.hh>
 
 namespace hst
 {
@@ -135,71 +133,6 @@ namespace hst
 
         // No element passed the test, so the overlap fails.
         return false;
-    }
-
-    istream &operator >> (istream &stream, intset_t &intset)
-    {
-        intset_t  result;
-        unsigned long  element;
-
-        // First try to read the opening curly brace.
-
-        require_char(stream, '{', true);
-        PROPAGATE_ANY_ERROR(stream);
-
-        // For the first element, we can either match a closing curly
-        // brace, signifying the empty set, or we can match an
-        // integer.
-
-        require_char(stream, '}', true);
-        EOF_IS_ERROR;
-        PROPAGATE_IO_ERROR(stream);
-
-        if (!stream.fail())
-        {
-            intset.swap(result);
-            return stream;
-        }
-
-        // It wasn't a brace, so it should be an integer.
-
-        stream.clear();
-        read_word(stream, element, true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(stream);
-
-        result += element;
-
-        // For the remaining elements, we must either match a closing
-        // curly brace, or a comma followed by an integer.  Anything
-        // else is a parse error.
-
-        while (true)
-        {
-            require_char(stream, '}', true);
-            EOF_IS_ERROR;
-            PROPAGATE_IO_ERROR(stream);
-
-            if (!stream.fail())
-            {
-                intset.swap(result);
-                return stream;
-            }
-
-            // It wasn't a brace, so it should be a comma followed by
-            // an integer.
-
-            stream.clear();
-            require_char(stream, ',', true);
-            EOF_IS_ERROR;
-            PROPAGATE_ANY_ERROR(stream);
-
-            read_word(stream, element, true);
-            EOF_IS_ERROR;
-            PROPAGATE_ANY_ERROR(stream);
-
-            result += element;
-        }
     }
 
     ostream &operator << (ostream &stream, const intset_t &intset)

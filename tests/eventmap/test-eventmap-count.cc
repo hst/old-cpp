@@ -31,7 +31,6 @@
 #include <iostream>
 
 #include <hst/eventmap.hh>
-#include <hst/io.hh>
 
 using namespace std;
 using namespace hst;

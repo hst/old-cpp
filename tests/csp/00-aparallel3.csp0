@@ -13,4 +13,4 @@ process $u2;
 prefix $u2 = a -> $u1;
 
 process P;
-aparallel P = $t2 [ {3} || {4} ] $u2;
+aparallel P = $t2 [ {b} || {c} ] $u2;

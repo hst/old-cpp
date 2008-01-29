@@ -30,7 +30,6 @@
 #include <iostream>
 
 #include <hst/lts.hh>
-#include <hst/io.hh>
 
 using namespace std;
 using namespace hst;

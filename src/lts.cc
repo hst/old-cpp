@@ -26,8 +26,6 @@
 
 #include <hst/types.hh>
 #include <hst/lts.hh>
-#include <hst/io.hh>
-#include <hst/io-macros.hh>
 
 using namespace std;
 
@@ -234,72 +232,6 @@ namespace hst
 
         stateset_p  stateset = graph_deref2(from, event);
         *stateset += to;
-    }
-
-    istream &operator >> (istream &stream, lts_t &lts)
-    {
-        lts_t    result;
-        state_t  from, to;
-        event_t  event;
-
-        // First try to read the opening curly brace.
-
-        require_char(stream, '{', true);
-        PROPAGATE_ANY_ERROR(stream);
-
-        // For the first element, we can either match a closing curly
-        // brace, signifying the empty LTS, or we can match an LTS
-        // link.
-
-        require_char(stream, '}', true);
-        EOF_IS_ERROR;
-        PROPAGATE_IO_ERROR(stream);
-
-        if (!stream.fail())
-        {
-            lts.swap(result);
-            return stream;
-        } else {
-            stream.clear();
-        }
-
-        // It wasn't a brace, so it should be an LTS link.
-
-        read_lts_link(stream, from, event, to, true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(stream);
-        result.add_edge(from, event, to);
-
-        // For the remaining elements, we must either match a closing
-        // curly brace, or a comma followed by an LTS link.  Anything
-        // else is a parse error.
-
-        while (true)
-        {
-            require_char(stream, '}', true);
-            EOF_IS_ERROR;
-            PROPAGATE_IO_ERROR(stream);
-
-            if (!stream.fail())
-            {
-                lts.swap(result);
-                return stream;
-            } else {
-                stream.clear();
-            }
-
-            // It wasn't a brace, so it should be a comma followed by
-            // an LTS link.
-
-            require_char(stream, ',', true);
-            EOF_IS_ERROR;
-            PROPAGATE_ANY_ERROR(stream);
-
-            read_lts_link(stream, from, event, to, true);
-            EOF_IS_ERROR;
-            PROPAGATE_ANY_ERROR(stream);
-            result.add_edge(from, event, to);
-        }
     }
 
     ostream &operator << (ostream &stream, const lts_t &lts)

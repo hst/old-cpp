@@ -21,28 +21,22 @@
  *----------------------------------------------------------------------
  */
 
-
-/*
- * Reads a CSP0 script from standard input, and tries to construct an
- * internal CSP representation from it.  Finally, prints the CSP's LTS
- * on standard output.
- */
-
 #include <iostream>
-
-#include <hst/csp.hh>
+#include <hst/intsetset.hh>
 
 using namespace std;
 using namespace hst;
 
 int main()
 {
-    csp_t  csp;
+    intsetset_t  intsetset;
 
-    read_csp0(cin, csp);
-
-    if (!cin.fail())
+    cin >> intsetset;
+    while (!cin.fail())
     {
-        cout << csp;
+        cout << intsetset << endl;
+        cin >> intsetset;
     }
+
+    return 0;
 }

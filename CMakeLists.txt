@@ -3,10 +3,14 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(AddFileDependencies)
 
-# We require the Judy library.
+# Find required libraries.
 
 find_package(Judy REQUIRED)
+find_package(Bison REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
+
+set(BISON_PREFIX_OUTPUTS TRUE)
+set(BISON_GENERATE_DEFINES TRUE)
 
 # The judyhash library is currently included directly in the source
 # tree.  That means we're responsible for installing it — plus, we

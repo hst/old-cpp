@@ -25,8 +25,6 @@
 #define EVENTMAP_CC
 
 #include <hst/eventmap.hh>
-#include <hst/io.hh>
-#include <hst/io-macros.hh>
 
 using namespace std;
 
@@ -99,72 +97,6 @@ namespace hst
 #endif
             return alphabet_p(it->second);
         }
-    }
-
-    istream &operator >> (istream &stream, eventmap_t &map)
-    {
-        eventmap_t   result;
-        eventpair_t  pair;
-
-        // First try to read the opening curly brace.
-
-        require_char(stream, '{', true);
-        PROPAGATE_ANY_ERROR(stream);
-
-        // For the first element, we can either match a closing curly
-        // brace, signifying the empty set, or we can match an
-        // integer.
-
-        require_char(stream, '}', true);
-        EOF_IS_ERROR;
-        PROPAGATE_IO_ERROR(stream);
-
-        if (!stream.fail())
-        {
-            map.swap(result);
-            return stream;
-        }
-
-        // It wasn't a brace, so it should be an event pair.
-
-        stream.clear();
-        read_eventpair(stream, pair, true);
-        EOF_IS_ERROR;
-        PROPAGATE_ANY_ERROR(stream);
-
-        result.insert(pair);
-
-        // For the remaining elements, we must either match a closing
-        // curly brace, or a comma followed by an event pair.
-        // Anything else is a parse error.
-
-        while (true)
-        {
-            require_char(stream, '}', true);
-            EOF_IS_ERROR;
-            PROPAGATE_IO_ERROR(stream);
-
-            if (!stream.fail())
-            {
-                map.swap(result);
-                return stream;
-            }
-
-            // It wasn't a brace, so it should be a comma followed by
-            // an event pair.
-
-            stream.clear();
-            require_char(stream, ',', true);
-            EOF_IS_ERROR;
-            PROPAGATE_ANY_ERROR(stream);
-
-            read_eventpair(stream, pair, true);
-            EOF_IS_ERROR;
-            PROPAGATE_ANY_ERROR(stream);
-
-            result.insert(pair);
-        }
-
     }
 
     ostream &operator << (ostream &stream, const eventmap_t &map)

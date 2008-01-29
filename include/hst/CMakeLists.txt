@@ -6,9 +6,8 @@ set(HST_INCLUDE_FILES
   eventmap.hh
   lts.hh
   csp.hh
-# csp-macros.hh     /* internal header file */
-  io.hh
-# io-macros.hh      /* internal header file */
+# csp-macros.hh               /* internal header file */
+# parser/scanner.hh           /* internal header file */
 )
 
 install(
