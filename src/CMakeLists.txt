@@ -22,16 +22,16 @@ set(LIBHST_SOURCES
   eventmap.cc
   lts.cc
   csp-basic.cc
-  csp-prefix.cc
-  csp-extchoice.cc
-  csp-intchoice.cc
-  csp-interrupt.cc
-  csp-seqcomp.cc
-  csp-interleave.cc
-  csp-interface-parallel.cc
-  csp-alphabetized-parallel.cc
-  csp-hide.cc
-  csp-rename.cc
+  operators/prefix.cc
+  operators/extchoice.cc
+  operators/intchoice.cc
+  operators/interrupt.cc
+  operators/seqcomp.cc
+  operators/interleave.cc
+  operators/interface-parallel.cc
+  operators/alphabetized-parallel.cc
+  operators/hide.cc
+  operators/rename.cc
   parser/scanner.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/intset.tab.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/intsetset.tab.cc
