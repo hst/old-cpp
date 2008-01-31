@@ -59,18 +59,20 @@ namespace hst_parser
             THREE_PIPE = 314,
             LPAR       = 315,
             RPAR       = 316,
+            BACKSLASH  = 317,
 
             // keywords
             APARALLEL  = 400,
             EVENT      = 401,
             EXTCHOICE  = 402,
-            INTCHOICE  = 403,
-            INTERLEAVE = 404,
-            INTERRUPT  = 405,
-            IPARALLEL  = 406,
-            PREFIX     = 407,
-            PROCESS    = 408,
-            SEQCOMP    = 409,
+            HIDE       = 403,
+            INTCHOICE  = 404,
+            INTERLEAVE = 405,
+            INTERRUPT  = 406,
+            IPARALLEL  = 407,
+            PREFIX     = 408,
+            PROCESS    = 409,
+            SEQCOMP    = 410,
 
             // literals
             ULONG      = 500,

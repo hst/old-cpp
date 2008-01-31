@@ -30,6 +30,7 @@ set(LIBHST_SOURCES
   csp-interleave.cc
   csp-interface-parallel.cc
   csp-alphabetized-parallel.cc
+  csp-hide.cc
   parser/scanner.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/intset.tab.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/intsetset.tab.cc

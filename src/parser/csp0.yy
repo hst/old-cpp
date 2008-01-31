@@ -102,18 +102,20 @@ using namespace hst_parser;
 %token THREE_PIPE 314 "|||"
 %token LPAR       315 "[|"
 %token RPAR       316 "|]"
+%token BACKSLASH  317 "\\"
 
 /* keywords */
 %token APARALLEL  400 "aparallel"
 %token EVENT      401 "event"
 %token EXTCHOICE  402 "extchoice"
-%token INTCHOICE  403 "intchoice"
-%token INTERLEAVE 404 "interleave"
-%token INTERRUPT  405 "interrupt"
-%token IPARALLEL  406 "iparallel"
-%token PREFIX     407 "prefix"
-%token PROCESS    408 "process"
-%token SEQCOMP    409 "seqcomp"
+%token HIDE       403 "hide"
+%token INTCHOICE  404 "intchoice"
+%token INTERLEAVE 405 "interleave"
+%token INTERRUPT  406 "interrupt"
+%token IPARALLEL  407 "iparallel"
+%token PREFIX     408 "prefix"
+%token PROCESS    409 "process"
+%token SEQCOMP    410 "seqcomp"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"
@@ -138,6 +140,7 @@ using namespace hst_parser;
 %type  <dummy>       process_def event_def prefix_stmt extchoice_stmt
 %type  <dummy>       intchoice_stmt interrupt_stmt seqcomp_stmt
 %type  <dummy>       interleave_stmt iparallel_stmt aparallel_stmt
+%type  <dummy>       hide_stmt
 
 %{ /*** C/C++ Declarations in code file ***/
 #include <hst/parser/scanner.hh>
@@ -188,6 +191,8 @@ stmt
     | iparallel_stmt
     { $$ = $1; }
     | aparallel_stmt
+    { $$ = $1; }
+    | hide_stmt
     { $$ = $1; }
     ;
 
@@ -360,6 +365,15 @@ aparallel_stmt
         _result.alphabetized_parallel($2, $4, *$6, *$8, $10);
         delete $6;
         delete $8;
+    }
+    ;
+
+hide_stmt
+    : HIDE process_id EQUALS
+      process_id BACKSLASH alphabet SEMI
+    {
+        _result.hide($2, $4, *$6);
+        delete $6;
     }
     ;
 

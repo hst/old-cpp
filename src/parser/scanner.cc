@@ -118,6 +118,8 @@ namespace hst_parser
             return token::SEMI;
         } else if (ch == ']') {
             return token::RBRACKET;
+        } else if (ch == '\\') {
+            return token::BACKSLASH;
         }
 
         // Tokens that start with "-"
@@ -307,6 +309,9 @@ namespace hst_parser
             } else if (*id == "extchoice") {
                 delete id;
                 return token::EXTCHOICE;
+            } else if (*id == "hide") {
+                delete id;
+                return token::HIDE;
             } else if (*id == "intchoice") {
                 delete id;
                 return token::INTCHOICE;

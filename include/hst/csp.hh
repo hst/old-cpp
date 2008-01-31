@@ -49,7 +49,8 @@ namespace hst
         SEQCOMP,
         INTERLEAVE,
         INTERFACE_PARALLEL,
-        ALPHABETIZED_PARALLEL
+        ALPHABETIZED_PARALLEL,
+        HIDE
     };
 
     class csp_t
@@ -315,6 +316,13 @@ namespace hst
         void alphabetized_parallel
         (state_t dest,
          state_t P, alphabet_t &alphaP, alphabet_t &alphaQ, state_t Q);
+
+        /// [P \ α]
+        state_t add_hide
+        (state_t P, alphabet_t &alpha);
+        void hide
+        (state_t dest,
+         state_t P, alphabet_t &alpha);
     };
 
     typedef shared_ptr<csp_t>  csp_p;

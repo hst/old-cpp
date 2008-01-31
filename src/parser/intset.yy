@@ -90,18 +90,20 @@ using namespace hst_parser;
 %token THREE_PIPE 314 "|||"
 %token LPAR       315 "[|"
 %token RPAR       316 "|]"
+%token BACKSLASH  317 "\\"
 
 /* keywords */
 %token APARALLEL  400 "aparallel"
 %token EVENT      401 "event"
 %token EXTCHOICE  402 "extchoice"
-%token INTCHOICE  403 "intchoice"
-%token INTERLEAVE 404 "interleave"
-%token INTERRUPT  405 "interrupt"
-%token IPARALLEL  406 "iparallel"
-%token PREFIX     407 "prefix"
-%token PROCESS    408 "process"
-%token SEQCOMP    409 "seqcomp"
+%token HIDE       403 "hide"
+%token INTCHOICE  404 "intchoice"
+%token INTERLEAVE 405 "interleave"
+%token INTERRUPT  406 "interrupt"
+%token IPARALLEL  407 "iparallel"
+%token PREFIX     408 "prefix"
+%token PROCESS    409 "process"
+%token SEQCOMP    410 "seqcomp"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"

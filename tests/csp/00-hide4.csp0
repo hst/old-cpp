@@ -1,0 +1,17 @@
+event a;
+event b;
+event c;
+event d;
+
+process $t1;
+prefix $t1 = d -> STOP;
+process $t2;
+prefix $t2 = c -> $t1;
+process $t3;
+prefix $t3 = b -> STOP;
+process $t4;
+prefix $t4 = a -> $t3;
+process $t5;
+extchoice $t5 = $t2 [] $t4;
+process P;
+hide P = $t5 \ {a,c};

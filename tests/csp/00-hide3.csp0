@@ -1,0 +1,16 @@
+event a;
+event b;
+event c;
+
+process $t1;
+prefix $t1 = b -> SKIP;
+process $t2;
+prefix $t2 = c -> $t1;
+process $t3;
+prefix $t3 = b -> SKIP;
+process $t4;
+prefix $t4 = a -> $t3;
+process $t5;
+seqcomp $t5 = $t4 ; $t2;
+process P;
+hide P = $t5 \ {b};

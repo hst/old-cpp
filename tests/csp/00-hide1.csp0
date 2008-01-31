@@ -1,0 +1,11 @@
+event a;
+event b;
+
+process $t1;
+prefix $t1 = a -> STOP;
+process $t2;
+prefix $t2 = b -> $t1;
+process $t3;
+prefix $t3 = a -> $t2;
+process P;
+hide P = $t3 \ {a};

@@ -21,6 +21,9 @@ set(TESTS
   00-aparallel1
   00-aparallel2
   00-aparallel3
+  00-hide1
+  00-hide2
+  00-hide3
   10-extchoice-intchoice
   10-intchoice-extchoice
 )
