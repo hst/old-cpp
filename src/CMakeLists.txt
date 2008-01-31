@@ -22,6 +22,7 @@ set(LIBHST_SOURCES
   eventmap.cc
   lts.cc
   csp-basic.cc
+  normalization/closure.cc
   operators/prefix.cc
   operators/extchoice.cc
   operators/intchoice.cc

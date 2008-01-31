@@ -253,6 +253,10 @@ namespace hst
             add_edge(edge.from, edge.event, edge.to);
         }
 
+        void closure
+        (event_t event, stateset_t &closure,
+         const stateset_t &initial) const;
+
         lts_t():
             num_states(0L),
             num_events(0L)
