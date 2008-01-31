@@ -131,6 +131,11 @@ namespace hst
 #endif
         }
 
+        bool domain_contains(const event_t event) const
+        {
+            return (map.count(event) != 0);
+        }
+
         typedef map_t::const_iterator  domain_iterator;
 
         domain_iterator domain_begin() const

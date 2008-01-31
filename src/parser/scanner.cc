@@ -116,8 +116,6 @@ namespace hst_parser
             return token::EQUALS;
         } else if (ch == ';') {
             return token::SEMI;
-        } else if (ch == ']') {
-            return token::RBRACKET;
         } else if (ch == '\\') {
             return token::BACKSLASH;
         }
@@ -166,10 +164,31 @@ namespace hst_parser
                 // found a "[|"
                 read_char(stream, loc);
                 return token::LPAR;
+            } else if (lookahead == '[') {
+                // found a "[["
+                read_char(stream, loc);
+                return token::LMAP;
             }
 
             // found a bare "["
             return token::LBRACKET;
+        }
+
+        // Tokens that start with "]"
+
+        if (ch == ']')
+        {
+            int lookahead = peek_char(stream);
+
+            if (lookahead == ']')
+            {
+                // found a "]]"
+                read_char(stream, loc);
+                return token::RMAP;
+            }
+
+            // found a bare "]"
+            return token::RBRACKET;
         }
 
         // Tokens that start with "/"
@@ -330,6 +349,9 @@ namespace hst_parser
             } else if (*id == "process") {
                 delete id;
                 return token::PROCESS;
+            } else if (*id == "rename") {
+                delete id;
+                return token::RENAME;
             } else if (*id == "seqcomp") {
                 delete id;
                 return token::SEQCOMP;

@@ -72,6 +72,7 @@ using namespace hst_parser;
     string         *str_val;
     bool           dummy;
     alphabet_t     *alpha_val;
+    eventmap_t     *map_val;
 }
 
 %token END 0 "end of file"
@@ -103,6 +104,8 @@ using namespace hst_parser;
 %token LPAR       315 "[|"
 %token RPAR       316 "|]"
 %token BACKSLASH  317 "\\"
+%token LMAP       318 "[["
+%token RMAP       319 "]]"
 
 /* keywords */
 %token APARALLEL  400 "aparallel"
@@ -115,7 +118,8 @@ using namespace hst_parser;
 %token IPARALLEL  407 "iparallel"
 %token PREFIX     408 "prefix"
 %token PROCESS    409 "process"
-%token SEQCOMP    410 "seqcomp"
+%token RENAME     410 "rename"
+%token SEQCOMP    411 "seqcomp"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"
@@ -136,11 +140,15 @@ using namespace hst_parser;
 %printer { debug_stream() << *$$; }  alphabet event_list
 %destructor { delete $$; }  alphabet event_list
 
+%type  <map_val>  map pair_list
+%printer { debug_stream() << *$$; }  map pair_list
+%destructor { delete $$; }  map pair_list
+
 %type  <dummy>       csp stmt
 %type  <dummy>       process_def event_def prefix_stmt extchoice_stmt
 %type  <dummy>       intchoice_stmt interrupt_stmt seqcomp_stmt
 %type  <dummy>       interleave_stmt iparallel_stmt aparallel_stmt
-%type  <dummy>       hide_stmt
+%type  <dummy>       hide_stmt rename_stmt
 
 %{ /*** C/C++ Declarations in code file ***/
 #include <hst/parser/scanner.hh>
@@ -193,6 +201,8 @@ stmt
     | aparallel_stmt
     { $$ = $1; }
     | hide_stmt
+    { $$ = $1; }
+    | rename_stmt
     { $$ = $1; }
     ;
 
@@ -279,6 +289,26 @@ event_list
     {
         $$ = $1;
         *$$ += $3;
+    }
+    ;
+
+map
+    : LMAP RMAP
+    { $$ = new eventmap_t(); }
+    | LMAP pair_list RMAP
+    { $$ = $2; }
+    ;
+
+pair_list
+    : event_id ARROW event_id
+    {
+        $$ = new eventmap_t();
+        $$->insert(eventpair_t($1, $3));
+    }
+    | pair_list COMMA event_id ARROW event_id
+    {
+        $$ = $1;
+        $$->insert(eventpair_t($3, $5));
     }
     ;
 
@@ -374,6 +404,15 @@ hide_stmt
     {
         _result.hide($2, $4, *$6);
         delete $6;
+    }
+    ;
+
+rename_stmt
+    : RENAME process_id EQUALS
+      process_id map SEMI
+    {
+        _result.rename($2, $4, *$5);
+        delete $5;
     }
     ;
 

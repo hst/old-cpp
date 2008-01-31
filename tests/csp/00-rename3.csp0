@@ -1,0 +1,17 @@
+event a;
+event b;
+event c;
+event d;
+
+process $t1;
+prefix $t1 = c -> STOP;
+process $t2;
+prefix $t2 = c -> STOP;
+process $t3;
+prefix $t3 = a -> $t1;
+process $t4;
+prefix $t4 = b -> $t2;
+process $t5;
+extchoice $t5 = $t3 [] $t4;
+process P;
+rename P = $t5 [[ a->d, b->d ]];

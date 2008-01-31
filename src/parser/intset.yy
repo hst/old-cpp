@@ -91,6 +91,8 @@ using namespace hst_parser;
 %token LPAR       315 "[|"
 %token RPAR       316 "|]"
 %token BACKSLASH  317 "\\"
+%token LMAP       318 "[["
+%token RMAP       319 "]]"
 
 /* keywords */
 %token APARALLEL  400 "aparallel"
@@ -103,7 +105,8 @@ using namespace hst_parser;
 %token IPARALLEL  407 "iparallel"
 %token PREFIX     408 "prefix"
 %token PROCESS    409 "process"
-%token SEQCOMP    410 "seqcomp"
+%token RENAME     410 "rename"
+%token SEQCOMP    411 "seqcomp"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"

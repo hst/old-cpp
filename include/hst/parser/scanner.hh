@@ -60,6 +60,8 @@ namespace hst_parser
             LPAR       = 315,
             RPAR       = 316,
             BACKSLASH  = 317,
+            LMAP       = 318,
+            RMAP       = 319,
 
             // keywords
             APARALLEL  = 400,
@@ -72,7 +74,8 @@ namespace hst_parser
             IPARALLEL  = 407,
             PREFIX     = 408,
             PROCESS    = 409,
-            SEQCOMP    = 410,
+            RENAME     = 410,
+            SEQCOMP    = 411,
 
             // literals
             ULONG      = 500,

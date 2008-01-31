@@ -30,6 +30,7 @@
 #include <tr1/memory>
 
 #include <hst/types.hh>
+#include <hst/eventmap.hh>
 #include <hst/lts.hh>
 
 #ifndef HST_CSP_DEBUG
@@ -50,7 +51,8 @@ namespace hst
         INTERLEAVE,
         INTERFACE_PARALLEL,
         ALPHABETIZED_PARALLEL,
-        HIDE
+        HIDE,
+        RENAME
     };
 
     class csp_t
@@ -323,6 +325,13 @@ namespace hst
         void hide
         (state_t dest,
          state_t P, alphabet_t &alpha);
+
+        /// [P \ μ]
+        state_t add_rename
+        (state_t P, eventmap_t &map);
+        void rename
+        (state_t dest,
+         state_t P, eventmap_t &map);
     };
 
     typedef shared_ptr<csp_t>  csp_p;
