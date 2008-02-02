@@ -257,6 +257,9 @@ namespace hst
         (event_t event, stateset_t &closure,
          const stateset_t &initial) const;
 
+        void divergent_nodes
+        (event_t event, stateset_t &divergent) const;
+
         lts_t():
             num_states(0L),
             num_events(0L)

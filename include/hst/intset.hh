@@ -97,6 +97,19 @@ namespace hst
         }
 
         /**
+         * Create a new set from a couple of iterators
+         */
+        template <class Iterator>
+        intset_t(Iterator begin, Iterator end):
+            _set(),
+            _hash(0L)
+        {
+            Iterator  it = begin;
+            for (; it != end; ++it)
+                *this += *it;
+        }
+
+        /**
          * Remove all entries from a set
          */
         void clear()

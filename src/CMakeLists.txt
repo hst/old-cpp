@@ -23,6 +23,7 @@ set(LIBHST_SOURCES
   lts.cc
   csp-basic.cc
   normalization/closure.cc
+  normalization/divergent.cc
   operators/prefix.cc
   operators/extchoice.cc
   operators/intchoice.cc
