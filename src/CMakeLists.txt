@@ -20,6 +20,7 @@ set(LIBHST_SOURCES
   intset.cc
   intsetset.cc
   eventmap.cc
+  event-stateset-map.cc
   lts.cc
   csp-basic.cc
   normalization/closure.cc

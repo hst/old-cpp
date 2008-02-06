@@ -34,6 +34,7 @@
 #include <judy_map_l.h>
 
 #include <hst/types.hh>
+#include <hst/event-stateset-map.hh>
 
 #ifndef HST_LTS_DEBUG
 #define HST_LTS_DEBUG 0
@@ -101,13 +102,9 @@ namespace hst
          * event) pairs and sets of events.
          */
 
-        typedef judy_map_l<event_t, stateset_p,
-                           event_t_hasher>       graph_inner_map_t;
-        typedef shared_ptr<graph_inner_map_t>    graph_inner_map_p;
-
-        typedef judy_map_l<state_t, graph_inner_map_p,
-                           state_t_hasher>              graph_t;
-        typedef shared_ptr<graph_t>                     graph_p;
+        typedef judy_map_l<state_t, event_stateset_map_p,
+                           state_t_hasher>                 graph_t;
+        typedef shared_ptr<graph_t>                        graph_p;
 
         graph_t  graph;
 
@@ -116,7 +113,7 @@ namespace hst
          * corresponding inner_map if necessary.
          */
 
-        graph_inner_map_p graph_deref1(state_t state);
+        event_stateset_map_p graph_deref1(state_t state);
 
         /**
          * Dereference the LTS graph by a from_state and an event,
@@ -131,7 +128,7 @@ namespace hst
          * pointer if the inner_map doesn't exist.
          */
 
-        graph_inner_map_p graph_deref1(state_t state) const;
+        event_stateset_map_cp graph_deref1(state_t state) const;
 
         /**
          * Dereference the LTS graph by a from_state and an event,
@@ -139,68 +136,7 @@ namespace hst
          * stateset doesn't exit.
          */
 
-        stateset_p graph_deref2(state_t state, event_t event) const;
-
-        /*
-         * The graph LTS iterators all have basically the same format,
-         * so we'll define it once using a template.  They all use an
-         * underlying iterator to perform all of the work, possibly
-         * modifying the result before it's returned.  «Iterator» is
-         * the base type of the underlying iterator.  «Result» is the
-         * value return by this iterator.  «Eval» is a functor that
-         * returns the current value from the underlying iterator.
-         */
-
-        template<typename Iterator,
-                 typename Result,
-                 typename Eval>
-        class proxy_iterator
-        {
-        private:
-            typedef proxy_iterator<Iterator, Result, Eval>
-                this_type;
-
-            Eval      eval;
-            Iterator  it;
-
-        public:
-            proxy_iterator()
-            {
-            }
-
-            proxy_iterator(Iterator &_it):
-                it(_it)
-            {
-            }
-
-            Result operator * ()
-            {
-                return eval(it);
-            }
-
-            this_type operator ++ (int)
-            {
-                this_type  ret = *this;
-                ++it;
-                return ret;
-            }
-
-            this_type &operator ++ ()
-            {
-                ++it;
-                return *this;
-            }
-
-            bool operator == (const this_type &other)
-            {
-                return (this->it == other.it);
-            }
-
-            bool operator != (const this_type &other)
-            {
-                return (this->it != other.it);
-            }
-        };
+        stateset_cp graph_deref2(state_t state, event_t event) const;
 
         /*
          * The underlying iterator returns a (state_t,
@@ -211,20 +147,6 @@ namespace hst
         struct from_state_evaluator
         {
             state_t operator () (graph_t::const_iterator &it)
-            {
-                return it->first;
-            }
-        };
-
-        /*
-         * The underlying iterator returns an (event_t, stateset_p)
-         * pair, so we can get the event by taking the first element
-         * of the pair.
-         */
-
-        struct state_events_evaluator
-        {
-            event_t operator () (graph_inner_map_t::const_iterator &it)
             {
                 return it->first;
             }
@@ -385,38 +307,28 @@ namespace hst
             return from_state_iterator(it);
         }
 
-        typedef proxy_iterator<graph_inner_map_t::const_iterator,
-                               event_t,
-                               state_events_evaluator>
+        typedef event_stateset_map_t::events_iterator
             state_events_iterator;
 
         state_events_iterator state_events_begin(state_t from) const
         {
-            graph_inner_map_p  inner_map = graph_deref1(from);
-
+            event_stateset_map_cp  inner_map = graph_deref1(from);
             if (inner_map.get() == NULL)
             {
-                graph_inner_map_t::const_iterator  it;
-                return state_events_iterator(it);
+                return state_events_iterator();
             } else {
-                graph_inner_map_t::const_iterator  it =
-                    inner_map->begin();
-                return state_events_iterator(it);
+                return inner_map->events_begin();
             }
         }
 
         state_events_iterator state_events_end(state_t from) const
         {
-            graph_inner_map_p  inner_map = graph_deref1(from);
-
+            event_stateset_map_cp  inner_map = graph_deref1(from);
             if (inner_map.get() == NULL)
             {
-                graph_inner_map_t::const_iterator  it;
-                return state_events_iterator(it);
+                return state_events_iterator();
             } else {
-                graph_inner_map_t::const_iterator  it =
-                    inner_map->end();
-                return state_events_iterator(it);
+                return inner_map->events_end();
             }
         }
 
@@ -428,7 +340,7 @@ namespace hst
         event_target_iterator event_targets_begin(state_t from,
                                                   event_t event) const
         {
-            stateset_p  stateset = graph_deref2(from, event);
+            stateset_cp  stateset = graph_deref2(from, event);
 
             if (stateset.get() == NULL)
             {
@@ -443,7 +355,7 @@ namespace hst
         event_target_iterator event_targets_end(state_t from,
                                                 event_t event) const
         {
-            stateset_p  stateset = graph_deref2(from, event);
+            stateset_cp  stateset = graph_deref2(from, event);
 
             if (stateset.get() == NULL)
             {
@@ -455,115 +367,34 @@ namespace hst
             }
         }
 
-        class state_pairs_iterator
-        {
-        protected:
-            graph_inner_map_t::const_iterator  se, se_end;
-            stateset_t::iterator               et, et_end;
-
-            event_state_t  current;
-
-            void load_current()
-            {
-                if (se != se_end)
-                    current.first = se->first;
-                if (et != et_end)
-                    current.second = *et;
-            }
-
-            void load_event_target()
-            {
-                if (se == se_end)
-                    et = stateset_t::iterator();
-                else
-                    et = se->second->begin();
-            }
-
-            void advance()
-            {
-                // First find the next event target.
-                ++et;
-
-                // ...but if we've reached the last one, then we move
-                // on to the next event.
-                if (et == et_end)
-                {
-                    ++se;
-                    load_event_target();
-                }
-
-                load_current();
-            }
-
-        public:
-            state_pairs_iterator()
-            {
-            }
-
-            state_pairs_iterator(graph_inner_map_t::const_iterator _se):
-                se(_se)
-            {
-                load_event_target();
-                load_current();
-            }
-
-            event_state_t operator * ()
-            {
-                return current;
-            }
-
-            event_state_t *operator -> ()
-            {
-                return &current;
-            }
-
-            state_pairs_iterator operator ++ (int)
-            {
-                state_pairs_iterator  ret = *this;
-                this->operator ++ ();
-                return ret;
-            }
-
-            state_pairs_iterator operator ++ ()
-            {
-                advance();
-                return *this;
-            }
-
-            bool operator == (const state_pairs_iterator &other)
-            {
-                return
-                    (this->se == other.se) &&
-                    (this->et == other.et);
-            }
-
-            bool operator != (const state_pairs_iterator &other)
-            {
-                return
-                    (this->se != other.se) ||
-                    (this->et != other.et);
-            }
-        };
+        typedef event_stateset_map_t::pairs_iterator
+            state_pairs_iterator;
 
         state_pairs_iterator state_pairs_begin(state_t from) const
         {
-            graph_inner_map_p  inner_map = graph_deref1(from);
-
-            if (inner_map == NULL)
+            event_stateset_map_cp  inner_map = graph_deref1(from);
+            if (inner_map.get() == NULL)
             {
                 return state_pairs_iterator();
             } else {
-                graph_inner_map_t::const_iterator  it =
-                    inner_map->begin();
-                return state_pairs_iterator(it);
+                return inner_map->pairs_begin();
             }
         }
 
         state_pairs_iterator state_pairs_end(state_t from) const
         {
-            return state_pairs_iterator();
+            event_stateset_map_cp  inner_map = graph_deref1(from);
+            if (inner_map.get() == NULL)
+            {
+                return state_pairs_iterator();
+            } else {
+                return inner_map->pairs_end();
+            }
         }
     };
+
+    typedef shared_ptr<lts_t>        lts_p;
+    typedef shared_ptr<const lts_t>  lts_cp;
 
     // Input and output operators for streams
     istream &operator >> (istream &stream, lts_t &lts);

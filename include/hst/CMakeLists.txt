@@ -4,6 +4,8 @@ set(HST_INCLUDE_FILES
   intsetset.hh
   types.hh
   eventmap.hh
+  proxy-iterator.hh
+  event-stateset-map.hh
   lts.hh
   csp.hh
 # csp-macros.hh               /* internal header file */

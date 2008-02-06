@@ -25,15 +25,16 @@
 #define LTS_CC
 
 #include <hst/types.hh>
+#include <hst/event-stateset-map.hh>
 #include <hst/lts.hh>
 
 using namespace std;
 
 namespace hst
 {
-    lts_t::graph_inner_map_p lts_t::graph_deref1(state_t state)
+    event_stateset_map_p lts_t::graph_deref1(state_t state)
     {
-        graph_inner_map_p  inner_map;
+        event_stateset_map_p  inner_map;
         pair<graph_t::iterator, bool>  insert_result;
 
 #if HST_LTS_DEBUG
@@ -60,7 +61,7 @@ namespace hst
 #if HST_LTS_DEBUG
             cerr << "  new = ";
 #endif
-            insert_result.first->second.reset(new graph_inner_map_t);
+            insert_result.first->second.reset(new event_stateset_map_t);
         } else {
             // The insert failed because there's already an inner
             // map.  Moreover, the iterator points to the inner
@@ -82,61 +83,11 @@ namespace hst
     {
         // Dereference the state first to get an inner map.
 
-        graph_inner_map_p  inner_map = graph_deref1(state);
-
-        // Right, now we perform basically the same logic as
-        // graph_deref1.
-
-        stateset_p  stateset;
-        pair<graph_inner_map_t::iterator, bool>  insert_result;
-
-#if HST_LTS_DEBUG
-        cerr << "Deref2 ("
-             << state << ","
-             << event << ")"
-             << endl
-             << "  inner map = "
-             << inner_map.get()
-             << endl;
-#endif
-
-        // Try to insert a NULL stateset into the inner map.  This
-        // will tell us whether there's already a stateset for
-        // this (state, event) pair.
-
-        insert_result =
-            inner_map->insert(make_pair(event, stateset));
-
-        if (insert_result.second)
-        {
-            // The insert succeeded, so there's currently a NULL
-            // pointer in the inner map for this (state, event).
-            // We need to change this NULL to a pointer to an
-            // actual stateset; luckily, we've got an iterator we
-            // can use to do this, though it's a bit tricky.
-
-#if HST_LTS_DEBUG
-            cerr << "  new = ";
-#endif
-            insert_result.first->second.reset(new stateset_t);
-        } else {
-            // The insert failed because there's already a
-            // stateset.  Moreover, the iterator points to the
-            // stateset's smart_ptr, so there's not really
-            // anything to do here.
-
-#if HST_LTS_DEBUG
-            cerr << "  old = ";
-#endif
-        }
-
-#if HST_LTS_DEBUG
-        cerr << insert_result.first->second.get() << endl;
-#endif
-        return insert_result.first->second;
+        event_stateset_map_p  inner_map = graph_deref1(state);
+        return inner_map->get(event);
     }
 
-    lts_t::graph_inner_map_p lts_t::graph_deref1(state_t state) const
+    event_stateset_map_cp lts_t::graph_deref1(state_t state) const
     {
 #if HST_LTS_DEBUG
         cerr << "Deref1 const ("
@@ -151,16 +102,16 @@ namespace hst
 #if HST_LTS_DEBUG
             cerr << "  new" << endl;
 #endif
-            return graph_inner_map_p();
+            return event_stateset_map_cp();
         } else {
 #if HST_LTS_DEBUG
             cerr << "  old = " << it->second << endl;
 #endif
-            return graph_inner_map_p(it->second);
+            return event_stateset_map_cp(it->second);
         }
     }
 
-    stateset_p lts_t::graph_deref2(state_t state, event_t event) const
+    stateset_cp lts_t::graph_deref2(state_t state, event_t event) const
     {
 #if HST_LTS_DEBUG
         cerr << "Deref2 const ("
@@ -171,7 +122,7 @@ namespace hst
 
         // Dereference the state first to get an inner map.
 
-        graph_inner_map_p  inner_map = graph_deref1(state);
+        event_stateset_map_cp  inner_map = graph_deref1(state);
 
 #if HST_LTS_DEBUG
         cerr << "  inner map = "
@@ -185,22 +136,14 @@ namespace hst
             cerr << "  new outer" << endl;
 #endif
             return stateset_p();
-        }
-
-        graph_inner_map_t::const_iterator  it =
-            inner_map->find(event);
-
-        if (it == inner_map->end())
-        {
-#if HST_LTS_DEBUG
-            cerr << "  new inner" << endl;
-#endif
-            return stateset_p();
         } else {
+            stateset_cp  result = inner_map->get(event);
+
 #if HST_LTS_DEBUG
-            cerr << "  old = " << it->second << endl;
+            cerr << "  old " << result << endl;
 #endif
-            return stateset_p(it->second);
+
+            return result;
         }
     }
 

@@ -40,9 +40,11 @@ using namespace std;
 
 namespace hst
 {
-    typedef unsigned long           state_t;
-    typedef intset_t                stateset_t;
-    typedef shared_ptr<stateset_t>  stateset_p;
+    typedef unsigned long  state_t;
+
+    typedef intset_t   stateset_t;
+    typedef intset_p   stateset_p;
+    typedef intset_cp  stateset_cp;
 
     struct state_t_hasher
     {
@@ -52,9 +54,11 @@ namespace hst
         }
     };
 
-    typedef unsigned long           event_t;
-    typedef intset_t                alphabet_t;
-    typedef shared_ptr<alphabet_t>  alphabet_p;
+    typedef unsigned long  event_t;
+
+    typedef intset_t   alphabet_t;
+    typedef intset_p   alphabet_p;
+    typedef intset_cp  alphabet_cp;
 
     struct event_t_hasher
     {
@@ -64,8 +68,9 @@ namespace hst
         }
     };
 
-    typedef pair<event_t, state_t>     event_state_t;
-    typedef shared_ptr<event_state_t>  event_state_p;
+    typedef pair<event_t, state_t>           event_state_t;
+    typedef shared_ptr<event_state_t>        event_state_p;
+    typedef shared_ptr<const event_state_t>  event_state_cp;
 
     struct string_hasher
     {

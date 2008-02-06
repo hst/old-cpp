@@ -268,7 +268,8 @@ namespace hst
 
     };
 
-    typedef shared_ptr<intsetset_t>  intsetset_p;
+    typedef shared_ptr<intsetset_t>        intsetset_p;
+    typedef shared_ptr<const intsetset_t>  intsetset_cp;
 
     struct intsetset_t_hasher
     {

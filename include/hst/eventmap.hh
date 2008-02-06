@@ -265,7 +265,8 @@ namespace hst
         }
     };
 
-    typedef shared_ptr<eventmap_t>  eventmap_p;
+    typedef shared_ptr<eventmap_t>        eventmap_p;
+    typedef shared_ptr<const eventmap_t>  eventmap_cp;
 
     istream &operator >> (istream &stream, eventmap_t &map);
     ostream &operator << (ostream &stream, const eventmap_t &map);

@@ -334,7 +334,8 @@ namespace hst
          state_t P, eventmap_t &map);
     };
 
-    typedef shared_ptr<csp_t>  csp_p;
+    typedef shared_ptr<csp_t>        csp_p;
+    typedef shared_ptr<const csp_t>  csp_cp;
 
     void read_csp0(istream &stream, csp_t &csp);
 
