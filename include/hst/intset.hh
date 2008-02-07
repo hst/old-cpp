@@ -283,6 +283,19 @@ namespace hst
         {
             return intset.hash();
         }
+
+        unsigned long operator () (intset_cp intset) const
+        {
+            return intset->hash();
+        }
+
+        bool operator () (intset_cp obj1, intset_cp obj2) const
+        {
+            if (obj1.get() == NULL)
+                return obj2.get() == NULL;
+            else
+                return *obj1 == *obj2;
+        }
     };
 
     // Input and output operators for streams

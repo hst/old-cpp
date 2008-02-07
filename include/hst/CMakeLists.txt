@@ -7,6 +7,7 @@ set(HST_INCLUDE_FILES
   proxy-iterator.hh
   event-stateset-map.hh
   lts.hh
+  normalized-lts.hh
   csp.hh
 # csp-macros.hh               /* internal header file */
 # parser/scanner.hh           /* internal header file */
