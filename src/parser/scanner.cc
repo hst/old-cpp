@@ -318,8 +318,11 @@ namespace hst_parser
             // instead.  Otherwise return an identifier token.
 
 
-            if (*id == "aparallel")
+            if (*id == "alias")
             {
+                delete id;
+                return token::ALIAS;
+            } else if (*id == "aparallel") {
                 delete id;
                 return token::APARALLEL;
             } else if (*id == "event") {

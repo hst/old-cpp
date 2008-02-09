@@ -29,6 +29,7 @@ set(TESTS
   00-rename3
   10-extchoice-intchoice
   10-intchoice-extchoice
+  roscoe-02
 )
 
 # Copy the test data from the source directory to the build directory.

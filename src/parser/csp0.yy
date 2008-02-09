@@ -108,18 +108,19 @@ using namespace hst_parser;
 %token RMAP       319 "]]"
 
 /* keywords */
-%token APARALLEL  400 "aparallel"
-%token EVENT      401 "event"
-%token EXTCHOICE  402 "extchoice"
-%token HIDE       403 "hide"
-%token INTCHOICE  404 "intchoice"
-%token INTERLEAVE 405 "interleave"
-%token INTERRUPT  406 "interrupt"
-%token IPARALLEL  407 "iparallel"
-%token PREFIX     408 "prefix"
-%token PROCESS    409 "process"
-%token RENAME     410 "rename"
-%token SEQCOMP    411 "seqcomp"
+%token ALIAS      400 "alias"
+%token APARALLEL  401 "aparallel"
+%token EVENT      402 "event"
+%token EXTCHOICE  403 "extchoice"
+%token HIDE       404 "hide"
+%token INTCHOICE  405 "intchoice"
+%token INTERLEAVE 406 "interleave"
+%token INTERRUPT  407 "interrupt"
+%token IPARALLEL  408 "iparallel"
+%token PREFIX     409 "prefix"
+%token PROCESS    410 "process"
+%token RENAME     411 "rename"
+%token SEQCOMP    412 "seqcomp"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"
@@ -148,7 +149,7 @@ using namespace hst_parser;
 %type  <dummy>       process_def event_def prefix_stmt extchoice_stmt
 %type  <dummy>       intchoice_stmt interrupt_stmt seqcomp_stmt
 %type  <dummy>       interleave_stmt iparallel_stmt aparallel_stmt
-%type  <dummy>       hide_stmt rename_stmt
+%type  <dummy>       hide_stmt rename_stmt alias_stmt
 
 %{ /*** C/C++ Declarations in code file ***/
 #include <hst/parser/scanner.hh>
@@ -183,6 +184,8 @@ stmt
     : process_def
     { $$ = $1; }
     | event_def
+    { $$ = $1; }
+    | alias_stmt
     { $$ = $1; }
     | prefix_stmt
     { $$ = $1; }
@@ -325,6 +328,15 @@ event_def
     : EVENT new_event_id SEMI
     {
         _result.add_event(*$2);
+        delete $2;
+        $$ = false;
+    }
+    ;
+
+alias_stmt
+    : ALIAS new_process_id EQUALS process_id SEMI
+    {
+        _result.alias_process(*$2, $4);
         delete $2;
         $$ = false;
     }

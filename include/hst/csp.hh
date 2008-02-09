@@ -233,6 +233,16 @@ namespace hst
             return state;
         }
 
+        void alias_process(const string &name, state_t process)
+        {
+#if HST_CSP_DEBUG
+            cerr << "Aliasing process " << name
+                 << " = " << process << endl;
+#endif
+
+            _state_symbol_table.insert(make_pair(name, process));
+        }
+
         event_t add_event(const string &name)
         {
 #if HST_CSP_DEBUG

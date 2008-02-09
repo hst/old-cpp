@@ -1,0 +1,20 @@
+event a;
+
+process Q0;
+process Q1;
+process Q2;
+
+process $t0;
+prefix $t0 = a -> Q0;
+process $t1;
+prefix $t1 = a -> Q1;
+process $t2;
+prefix $t2 = a -> Q2;
+process $t3;
+prefix $t3 = a -> STOP;
+
+extchoice Q2 = $t0 [] $t1;
+extchoice Q1 = $t3 [] $t2;
+extchoice Q0 = $t3 [] $t1;
+
+alias P = Q0;
