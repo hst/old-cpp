@@ -32,6 +32,7 @@
 #include <hst/types.hh>
 #include <hst/eventmap.hh>
 #include <hst/lts.hh>
+#include <hst/normalized-lts.hh>
 
 #ifndef HST_CSP_DEBUG
 #define HST_CSP_DEBUG 0
@@ -82,6 +83,8 @@ namespace hst
 
         state_name_map_t  _memoized_processes;
 
+        normalized_lts_t  _normalized_lts;
+
         void define_standard_ops()
         {
             /*
@@ -101,9 +104,12 @@ namespace hst
 
     public:
         csp_t():
-            _next_temp_index(0L)
+            _lts(),
+            _next_temp_index(0L),
+            _normalized_lts(&_lts, 0L)
         {
             define_standard_ops();
+            _normalized_lts.tau(_tau);
         }
 
         csp_t(const csp_t &other):
@@ -115,7 +121,8 @@ namespace hst
             _state_symbol_table(other._state_symbol_table),
             _event_symbol_table(other._event_symbol_table),
             _next_temp_index(0L),
-            _memoized_processes(other._memoized_processes)
+            _memoized_processes(other._memoized_processes),
+            _normalized_lts(other._normalized_lts)
         {
         }
 
@@ -126,6 +133,7 @@ namespace hst
             _event_symbol_table.clear();
             _next_temp_index = 0L;
             _memoized_processes.clear();
+            _normalized_lts.clear();
             define_standard_ops();
         }
 
@@ -140,6 +148,14 @@ namespace hst
             _event_symbol_table.swap(other._event_symbol_table);
             std::swap(_next_temp_index, other._next_temp_index);
             _memoized_processes.swap(other._memoized_processes);
+            _normalized_lts.swap(other._normalized_lts);
+
+            // We've just swapped _normalized_lts._source twice; the
+            // ._source pointers were swapped, while the contents of
+            // those pointers were also swapped.  Let's swap the
+            // source pointers back to fix this.
+
+            _normalized_lts.swap_sources(other._normalized_lts);
         }
 
         csp_t &operator = (const csp_t &other)
@@ -154,9 +170,24 @@ namespace hst
             return *this;
         }
 
-        lts_t lts() const
+        lts_t *lts()
         {
-            return _lts;
+            return &_lts;
+        }
+
+        const lts_t *lts() const
+        {
+            return &_lts;
+        }
+
+        normalized_lts_t *normalized_lts()
+        {
+            return &_normalized_lts;
+        }
+
+        const normalized_lts_t *normalized_lts() const
+        {
+            return &_normalized_lts;
         }
 
         state_t stop() const

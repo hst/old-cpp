@@ -54,12 +54,12 @@ namespace hst
          * The source LTS that this is a normalization of.
          */
 
-        lts_t  &_source;
+        lts_t  *_source;
 
         /**
          * The τ event for this normalization.
          */
-        event_t  tau;
+        event_t  _tau;
 
         /**
          * We use an LTS to store the graph structure of the
@@ -106,9 +106,9 @@ namespace hst
         ostream &operator <<
         (ostream &stream, const normalized_lts_t &normalized);
 
-        normalized_lts_t(lts_t &__source, event_t _tau):
+        normalized_lts_t(lts_t *__source, event_t __tau):
             _source(__source),
-            tau(_tau),
+            _tau(__tau),
             _normalized(),
             states(),
             sets(),
@@ -118,7 +118,7 @@ namespace hst
 
         normalized_lts_t(const normalized_lts_t &other):
             _source(other._source),
-            tau(other.tau),
+            _tau(other._tau),
             _normalized(other._normalized),
             states(other.states),
             sets(other.sets),
@@ -136,12 +136,17 @@ namespace hst
 
         void swap(normalized_lts_t &other)
         {
-            _source.swap(other._source);
-            std::swap(tau, other.tau);
+            std::swap(_source, other._source);
+            std::swap(_tau, other._tau);
             _normalized.swap(other._normalized);
             states.swap(other.states);
             sets.swap(other.sets);
             prenormalized.swap(other.prenormalized);
+        }
+
+        void swap_sources(normalized_lts_t &other)
+        {
+            std::swap(_source, other._source);
         }
 
         normalized_lts_t &operator = (const normalized_lts_t &other)
@@ -156,14 +161,24 @@ namespace hst
             return *this;
         }
 
-        lts_t &source()
+        lts_t *source()
         {
             return _source;
         }
 
-        const lts_t &source() const
+        const lts_t *source() const
         {
             return _source;
+        }
+
+        event_t tau() const
+        {
+            return _tau;
+        }
+
+        void tau(event_t __tau)
+        {
+            _tau = __tau;
         }
 
         lts_t &normalized()

@@ -44,14 +44,14 @@ namespace hst
         stream << "processes {";
         first = true;
 
-        for (i = 0; i < csp.lts().state_count(); i++)
+        for (i = 0; i < csp.lts()->state_count(); i++)
         {
             if (first)
                 first = false;
             else
                 stream << ",";
 
-            stream << i << ":" << csp.lts().get_state_name(i);
+            stream << i << ":" << csp.lts()->get_state_name(i);
         }
 
         stream << "}" << endl;
@@ -61,21 +61,21 @@ namespace hst
         stream << "events {";
         first = true;
 
-        for (i = 0; i < csp.lts().event_count(); i++)
+        for (i = 0; i < csp.lts()->event_count(); i++)
         {
             if (first)
                 first = false;
             else
                 stream << ",";
 
-            stream << i << ":" << csp.lts().get_event_name(i);
+            stream << i << ":" << csp.lts()->get_event_name(i);
         }
 
         stream << "}" << endl;
 
         // Output the LTS
 
-        stream << csp.lts() << endl;
+        stream << *csp.lts() << endl;
 
         return stream;
     }

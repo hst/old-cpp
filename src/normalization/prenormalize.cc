@@ -57,13 +57,29 @@ namespace hst
                  << "." << endl;
 #endif
 
-            _source.closure(tau, *source_closure, source_set);
+            _source->closure(_tau, *source_closure, source_set);
             normalized_source = get_normalized_state(source_closure);
 
 #if DEBUG_PRENORMALIZE
             cerr << "Tau closure: " << *source_closure << endl
                  << "Normalized state = " << normalized_source << endl;
 #endif
+
+            /*
+             * If we've already prenormalized this target state, just
+             * return it.
+             */
+
+            if (prenormalized.contains(normalized_source))
+            {
+#if DEBUG_PRENORMALIZE
+                cerr << normalized_closure
+                     << " is already prenormalized." << endl;
+#endif
+
+                return normalized_source;
+            }
+
         }
 
 
@@ -114,8 +130,8 @@ namespace hst
 
                 lts_t::state_pairs_iterator  sp_it;
 
-                for (sp_it = _source.state_pairs_begin(state);
-                     sp_it != _source.state_pairs_end(state);
+                for (sp_it = _source->state_pairs_begin(state);
+                     sp_it != _source->state_pairs_end(state);
                      ++sp_it)
                 {
                     event_t  event = sp_it->first;
@@ -126,7 +142,7 @@ namespace hst
                          << to_state << endl;
 #endif
 
-                    if (event == tau)
+                    if (event == _tau)
                     {
                         /*
                          * We don't include the τ events, since these
@@ -175,7 +191,7 @@ namespace hst
                 stateset_cp  event_image = c_accumulator.get(event);
                 stateset_p   closure(new stateset_t);
 
-                _source.closure(tau, *closure, *event_image);
+                _source->closure(_tau, *closure, *event_image);
 
 #if DEBUG_PRENORMALIZE
                 cerr << "    Event: " << event << endl
@@ -218,7 +234,7 @@ namespace hst
                 {
 #if DEBUG_PRENORMALIZE
                     cerr << "      " << normalized_closure
-                         <<" is new; adding to pending" << endl;
+                         << " is new; adding to pending" << endl;
 #endif
 
                     pending += normalized_closure;
@@ -238,6 +254,8 @@ namespace hst
             pending -= next;
             prenormalized += next;
         }
+
+        return normalized_source;
     }
 }
 

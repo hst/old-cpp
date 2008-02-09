@@ -21,31 +21,36 @@
  *----------------------------------------------------------------------
  */
 
-#include <hst/types.hh>
-#include <hst/lts.hh>
+
+/*
+ * Reads a CSP0 script from standard input, and tries to construct an
+ * internal CSP representation from it.  Then, prenormalizes the CSP's
+ * LTS in terms of the process named P, and prints out the
+ * prenormalized LTS.
+ */
+
+#include <iostream>
+
 #include <hst/normalized-lts.hh>
+#include <hst/csp.hh>
 
 using namespace std;
 using namespace hst;
 
 int main()
 {
-    lts_t             lts;
-    normalized_lts_t  normalized(&lts, 0);
-    state_t           source;
+    csp_t  csp;
 
-    cin >> lts;
-    if (cin.fail())
-        return 1;
+    read_csp0(cin, csp);
 
-    cin >> source;
-    while (!cin.fail())
+    if (!cin.fail())
     {
-        state_t  prenormal;
+        state_t  P;
 
-        normalized.prenormalize(source);
-        cout << normalized;
+        P = csp.get_process("P");
+        csp.normalized_lts()->prenormalize(P);
 
-        cin >> source;
+        cerr << csp;
+        cout << *csp.normalized_lts();
     }
 }

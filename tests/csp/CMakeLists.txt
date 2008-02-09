@@ -34,7 +34,7 @@ set(TESTS
 # Copy the test data from the source directory to the build directory.
 
 foreach(_test ${TESTS})
-  foreach(_ext csp0 output)
+  foreach(_ext csp0 output prenormal-output)
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/${_test}.${_ext}
       ${CMAKE_CURRENT_BINARY_DIR}/${_test}.${_ext}
@@ -51,5 +51,15 @@ foreach(_test ${TESTS})
   add_test(
     csp:compile:${_test}
     bash -c "./test-csp0 < ${_test}.csp0 | cmp - ${_test}.output"
+  )
+endforeach(_test)
+
+add_executable(test-prenormalize test-prenormalize.cc)
+target_link_libraries(test-prenormalize hst)
+foreach(_test ${TESTS})
+  add_test(
+    csp:prenormalize:${_test}
+    bash -c "./test-prenormalize < ${_test}.csp0 | 
+       cmp - ${_test}.prenormal-output"
   )
 endforeach(_test)
