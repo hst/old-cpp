@@ -90,13 +90,14 @@ namespace hst
         stream << "  mapping {";
 
         first = true;
-        normalized_lts_t::states_iterator  s_it;
+        normalized_lts_t::state_set_map_t::const_iterator  s_it;
 
-        for (s_it = normalized.states_begin();
-             s_it != normalized.states_end();
+        for (s_it = normalized.sets.begin();
+             s_it != normalized.sets.end();
              ++s_it)
         {
-            state_t  state = *s_it;
+            state_t      state = s_it->first;
+            stateset_cp  set = s_it->second;
 
             if (first)
             {
@@ -105,8 +106,6 @@ namespace hst
             } else {
                 stream << "," << endl << "    ";
             }
-
-            stateset_cp  set = normalized.get_normalized_set(state);
 
             stream << state << "=" << *set;
         }
@@ -117,7 +116,7 @@ namespace hst
          * Then print the normalized LTS's edges.
          */
 
-        stream << "  edges " << normalized.normalized()
+        stream << "  edges " << normalized._normalized
                << endl << "}" << endl;
     }
 

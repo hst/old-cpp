@@ -102,6 +102,10 @@ namespace hst
         stateset_t  prenormalized;
 
     public:
+        friend
+        ostream &operator <<
+        (ostream &stream, const normalized_lts_t &normalized);
+
         normalized_lts_t(lts_t &__source, event_t _tau):
             _source(__source),
             tau(_tau),
