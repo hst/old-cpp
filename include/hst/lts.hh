@@ -34,6 +34,7 @@
 #include <judy_map_l.h>
 
 #include <hst/types.hh>
+#include <hst/equivalence.hh>
 #include <hst/event-stateset-map.hh>
 
 #ifndef HST_LTS_DEBUG
@@ -181,6 +182,8 @@ namespace hst
 
         void divergent_nodes
         (event_t event, stateset_t &divergent) const;
+
+        void bisimulate(equivalences_t &equiv) const;
 
         lts_t():
             num_states(0L),

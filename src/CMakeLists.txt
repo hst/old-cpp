@@ -25,6 +25,7 @@ set(LIBHST_SOURCES
   equivalence.cc
   lts.cc
   csp-basic.cc
+  normalization/bisimulate.cc
   normalization/closure.cc
   normalization/divergent.cc
   normalization/normalized-lts.cc

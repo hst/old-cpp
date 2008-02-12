@@ -3,6 +3,7 @@ set(TESTS
   00-extchoice1
   00-extchoice2
   00-extchoice3
+  00-extchoice4
   00-intchoice1
   00-intchoice2
   00-interrupt1
