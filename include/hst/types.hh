@@ -68,6 +68,10 @@ namespace hst
         }
     };
 
+    typedef pair<state_t, state_t>           state_state_t;
+    typedef shared_ptr<state_state_t>        state_state_p;
+    typedef shared_ptr<const state_state_t>  state_state_cp;
+
     typedef pair<event_t, state_t>           event_state_t;
     typedef shared_ptr<event_state_t>        event_state_p;
     typedef shared_ptr<const event_state_t>  event_state_cp;

@@ -21,30 +21,30 @@
  *----------------------------------------------------------------------
  */
 
-#ifndef EVENT_STATESET_MAP_CC
-#define EVENT_STATESET_MAP_CC
+#ifndef STATE_STATESET_MAP_CC
+#define STATE_STATESET_MAP_CC
 
 #include <hst/types.hh>
-#include <hst/event-stateset-map.hh>
+#include <hst/state-stateset-map.hh>
 
 using namespace std;
 
 namespace hst
 {
-    stateset_p event_stateset_map_t::get(event_t event)
+    stateset_p state_stateset_map_t::get(state_t state)
     {
         stateset_p  stateset;
         pair<map_t::iterator, bool>  insert_result;
 
         // Try to insert a NULL stateset into the map.  This will tell
-        // us whether there's already a stateset for this event.
+        // us whether there's already a stateset for this state.
 
-        insert_result = map.insert(make_pair(event, stateset));
+        insert_result = map.insert(make_pair(state, stateset));
 
         if (insert_result.second)
         {
             // The insert succeeded, so there's currently a NULL
-            // pointer in the map for this event.  We need to change
+            // pointer in the map for this state.  We need to change
             // this NULL to a pointer to an actual stateset; luckily,
             // we've got an iterator we can use to do this, though
             // it's a bit tricky.
@@ -60,9 +60,9 @@ namespace hst
         return insert_result.first->second;
     }
 
-    stateset_cp event_stateset_map_t::get(event_t event) const
+    stateset_cp state_stateset_map_t::get(state_t state) const
     {
-        map_t::const_iterator  it = map.find(event);
+        map_t::const_iterator  it = map.find(state);
 
         if (it == map.end())
         {
@@ -73,4 +73,4 @@ namespace hst
     }
 }
 
-#endif // EVENT_STATESET_MAP_CC
+#endif // STATE_STATESET_MAP_CC

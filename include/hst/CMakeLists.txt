@@ -6,6 +6,8 @@ set(HST_INCLUDE_FILES
   eventmap.hh
   proxy-iterator.hh
   event-stateset-map.hh
+  state-stateset-map.hh
+  equivalence.hh
   lts.hh
   normalized-lts.hh
   csp.hh

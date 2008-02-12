@@ -21,8 +21,8 @@
  *----------------------------------------------------------------------
  */
 
-#ifndef HST_EVENT_STATESET_MAP_HH
-#define HST_EVENT_STATESET_MAP_HH
+#ifndef HST_STATE_STATESET_MAP_HH
+#define HST_STATE_STATESET_MAP_HH
 
 #include <assert.h>
 #include <tr1/memory>
@@ -38,36 +38,36 @@ using namespace std;
 
 namespace hst
 {
-    class event_stateset_map_t
+    class state_stateset_map_t
     {
     protected:
-        typedef judy_map_l<event_t, stateset_p,
-                           event_t_hasher>       map_t;
+        typedef judy_map_l<state_t, stateset_p,
+                           state_t_hasher>       map_t;
         typedef shared_ptr<map_t>                map_p;
 
         map_t  map;
 
     public:
         /**
-         * Dereference the map by an event, creating the corresponding
+         * Dereference the map by an state, creating the corresponding
          * stateset if necessary.
          */
 
-        stateset_p get(event_t event);
+        stateset_p get(state_t state);
 
         /**
-         * Dereference the map by an event, returning a NULL pointer
+         * Dereference the map by an state, returning a NULL pointer
          * if the corresponding stateset doesn't exit.
          */
 
-        stateset_cp get(event_t event) const;
+        stateset_cp get(state_t state) const;
 
-        event_stateset_map_t():
+        state_stateset_map_t():
             map()
         {
         }
 
-        event_stateset_map_t(const event_stateset_map_t &other):
+        state_stateset_map_t(const state_stateset_map_t &other):
             map(other.map)
         {
         }
@@ -77,54 +77,54 @@ namespace hst
             map.clear();
         }
 
-        void swap(event_stateset_map_t &other)
+        void swap(state_stateset_map_t &other)
         {
             map.swap(other.map);
         }
 
-        event_stateset_map_t &operator =
-        (const event_stateset_map_t &other)
+        state_stateset_map_t &operator =
+        (const state_stateset_map_t &other)
         {
             if (this != &other)
             {
                 clear();
-                event_stateset_map_t  temp(other);
+                state_stateset_map_t  temp(other);
                 swap(temp);
             }
 
             return *this;
         }
 
-        void add(event_t event, state_t state)
+        void add(state_t state1, state_t state2)
         {
-            stateset_p  set = get(event);
-            *set += state;
+            stateset_p  set = get(state1);
+            *set += state2;
         }
 
-        void erase(event_t event)
+        void erase(state_t state)
         {
-            map.erase(event);
+            map.erase(state);
         }
 
-        void erase(event_t event, state_t state)
+        void erase(state_t state1, state_t state2)
         {
-            stateset_p  set = get(event);
-            *set -= state;
+            stateset_p  set = get(state1);
+            *set -= state2;
 
             if (set->size() == 0)
-                erase(event);
+                erase(state1);
         }
 
     protected:
         /*
-         * The judy_map_l iterator returns an (event_t, stateset_p)
-         * pair, so we can get the event by taking the first element
+         * The judy_map_l iterator returns a (state_t, stateset_p)
+         * pair, so we can get the state by taking the first element
          * of the pair.
          */
 
-        struct events_evaluator
+        struct states_evaluator
         {
-            event_t operator () (map_t::const_iterator &it)
+            state_t operator () (map_t::const_iterator &it)
             {
                 return it->first;
             }
@@ -132,19 +132,19 @@ namespace hst
 
     public:
         typedef proxy_iterator<map_t::const_iterator,
-                               event_t,
-                               events_evaluator>
-            events_iterator;
+                               state_t,
+                               states_evaluator>
+            states_iterator;
 
-        events_iterator events_begin() const
+        states_iterator states_begin() const
         {
             map_t::const_iterator  it = map.begin();
-            return events_iterator(it);
+            return states_iterator(it);
         }
 
-        events_iterator events_end() const
+        states_iterator states_end() const
         {
-            return events_iterator();
+            return states_iterator();
         }
 
         class pairs_iterator
@@ -153,7 +153,7 @@ namespace hst
             map_t::const_iterator  se, se_end;
             stateset_t::iterator   et, et_end;
 
-            event_state_t  current;
+            state_state_t  current;
 
             void load_current()
             {
@@ -163,7 +163,7 @@ namespace hst
                     current.second = *et;
             }
 
-            void load_event_target()
+            void load_state_target()
             {
                 if (se == se_end)
                     et = stateset_t::iterator();
@@ -173,15 +173,15 @@ namespace hst
 
             void advance()
             {
-                // First find the next event target.
+                // First find the next state target.
                 ++et;
 
                 // ...but if we've reached the last one, then we move
-                // on to the next event.
+                // on to the next state.
                 if (et == et_end)
                 {
                     ++se;
-                    load_event_target();
+                    load_state_target();
                 }
 
                 load_current();
@@ -195,16 +195,16 @@ namespace hst
             pairs_iterator(map_t::const_iterator _se):
                 se(_se)
             {
-                load_event_target();
+                load_state_target();
                 load_current();
             }
 
-            event_state_t operator * ()
+            state_state_t operator * ()
             {
                 return current;
             }
 
-            event_state_t *operator -> ()
+            state_state_t *operator -> ()
             {
                 return &current;
             }
@@ -250,8 +250,8 @@ namespace hst
 
     };
 
-    typedef shared_ptr<event_stateset_map_t>        event_stateset_map_p;
-    typedef shared_ptr<const event_stateset_map_t>  event_stateset_map_cp;
+    typedef shared_ptr<state_stateset_map_t>        state_stateset_map_p;
+    typedef shared_ptr<const state_stateset_map_t>  state_stateset_map_cp;
 }
 
-#endif // HST_EVENT_STATESET_MAP_H
+#endif // HST_STATE_STATESET_MAP_H
