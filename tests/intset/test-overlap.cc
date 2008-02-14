@@ -29,9 +29,8 @@ using namespace hst;
 
 int main()
 {
-    intset_t       A, B;
-    bool           overlap, actual_overlap;
-    unsigned long  i;
+    intset_t  A, B;
+    bool      overlap, actual_overlap;
 
     while (true)
     {

@@ -43,7 +43,7 @@ int main()
     {
         state_t  prenormal;
 
-        normalized.prenormalize(source);
+        prenormal = normalized.prenormalize(source);
         cout << normalized;
 
         cin >> source;

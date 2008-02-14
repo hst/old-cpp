@@ -29,8 +29,7 @@ using namespace hst;
 
 int main()
 {
-    intsetset_t    A, B, S, actual_S;
-    unsigned long  i;
+    intsetset_t  A, B, S, actual_S;
 
     while (true)
     {

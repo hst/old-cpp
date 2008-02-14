@@ -118,6 +118,8 @@ namespace hst
 
         stream << "  edges " << normalized._normalized
                << endl << "}" << endl;
+
+        return stream;
     }
 
 }

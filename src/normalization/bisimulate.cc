@@ -68,8 +68,6 @@ namespace hst
 
         // Loop through each state in the LTS.
 
-        state_t  state;
-
         for (state_t state = 0; state < lts.state_count(); state++)
         {
 #if DEBUG_BISIMULATE
