@@ -28,6 +28,7 @@ set(LIBHST_SOURCES
   normalization/bisimulate.cc
   normalization/closure.cc
   normalization/divergent.cc
+  normalization/normalize.cc
   normalization/normalized-lts.cc
   normalization/prenormalize.cc
   operators/prefix.cc

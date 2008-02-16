@@ -127,8 +127,6 @@ namespace hst
         void add(state_t state, state_t head);
         void merge(state_t new_head, state_t old_head);
 
-    public:
-
         typedef state_stateset_map_t::states_iterator
             heads_iterator;
 
@@ -140,6 +138,49 @@ namespace hst
         heads_iterator heads_end() const
         {
             return _members.states_end();
+        }
+
+    protected:
+        /*
+         * The judy_map_l iterator returns a (state_t, state_t) pair,
+         * so we can get the right state by taking the first element
+         * of the pair.
+         */
+
+        struct range_evaluator
+        {
+            state_t operator () (head_map_t::const_iterator &it)
+            {
+                return it->first;
+            }
+        };
+
+    public:
+        typedef proxy_iterator<head_map_t::const_iterator, state_t,
+                               range_evaluator>
+            range_iterator;
+
+        range_iterator range_begin() const
+        {
+            head_map_t::const_iterator  it = _heads.begin();
+            return range_iterator(it);
+        }
+
+        range_iterator range_end() const
+        {
+            return range_iterator();
+        }
+
+        typedef head_map_t::const_iterator  pairs_iterator;
+
+        pairs_iterator pairs_begin() const
+        {
+            return _heads.begin();
+        }
+
+        pairs_iterator pairs_end() const
+        {
+            return _heads.end();
         }
     };
 

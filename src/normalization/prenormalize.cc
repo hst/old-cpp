@@ -39,7 +39,26 @@ namespace hst
 {
     state_t normalized_lts_t::prenormalize(state_t source_state)
     {
-        state_t     normalized_source;
+        if (_stage != PRENORMALIZING)
+        {
+#if DEBUG_PRENORMALIZE
+            cerr << "Cannot prenormalize anymore!" << endl;
+            return HST_ERROR_STATE;
+#endif
+        }
+
+        /*
+         * If we've already prenormalized from this initial state,
+         * just return the result.
+         */
+
+        state_t  normalized_source =
+            initial_normal_state(source_state);
+
+        if (normalized_source != HST_ERROR_STATE)
+        {
+            return normalized_source;
+        }
 
         /*
          * We need to find the τ-closure of the [source_state] before
@@ -77,6 +96,8 @@ namespace hst
                      << " is already prenormalized." << endl;
 #endif
 
+                initial_map.insert(make_pair(source_state,
+                                             normalized_source));
                 return normalized_source;
             }
 
@@ -255,6 +276,8 @@ namespace hst
             prenormalized += next;
         }
 
+        initial_map.insert(make_pair(source_state,
+                                     normalized_source));
         return normalized_source;
     }
 }

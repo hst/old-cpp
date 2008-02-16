@@ -51,6 +51,22 @@ namespace hst
     {
     protected:
         /**
+         * There are two stages that a normalized LTS can be in.
+         * After it's first created, you can prenormalize as many
+         * source states as you want.  The first stage is ended by
+         * calling the normalize() function, which completes the
+         * normalization.  After this point, the normalized LTS is
+         * effectively “locked down”, and no useful additions can be
+         * made to it.
+         */
+
+        enum stage_t
+        {
+            PRENORMALIZING,
+            NORMALIZED
+        } _stage;
+
+        /**
          * The source LTS that this is a normalization of.
          */
 
@@ -95,6 +111,17 @@ namespace hst
         state_set_map_t  sets;
 
         /**
+         * A mapping from initial source sets to initial normalized
+         * sets.
+         */
+
+        typedef judy_map_l<state_t, state_t,
+                           state_t_hasher>    initial_map_t;
+        typedef shared_ptr<initial_map_t>     initial_map_p;
+
+        initial_map_t  initial_map;
+
+        /**
          * A set of the normalized states that have been fully
          * prenormalized.
          */
@@ -107,40 +134,48 @@ namespace hst
         (ostream &stream, const normalized_lts_t &normalized);
 
         normalized_lts_t(lts_t *__source, event_t __tau):
+            _stage(PRENORMALIZING),
             _source(__source),
             _tau(__tau),
             _normalized(),
             states(),
             sets(),
+            initial_map(),
             prenormalized()
         {
         }
 
         normalized_lts_t(const normalized_lts_t &other):
+            _stage(other._stage),
             _source(other._source),
             _tau(other._tau),
             _normalized(other._normalized),
             states(other.states),
             sets(other.sets),
+            initial_map(other.initial_map),
             prenormalized(other.prenormalized)
         {
         }
 
         void clear()
         {
+            _stage = PRENORMALIZING;
             _normalized.clear();
             states.clear();
             sets.clear();
+            initial_map.clear();
             prenormalized.clear();
         }
 
         void swap(normalized_lts_t &other)
         {
+            std::swap(_stage, other._stage);
             std::swap(_source, other._source);
             std::swap(_tau, other._tau);
             _normalized.swap(other._normalized);
             states.swap(other.states);
             sets.swap(other.sets);
+            initial_map.swap(other.initial_map);
             prenormalized.swap(other.prenormalized);
         }
 
@@ -161,6 +196,11 @@ namespace hst
             return *this;
         }
 
+        stage_t stage()
+        {
+            return _stage;
+        }
+
         lts_t *source()
         {
             return _source;
@@ -179,6 +219,18 @@ namespace hst
         void tau(event_t __tau)
         {
             _tau = __tau;
+        }
+
+        state_t initial_normal_state(state_t initial_source)
+        {
+            initial_map_t::const_iterator  im_it =
+                initial_map.find(initial_source);
+            if (im_it == initial_map.end())
+            {
+                return HST_ERROR_STATE;
+            } else {
+                return im_it->second;
+            }
         }
 
         lts_t &normalized()
@@ -207,6 +259,17 @@ namespace hst
         stateset_cp get_normalized_set(state_t state) const;
 
         state_t prenormalize(state_t source_state);
+
+        /**
+         * Having prenormalized as many source states as necessary,
+         * this method finalizes the normalization by finding any
+         * normalized states that have the same behavior.  This is
+         * done by bisimulating the normalized LTS; any states that
+         * are identified as equivalent by this bisimulation are then
+         * merge together in the normalized LTS.
+         */
+
+        void normalize();
     };
 
     ostream &operator <<
