@@ -1,0 +1,17 @@
+event a;
+event b;
+event c;
+
+process $u1;
+prefix $u1 = c -> STOP;
+
+process $t1;
+prefix $t1 = b -> SKIP;
+process $t2;
+prefix $t2 = a -> $t1;
+
+process P;
+seqcomp P = $t2 ; $u1;
+
+process Q;
+seqcomp Q = $t1 ; $u1;

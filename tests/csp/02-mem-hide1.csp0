@@ -1,0 +1,16 @@
+event a;
+event b;
+event c;
+
+process $t1;
+process $t2;
+process $t3;
+prefix $t1 = a -> $t2;
+prefix $t2 = b -> $t3;
+prefix $t3 = c -> $t1;
+
+process P;
+hide P = $t1 \ {b,c};
+
+process Q;
+hide Q = $t2 \ {b,c};

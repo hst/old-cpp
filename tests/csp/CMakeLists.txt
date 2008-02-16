@@ -28,9 +28,30 @@ set(TESTS
   00-rename1
   00-rename2
   00-rename3
+  02-mem-prefix1
+  02-mem-extchoice1
+  02-mem-intchoice1
+  02-mem-interrupt1
+  02-mem-seqcomp1
+  02-mem-interleave1
+  02-mem-iparallel1
+  02-mem-aparallel1
+  02-mem-hide1
+  02-mem-rename1
+  05-rec-prefix1
+  05-rec-extchoice1
+  05-rec-extchoice2
+  05-rec-intchoice1
+  05-rec-interrupt1
+  05-rec-seqcomp1
+  05-rec-interleave1
+  05-rec-iparallel1
+  05-rec-aparallel1
+  05-rec-hide1
+  05-rec-rename1
   10-extchoice-intchoice
   10-intchoice-extchoice
-  roscoe-02
+  80-roscoe-02
 )
 
 # Copy the test data from the source directory to the build directory.

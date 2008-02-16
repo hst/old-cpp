@@ -1,0 +1,29 @@
+The tests in this directory are broken down into the following basic
+categories.  If you are writing a new test case, and it fits into one
+of these categories, please name the test accordingly.  If your test
+defines a new category, make sure you describe it here, and make sure
+you add enough test cases to this new category to provide full
+coverage (of all of the CSP operators, for instance).
+
+00-*
+    Test the basic operational semantics of each CSP operator.
+
+02-mem-*
+    Test the memoization routines in the prescence of expanded
+    operators.  For instance, defining an extchoice requires drilling
+    down through the LTS of each operand.  If a later process is then
+    defined to be one of the sub-extchoices, we should reuse that
+    existing result.
+
+05-rec-*
+    Test recursive processes, ensuring that they don't (for instance)
+    cause an infinite loop when the process is well-defined.
+
+10-*
+    Test combinations of operators.
+
+80-*
+    Tests more sophisticated, real process definitions.  These will
+    often come from a textbook or paper, in which case, the test name
+    should somehow include the author or title of the work it comes
+    from.

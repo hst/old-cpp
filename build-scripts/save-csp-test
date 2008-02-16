@@ -1,0 +1,18 @@
+#!/bin/bash
+# save-csp-test [test name]
+
+# Assumes that the test programs in tests/csp generate the correct
+# output for [test name], and saves this test output.  The script
+# should be run from your CMake build directory, which is assumed to
+# be a subdirectory of the project source tree.
+
+if [ x$1 == x ]; then
+    echo "Usage: save-csp-test [test name]"
+    exit 1
+fi
+
+TEST=$1
+
+tests/csp/test-csp0 < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.output
+tests/csp/test-prenormalize < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.prenormal-output
+tests/csp/test-normalize < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.normal-output

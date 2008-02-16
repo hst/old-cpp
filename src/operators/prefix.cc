@@ -35,28 +35,11 @@ using namespace std;
 
 namespace hst
 {
-    state_t csp_t::add_prefix(event_t a, state_t P)
+    static
+    void do_prefix(csp_t &csp, state_t dest, event_t a, state_t P)
     {
-        ostringstream  key;
-        state_t        dest;
+        lts_t  &_lts = *csp.lts();
 
-        // Create the memoization key.
-        key << a << "->" << P;
-
-        dest = lookup_memoized_process(key.str());
-        if (dest == HST_ERROR_STATE)
-        {
-            // We haven't created this process yet, so do so.
-            dest = add_temp_process();
-            prefix(dest, a, P);
-            save_memoized_process(key.str(), dest);
-        }
-
-        return dest;
-    }
-
-    void csp_t::prefix(state_t dest, event_t a, state_t P)
-    {
 #if HST_CSP_DEBUG
         cerr << "Prefix " << dest
              << " = " << a << " -> " << P << endl;
@@ -78,6 +61,48 @@ namespace hst
 
         _lts.add_edge(dest, a, P);
         _lts.finalize(dest);
+    }
+
+    state_t csp_t::add_prefix(event_t a, state_t P)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Create the memoization key.
+        key << a << "->" << P;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            save_memoized_process(key.str(), dest);
+            do_prefix(*this, dest, a, P);
+        }
+
+        return dest;
+    }
+
+    void csp_t::prefix(state_t dest, event_t a, state_t P)
+    {
+        ostringstream  key;
+        state_t        old_dest;
+
+        // Create the memoization key.
+        key << a << "->" << P;
+
+        old_dest = lookup_memoized_process(key.str());
+        if (old_dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            save_memoized_process(key.str(), dest);
+            do_prefix(*this, dest, a, P);
+        } else {
+            // We've already create this process, so let's just add a
+            // single τ process to the previously calculated state.
+            _lts.add_edge(dest, _tau, old_dest);
+            _lts.finalize(dest);
+        }
     }
 }
 

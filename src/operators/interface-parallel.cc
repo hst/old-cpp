@@ -35,34 +35,12 @@ using namespace std;
 
 namespace hst
 {
-    state_t csp_t::add_interface_parallel
-    (state_t P, alphabet_t &alpha, state_t Q)
+    static
+    void do_interface_parallel
+    (csp_t &csp, state_t dest, state_t P, alphabet_t &alpha, state_t Q)
     {
-        ostringstream  key;
-        state_t        dest;
+        lts_t  &_lts = *csp.lts();
 
-        // Interface parallel is commutative, so always memoize with
-        // the lower-numbered process first.
-        if (Q < P) std::swap(P,Q);
-
-        // Create the memoization key.
-        key << P << "[|" << alpha << "|]" << Q;
-
-        dest = lookup_memoized_process(key.str());
-        if (dest == HST_ERROR_STATE)
-        {
-            // We haven't created this process yet, so do so.
-            dest = add_temp_process();
-            interface_parallel(dest, P, alpha, Q);
-            save_memoized_process(key.str(), dest);
-        }
-
-        return dest;
-    }
-
-    void csp_t::interface_parallel
-    (state_t dest, state_t P, alphabet_t &alpha, state_t Q)
-    {
 #if HST_CSP_DEBUG
         cerr << "Interface parallel " << dest << " = "
              << P << " [|"
@@ -116,7 +94,7 @@ namespace hst
              * terminate.)
              */
 
-            if (E == _tick || alpha.contains(E))
+            if (E == csp.tick() || alpha.contains(E))
             {
                 /*
                  * The event must be synchronized, so we add an edge
@@ -142,7 +120,7 @@ namespace hst
                      */
 
                     state_t  P_prime_parallel_Q_prime =
-                        add_interface_parallel(P_prime, alpha, Q_prime);
+                        csp.add_interface_parallel(P_prime, alpha, Q_prime);
                     _lts.add_edge(dest, E, P_prime_parallel_Q_prime);
                 }
 
@@ -157,7 +135,7 @@ namespace hst
                  */
 
                 state_t  P_prime_parallel_Q =
-                    add_interface_parallel(P_prime, alpha, Q);
+                    csp.add_interface_parallel(P_prime, alpha, Q);
                 _lts.add_edge(dest, E, P_prime_parallel_Q);
             }
         }
@@ -180,7 +158,7 @@ namespace hst
              * terminate.)
              */
 
-            if (E == _tick || alpha.contains(E))
+            if (E == csp.tick() || alpha.contains(E))
             {
                 /*
                  * We'll have already found the synchronized events
@@ -200,7 +178,7 @@ namespace hst
                  */
 
                 state_t  P_parallel_Q_prime =
-                    add_interface_parallel(P, alpha, Q_prime);
+                    csp.add_interface_parallel(P, alpha, Q_prime);
                 _lts.add_edge(dest, E, P_parallel_Q_prime);
             }
         }
@@ -210,6 +188,58 @@ namespace hst
          */
 
         _lts.finalize(dest);
+    }
+
+    state_t csp_t::add_interface_parallel
+    (state_t P, alphabet_t &alpha, state_t Q)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Interface parallel is commutative, so always memoize with
+        // the lower-numbered process first.
+        if (Q < P) std::swap(P,Q);
+
+        // Create the memoization key.
+        key << P << "[|" << alpha << "|]" << Q;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            save_memoized_process(key.str(), dest);
+            do_interface_parallel(*this, dest, P, alpha, Q);
+        }
+
+        return dest;
+    }
+
+    void csp_t::interface_parallel
+    (state_t dest, state_t P, alphabet_t &alpha, state_t Q)
+    {
+        ostringstream  key;
+        state_t        old_dest;
+
+        // Interface parallel is commutative, so always memoize with
+        // the lower-numbered process first.
+        if (Q < P) std::swap(P,Q);
+
+        // Create the memoization key.
+        key << P << "[|" << alpha << "|]" << Q;
+
+        old_dest = lookup_memoized_process(key.str());
+        if (old_dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            save_memoized_process(key.str(), dest);
+            do_interface_parallel(*this, dest, P, alpha, Q);
+        } else {
+            // We've already create this process, so let's just add a
+            // single τ process to the previously calculated state.
+            _lts.add_edge(dest, _tau, old_dest);
+            _lts.finalize(dest);
+        }
     }
 }
 

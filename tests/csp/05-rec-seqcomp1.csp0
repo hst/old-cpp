@@ -1,0 +1,7 @@
+event a;
+
+process $t1;
+prefix $t1 = a -> SKIP;
+
+process P;
+seqcomp P = $t1 ; P;

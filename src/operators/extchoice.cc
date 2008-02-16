@@ -35,32 +35,11 @@ using namespace std;
 
 namespace hst
 {
-    state_t csp_t::add_extchoice(state_t P, state_t Q)
+    static
+    void do_extchoice(csp_t &csp, state_t dest, state_t P, state_t Q)
     {
-        ostringstream  key;
-        state_t        dest;
+        lts_t  &_lts = *csp.lts();
 
-        // Extchoice is commutative, so always memoize with the
-        // lower-numbered process first.
-        if (Q < P) std::swap(P,Q);
-
-        // Create the memoization key.
-        key << P << "[]" << Q;
-
-        dest = lookup_memoized_process(key.str());
-        if (dest == HST_ERROR_STATE)
-        {
-            // We haven't created this process yet, so do so.
-            dest = add_temp_process();
-            extchoice(dest, P, Q);
-            save_memoized_process(key.str(), dest);
-        }
-
-        return dest;
-    }
-
-    void csp_t::extchoice(state_t dest, state_t P, state_t Q)
-    {
 #if HST_CSP_DEBUG
         cerr << "Extchoice " << dest
              << " = " << P << " [] " << Q << endl;
@@ -104,7 +83,7 @@ namespace hst
             event_t  E       = sp_it->first;
             state_t  P_prime = sp_it->second;
 
-            if (E == _tau)
+            if (E == csp.tau())
             {
                 /*
                  * If the event is a τ, then it does *not* resolve the
@@ -115,7 +94,7 @@ namespace hst
                  */
 
                 state_t  P_prime_extchoice_Q =
-                    add_extchoice(P_prime, Q);
+                    csp.add_extchoice(P_prime, Q);
                 _lts.add_edge(dest, E, P_prime_extchoice_Q);
             } else {
                 /*
@@ -140,7 +119,7 @@ namespace hst
             event_t  E       = sp_it->first;
             state_t  Q_prime = sp_it->second;
 
-            if (E == _tau)
+            if (E == csp.tau())
             {
                 /*
                  * If the event is a τ, then it does *not* resolve the
@@ -151,7 +130,7 @@ namespace hst
                  */
 
                 state_t  P_extchoice_Q_prime =
-                    add_extchoice(P, Q_prime);
+                    csp.add_extchoice(P, Q_prime);
                 _lts.add_edge(dest, E, P_extchoice_Q_prime);
             } else {
                 /*
@@ -171,6 +150,56 @@ namespace hst
          */
 
         _lts.finalize(dest);
+    }
+
+    state_t csp_t::add_extchoice(state_t P, state_t Q)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Extchoice is commutative, so always memoize with the
+        // lower-numbered process first.
+        if (Q < P) std::swap(P,Q);
+
+        // Create the memoization key.
+        key << P << "[]" << Q;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            save_memoized_process(key.str(), dest);
+            do_extchoice(*this, dest, P, Q);
+        }
+
+        return dest;
+    }
+
+    void csp_t::extchoice(state_t dest, state_t P, state_t Q)
+    {
+        ostringstream  key;
+        state_t        old_dest;
+
+        // Extchoice is commutative, so always memoize with the
+        // lower-numbered process first.
+        if (Q < P) std::swap(P,Q);
+
+        // Create the memoization key.
+        key << P << "[]" << Q;
+
+        old_dest = lookup_memoized_process(key.str());
+        if (old_dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            save_memoized_process(key.str(), dest);
+            do_extchoice(*this, dest, P, Q);
+        } else {
+            // We've already create this process, so let's just add a
+            // single τ process to the previously calculated state.
+            _lts.add_edge(dest, _tau, old_dest);
+            _lts.finalize(dest);
+        }
     }
 }
 

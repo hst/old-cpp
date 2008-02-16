@@ -48,10 +48,19 @@ int main()
         state_t  P;
 
         P = csp.get_process("P");
-        csp.normalized_lts()->prenormalize(P);
+        if (P != HST_ERROR_STATE)
+            csp.normalized_lts()->prenormalize(P);
+
+        P = csp.get_process("Q");
+        if (P != HST_ERROR_STATE)
+            csp.normalized_lts()->prenormalize(P);
+
+        P = csp.get_process("R");
+        if (P != HST_ERROR_STATE)
+            csp.normalized_lts()->prenormalize(P);
+
         csp.normalized_lts()->normalize();
 
-        cerr << csp;
         cout << *csp.normalized_lts();
     }
 }

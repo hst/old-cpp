@@ -35,28 +35,11 @@ using namespace std;
 
 namespace hst
 {
-    state_t csp_t::add_rename(state_t P, eventmap_t &map)
+    static
+    void do_rename(csp_t &csp, state_t dest, state_t P, eventmap_t &map)
     {
-        ostringstream  key;
-        state_t        dest;
+        lts_t  &_lts = *csp.lts();
 
-        // Create the memoization key.
-        key << P << "\\\\" << map;
-
-        dest = lookup_memoized_process(key.str());
-        if (dest == HST_ERROR_STATE)
-        {
-            // We haven't created this process yet, so do so.
-            dest = add_temp_process();
-            rename(dest, P, map);
-            save_memoized_process(key.str(), dest);
-        }
-
-        return dest;
-    }
-
-    void csp_t::rename(state_t dest, state_t P, eventmap_t &map)
-    {
 #if HST_CSP_DEBUG
         cerr << "Rename " << dest
              << " = " << P << " \\ " << map << endl;
@@ -93,7 +76,7 @@ namespace hst
             event_t  E       = sp_it->first;
             state_t  P_prime = sp_it->second;
 
-            if (E == _tick)
+            if (E == csp.tick())
             {
                 /*
                  * If the event is a ✓, then the renamed process can
@@ -104,8 +87,8 @@ namespace hst
                  *   P〚→〛 =✓=> STOP
                  */
 
-                _lts.add_edge(dest, E, _stop);
-            } else if (E == _tau) {
+                _lts.add_edge(dest, E, csp.stop());
+            } else if (E == csp.tau()) {
                 /*
                  * If the event is a τ, then the renamed process can
                  * also perform a τ.  We do not allow τs to be
@@ -116,7 +99,7 @@ namespace hst
                  */
 
                 state_t  P_prime_rename =
-                    add_rename(P_prime, map);
+                    csp.add_rename(P_prime, map);
                 _lts.add_edge(dest, E, P_prime_rename);
             } else {
                 /*
@@ -126,7 +109,7 @@ namespace hst
                  */
 
                 state_t  P_prime_rename =
-                    add_rename(P_prime, map);
+                    csp.add_rename(P_prime, map);
 
                 if (map.domain_contains(E))
                 {
@@ -166,6 +149,48 @@ namespace hst
          */
 
         _lts.finalize(dest);
+    }
+
+    state_t csp_t::add_rename(state_t P, eventmap_t &map)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Create the memoization key.
+        key << P << "\\\\" << map;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            save_memoized_process(key.str(), dest);
+            do_rename(*this, dest, P, map);
+        }
+
+        return dest;
+    }
+
+    void csp_t::rename(state_t dest, state_t P, eventmap_t &map)
+    {
+        ostringstream  key;
+        state_t        old_dest;
+
+        // Create the memoization key.
+        key << P << "\\\\" << map;
+
+        old_dest = lookup_memoized_process(key.str());
+        if (old_dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            save_memoized_process(key.str(), dest);
+            do_rename(*this, dest, P, map);
+        } else {
+            // We've already create this process, so let's just add a
+            // single τ process to the previously calculated state.
+            _lts.add_edge(dest, _tau, old_dest);
+            _lts.finalize(dest);
+        }
     }
 }
 

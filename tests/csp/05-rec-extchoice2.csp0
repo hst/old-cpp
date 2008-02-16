@@ -1,0 +1,21 @@
+event a;
+event b;
+
+process $t1;
+process $t1a;
+process $t1b;
+
+process $t2;
+process $t2a;
+process $t2b;
+
+prefix $t1a = a -> $t2;
+prefix $t1b = b -> $t2;
+intchoice $t1 = $t1a |~| $t1b;
+
+prefix $t2a = a -> $t1;
+prefix $t2b = b -> $t1;
+intchoice $t2 = $t2a |~| $t2b;
+
+process P;
+extchoice P = $t1 [] $t2;

@@ -35,28 +35,11 @@ using namespace std;
 
 namespace hst
 {
-    state_t csp_t::add_interrupt(state_t P, state_t Q)
+    static
+    void do_interrupt(csp_t &csp, state_t dest, state_t P, state_t Q)
     {
-        ostringstream  key;
-        state_t        dest;
+        lts_t  &_lts = *csp.lts();
 
-        // Create the memoization key.
-        key << P << "/\\" << Q;
-
-        dest = lookup_memoized_process(key.str());
-        if (dest == HST_ERROR_STATE)
-        {
-            // We haven't created this process yet, so do so.
-            dest = add_temp_process();
-            interrupt(dest, P, Q);
-            save_memoized_process(key.str(), dest);
-        }
-
-        return dest;
-    }
-
-    void csp_t::interrupt(state_t dest, state_t P, state_t Q)
-    {
 #if HST_CSP_DEBUG
         cerr << "Interrupt " << dest
              << " = " << P << " /\\ " << Q << endl;
@@ -96,7 +79,7 @@ namespace hst
             event_t  E       = sp_it->first;
             state_t  P_prime = sp_it->second;
 
-            if (E == _tau)
+            if (E == csp.tau())
             {
                 /*
                  * If the event is a τ, then it does *not* resolve the
@@ -107,7 +90,7 @@ namespace hst
                  */
 
                 state_t  P_prime_interrupt_Q =
-                    add_interrupt(P_prime, Q);
+                    csp.add_interrupt(P_prime, Q);
                 _lts.add_edge(dest, E, P_prime_interrupt_Q);
             } else {
                 /*
@@ -127,13 +110,55 @@ namespace hst
          * only need a single τ action.
          */
 
-        _lts.add_edge(dest, _tau, Q);
+        _lts.add_edge(dest, csp.tau(), Q);
 
         /*
          * Lastly, finalize the ‘dest’ process.
          */
 
         _lts.finalize(dest);
+    }
+
+    state_t csp_t::add_interrupt(state_t P, state_t Q)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Create the memoization key.
+        key << P << "/\\" << Q;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            save_memoized_process(key.str(), dest);
+            do_interrupt(*this, dest, P, Q);
+        }
+
+        return dest;
+    }
+
+    void csp_t::interrupt(state_t dest, state_t P, state_t Q)
+    {
+        ostringstream  key;
+        state_t        old_dest;
+
+        // Create the memoization key.
+        key << P << "/\\" << Q;
+
+        old_dest = lookup_memoized_process(key.str());
+        if (old_dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            save_memoized_process(key.str(), dest);
+            do_interrupt(*this, dest, P, Q);
+        } else {
+            // We've already create this process, so let's just add a
+            // single τ process to the previously calculated state.
+            _lts.add_edge(dest, _tau, old_dest);
+            _lts.finalize(dest);
+        }
     }
 }
 

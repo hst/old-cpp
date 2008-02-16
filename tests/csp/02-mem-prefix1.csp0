@@ -1,0 +1,10 @@
+event a;
+event b;
+
+process $t1;
+prefix $t1 = a -> STOP;
+process $t2;
+prefix $t2 = b -> $t1;
+
+process P;
+prefix P = b -> $t1;

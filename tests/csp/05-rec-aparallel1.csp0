@@ -1,0 +1,16 @@
+event a;
+event b;
+event c;
+
+process $t1;
+process $t2;
+prefix $t1 = a -> $t2;
+prefix $t2 = b -> $t1;
+
+process $u1;
+process $u2;
+prefix $u1 = c -> $u2;
+prefix $u2 = b -> $u1;
+
+process P;
+aparallel P = $t1 [ {b} || {b} ] $u1;

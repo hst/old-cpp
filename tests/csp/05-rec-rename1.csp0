@@ -1,0 +1,12 @@
+event a;
+event b;
+event c;
+event d;
+
+process $t1;
+process $t2;
+prefix $t1 = a -> $t2;
+prefix $t2 = b -> $t1;
+
+process P;
+rename P = $t1 [[ a->c, a->d ]];

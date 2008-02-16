@@ -1,0 +1,8 @@
+event a;
+
+process $t1;
+process $t2;
+prefix $t1 = a -> $t2;
+prefix $t2 = a -> $t1;
+
+alias P = $t1;

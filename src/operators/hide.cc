@@ -35,28 +35,11 @@ using namespace std;
 
 namespace hst
 {
-    state_t csp_t::add_hide(state_t P, alphabet_t &alpha)
+    static
+    void do_hide(csp_t &csp, state_t dest, state_t P, alphabet_t &alpha)
     {
-        ostringstream  key;
-        state_t        dest;
+        lts_t  &_lts = *csp.lts();
 
-        // Create the memoization key.
-        key << P << "\\" << alpha;
-
-        dest = lookup_memoized_process(key.str());
-        if (dest == HST_ERROR_STATE)
-        {
-            // We haven't created this process yet, so do so.
-            dest = add_temp_process();
-            hide(dest, P, alpha);
-            save_memoized_process(key.str(), dest);
-        }
-
-        return dest;
-    }
-
-    void csp_t::hide(state_t dest, state_t P, alphabet_t &alpha)
-    {
 #if HST_CSP_DEBUG
         cerr << "Hide " << dest
              << " = " << P << " \\ " << alpha << endl;
@@ -94,7 +77,7 @@ namespace hst
             event_t  E       = sp_it->first;
             state_t  P_prime = sp_it->second;
 
-            if (E == _tick)
+            if (E == csp.tick())
             {
                 /*
                  * If the event is a ✓, then the hidden process can
@@ -105,7 +88,7 @@ namespace hst
                  *   P \ α =✓=> STOP
                  */
 
-                _lts.add_edge(dest, E, _stop);
+                _lts.add_edge(dest, E, csp.stop());
             } else {
                 /*
                  * If the event is not ✓, we can still execute it, but
@@ -114,10 +97,10 @@ namespace hst
                  */
 
                 if (alpha.contains(E))
-                    E = _tau;
+                    E = csp.tau();
 
                 state_t  P_prime_hide =
-                    add_hide(P_prime, alpha);
+                    csp.add_hide(P_prime, alpha);
                 _lts.add_edge(dest, E, P_prime_hide);
             }
         }
@@ -127,6 +110,48 @@ namespace hst
          */
 
         _lts.finalize(dest);
+    }
+
+    state_t csp_t::add_hide(state_t P, alphabet_t &alpha)
+    {
+        ostringstream  key;
+        state_t        dest;
+
+        // Create the memoization key.
+        key << P << "\\" << alpha;
+
+        dest = lookup_memoized_process(key.str());
+        if (dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            dest = add_temp_process();
+            save_memoized_process(key.str(), dest);
+            do_hide(*this, dest, P, alpha);
+        }
+
+        return dest;
+    }
+
+    void csp_t::hide(state_t dest, state_t P, alphabet_t &alpha)
+    {
+        ostringstream  key;
+        state_t        old_dest;
+
+        // Create the memoization key.
+        key << P << "\\" << alpha;
+
+        old_dest = lookup_memoized_process(key.str());
+        if (old_dest == HST_ERROR_STATE)
+        {
+            // We haven't created this process yet, so do so.
+            save_memoized_process(key.str(), dest);
+            do_hide(*this, dest, P, alpha);
+        } else {
+            // We've already create this process, so let's just add a
+            // single τ process to the previously calculated state.
+            _lts.add_edge(dest, _tau, old_dest);
+            _lts.finalize(dest);
+        }
     }
 }
 
