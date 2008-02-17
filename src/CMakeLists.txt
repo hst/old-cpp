@@ -12,7 +12,7 @@ set_source_files_properties(
   ${CMAKE_CURRENT_BINARY_DIR}/parser/lts.tab.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/csp0.tab.cc
   COMPILE_FLAGS
-  "-I${CMAKE_CURRENT_BINARY_DIR}/parser"
+  "-I${CMAKE_CURRENT_BINARY_DIR}/parser -fno-strict-aliasing"
 )
 
 set(LIBHST_SOURCES
