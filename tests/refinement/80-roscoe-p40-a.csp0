@@ -1,0 +1,20 @@
+event up;
+event down;
+
+process P1;
+process P2;
+
+process $a1;
+prefix $a1 = down -> P1;
+prefix P1 = up -> $a1;
+
+process $b3;
+process $b2;
+process $b1;
+prefix $b3 = down -> P2;
+prefix $b2 = up -> $b3;
+prefix $b1 = down -> $b2;
+prefix P2 = up -> $b1;
+
+alias SPEC = P1;
+alias IMPL = P2;

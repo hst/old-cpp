@@ -1,0 +1,22 @@
+event a;
+event b;
+
+
+process P;
+
+process $t1;
+prefix $t1 = a -> P;
+
+process $t2;
+prefix $t2 = b -> P;
+
+intchoice P = $t1 |~| $t2;
+
+
+process Q;
+
+prefix Q = a -> Q;
+
+
+alias SPEC = P;
+alias IMPL = Q;

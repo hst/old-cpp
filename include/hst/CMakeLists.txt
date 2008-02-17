@@ -10,6 +10,7 @@ set(HST_INCLUDE_FILES
   equivalence.hh
   lts.hh
   normalized-lts.hh
+  assertions.hh
   csp.hh
 # csp-macros.hh               /* internal header file */
 # parser/scanner.hh           /* internal header file */

@@ -1,0 +1,38 @@
+event a;
+event b;
+event c;
+
+process P;
+
+process $a2;
+process $a1;
+prefix $a2 = a -> STOP;
+prefix $a1 = a -> $a2;
+
+process $b1;
+prefix $b1 = b -> STOP;
+
+extchoice P = $a1 [] $b1;
+
+
+process Q;
+
+process $c1;
+prefix $c1 = a -> STOP;
+
+process $d2;
+process $d1;
+prefix $d2 = a -> STOP;
+prefix $d1 = c -> $d2;
+
+extchoice Q = $c1 [] $d1;
+
+
+process PQ1;
+iparallel PQ1 = P [| {a,b,c} |] Q;
+
+process PQ2;
+prefix PQ2 = a -> STOP;
+
+alias SPEC = PQ1;
+alias IMPL = PQ2;
