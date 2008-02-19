@@ -1,3 +1,5 @@
+add_subdirectory(bin)
+
 bison_file(parser/intset.yy)
 bison_file(parser/intsetset.yy)
 bison_file(parser/eventmap.yy)

@@ -18,5 +18,5 @@ set(HST_INCLUDE_FILES
 
 install(
   FILES ${HST_INCLUDE_FILES}
-  DESTINATION install/hst
+  DESTINATION include/hst
 )
