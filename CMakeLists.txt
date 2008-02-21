@@ -5,7 +5,19 @@ include(AddFileDependencies)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror")
 
-# Find required libraries.
+# Find required libraries and programs.
+
+message(STATUS "Looking for asciidoc")
+find_program(ASCIIDOC asciidoc)
+if(NOT ASCIIDOC)
+  message(FATAL_ERROR "Cannot find asciidoc")
+endif(NOT ASCIIDOC)
+
+message(STATUS "Looking for xmlto")
+find_program(XMLTO xmlto)
+if(NOT XMLTO)
+  message(FATAL_ERROR "Cannot find xmlto")
+endif(NOT XMLTO)
 
 find_package(Judy REQUIRED)
 find_package(Bison REQUIRED)
@@ -30,4 +42,5 @@ link_directories(${HST_BINARY_DIR}/src)
 enable_testing()
 add_subdirectory(include/hst)
 add_subdirectory(src)
+add_subdirectory(doc)
 add_subdirectory(tests)
