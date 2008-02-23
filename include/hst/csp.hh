@@ -93,8 +93,8 @@ namespace hst
 
             _stop = add_process("STOP");
             _skip = add_process("SKIP");
-            _tau  = add_event("TAU");
-            _tick = add_event("TICK");
+            _tau  = add_event("%TAU");
+            _tick = add_event("%TICK");
 
             _lts.add_edge(_skip, _tick, _stop);
 
