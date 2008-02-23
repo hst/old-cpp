@@ -1,0 +1,50 @@
+Douglas Creager (48):
+      Creating directory for HST project
+      C++ implementation of integer sets
+      Zobrist hashes
+      Using judyhash library
+      Sets of integer sets
+      Labeled transition systems
+      Eventmaps
+      Finalization of states
+      Initial CSP representation; operational semantics for prefix
+      Operational semantics for external choice
+      New “state pairs” iterator for LTSes
+      Operational semantics for internal choice
+      Using macros to simplify CSP0 definitions
+      Operational semantics for interrupt
+      Fixed null pointer dereference when examining LTS edges
+      Operational semantics for sequential composition
+      Operational semantics for interleaving
+      Memoization of CSP processes
+      Operational semantics for interface parallel
+      Operational semantics for alphabetized parallel
+      Using cmake for the build system
+      Refactoring test cases to use ctest
+      Using Bison for all parsing routines
+      Operational semantics for hiding
+      Operational semantics for renaming
+      Moving CSP operator definitions into a subdirectory
+      Event closure
+      Divergent nodes in an LTS
+      Refactoring LTS graph into separate class
+      Initial support for LTS prenormalization
+      Normalized LTS output now includes STOP states
+      Prenormalization of CSP scripts
+      Adding “alias” CSP0 statement
+      Equivalence classes
+      Traces bisimulation
+      Compilation warnings are now errors
+      Traces normalization
+      Fixed recursion and memoization support
+      Traces refinement
+      Fixed strict-aliasing warning in release builds
+      CSP₀ command-line utility
+      Improvements to build infrastructure
+      Initial documentation
+      Renaming TAU and TICK so that they are hidden
+      Adding technical overview article
+      Adding description of $ identifiers to CSP₀ reference
+      Fixes to basic documentation set
+      Updated copyright notices
+
