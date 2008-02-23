@@ -1,4 +1,6 @@
 <!-- callout.xsl: converts asciidoc callouts to man page format -->
+<!-- borrowed from the git project -->
+
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
 <xsl:template match="co">
 	<xsl:value-of select="concat('\fB(',substring-after(@id,'-'),')\fR')"/>

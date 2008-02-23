@@ -2,7 +2,7 @@
 CSP₀ file format
 ================
 Douglas Creager <dcreager@alum.mit.edu>
-v1.0α, February 19, 2008
+v1.0-α1, February 19, 2008
 
 Introduction
 ------------

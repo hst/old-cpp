@@ -1,5 +1,6 @@
 set(DOC_SOURCES
   csp0
+  tech-overview
 )
 
 set(MAN_SOURCES
