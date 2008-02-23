@@ -2,7 +2,7 @@
 CSP₀ file format
 ================
 Douglas Creager <dcreager@alum.mit.edu>
-v1.0-α1, February 19, 2008
+v1.0-α1, February 2008
 
 Introduction
 ------------
@@ -16,13 +16,13 @@ compiled into CSP₀.
 Recursion
 ---------
 
-There is limited support for recursion in CSP₀, via “finalized”
-processes.  A process must be declared with a “process” statement, but
+There is limited support for recursion in CSP₀, via _finalized_
+processes.  A process must be declared with a +process+ statement, but
 the process isn't finalized until after it has been defined with an
 operator statement.  Many process parameters require a finalized
 process, which don't allow recursion.  However, some process
 parameters work with processes that have been declared but not yet
-defined.  The most notable of these parameters is the “prefix”
+defined.  The most notable of these parameters is the +prefix+
 statement; the underlying rule is that a process parameter only needs
 to be finalized we need to know its initials and afters set in order
 to define the operator's semantics.
@@ -38,6 +38,12 @@ remaining characters must be letters, numbers, or underscores.  Those
 that begin with a dollar sign must contain at least one more character
 — ‘++$++’ on its own is not a valid identifier.
 
+The intention is that higher-level languages shouldn't allow
+identifiers beginning with +$+; instead, these identifiers are
+available for the compiler that translates the higher-level language
+into CSP₀ in case it needs to create any temporary processes as part
+of the compilation process.
+
 Declarations
 ~~~~~~~~~~~~
 
@@ -45,15 +51,15 @@ Declarations
 +event+ _‹id›_+;+
 ====
 
-Declare a new event.  An event must be declared before it can be used
+Declares a new event.  An event must be declared before it can be used
 in any process definition.  It is illegal to declare an event more
 than once.
 
 ====
-+process+ _id_+;+
++process+ _‹id›_+;+
 ====
 
-Declare a new process.  A process must be declared before it can be
+Declares a new process.  A process must be declared before it can be
 defined with an operator statement.  It is illegal to declare a
 process more than once.
 
@@ -120,9 +126,8 @@ finalized. _‹Q›_ and _‹R›_ must both be finalized.
 
 Creates an internal choice process.  _‹P›_ nondeterministically
 chooses whether to behave like _‹Q›_ or _‹R›_.  At least one of the
-subprocesses will be available, but all of the others might be
-refused.  _‹P›_ must not be finalized. _‹Q›_ and _‹R›_ can either be
-finalized or not.
+subprocesses will be available, but the other might be refused.  _‹P›_
+must not be finalized. _‹Q›_ and _‹R›_ can either be finalized or not.
 
 ====
 +interrupt+ _‹P›_ +=+ _‹Q›_ +/\+ _‹R›_+;+
