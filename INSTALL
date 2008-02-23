@@ -1,9 +1,38 @@
+I'll write more detailed notes later.  For now, to compile this
+package, you need:
+
+ * cmake
+ * bison
+ * asciidoc
+ * xmlto
+ * libjudy
+
+The first four are only needed at build-time.  The last is required at
+runtime as well.
+
 It's highly recommended that you perform an out-of-source build.
-Create a directory to hold the build results:
+Decide on values for the following:
+
+  SRC_DIR:   the top-level “hst” source directory.
+
+  BUILD_DIR: the directory where you will perform the build.  (It's
+             fine if this is a subdirectory of ${SRC_DIR}).
+
+  PREFIX:    the filesystem directory that you want to install into.
+             This will usually be /usr, /usr/local, ${HOME}, or
+             something similar.
+
+Then execute the following:
 
   mkdir ${BUILD_DIR}
   cd ${BUILD_DIR}
-  cmake ${PATH_TO_LIBHST_SOURCE}
+  cmake \
+    -D CMAKE_BUILD_TYPE:string=RELEASE \
+    -D CMAKE_INSTALL_PREFIX:string=${PREFIX} \
+    ${SRC_DIR}
   make
   make test
-  make install
+  sudo make install
+
+(You'll obviously only need the “sudo” if you're installing into a
+system-wide directory.)

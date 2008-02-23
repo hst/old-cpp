@@ -1,14 +1,19 @@
-I'll write more later.  For now, to compile this package, you need:
+HST
+===
 
- * cmake
- * libjudy
+HST is a library and set of command-line programs for processing CSP
+scripts.  The goal for the 1.0 release is to support refinement
+checking in the traces (T), stable failures (F), and
+failures-divergences (N) semantic models, all of which are described
+in [1].
 
-It's highly recommended that you perform an out-of-source build.
-Create a directory to hold the build results:
+[1] A. W. Roscoe.  /The theory and practice of concurrency/.  Prentice
+    Hall, 1998.  ISBN 0-13-6774409-5.
+    http://web.comlab.ox.ac.uk/oucl/publications/books/concurrency/
 
-  mkdir ${BUILD_DIR}
-  cd ${BUILD_DIR}
-  cmake ${PATH_TO_LIBHST_SOURCE}
-  make
-  make test
-  make install
+For installation instructions, please see the INSTALL file.  There is
+currently a single command-line program, called “csp0”, which allows
+you to perform refinement checks on scripts written in the CSP₀
+language.  The program is self-documented; run “csp0 help” for usage
+details.  The CSP₀ language is described in the csp0.html file, which
+should be installed as part of the standard installation process.
