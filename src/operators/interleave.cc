@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
  *
- *  Copyright (C) 2007 Douglas Creager
+ *  Copyright © 2007, 2008 Douglas Creager
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
