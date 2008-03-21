@@ -24,6 +24,7 @@
 #ifndef HST_TYPES_HH
 #define HST_TYPES_HH
 
+#include <deque>
 #include <tr1/memory>
 
 #include <hst/intset.hh>
@@ -67,6 +68,10 @@ namespace hst
             return event;
         }
     };
+
+    typedef deque<event_t>             trace_t;
+    typedef shared_ptr<trace_t>        trace_p;
+    typedef shared_ptr<const trace_t>  trace_cp;
 
     typedef pair<state_t, state_t>           state_state_t;
     typedef shared_ptr<state_state_t>        state_state_p;

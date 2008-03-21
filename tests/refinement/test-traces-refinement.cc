@@ -64,9 +64,39 @@ int main()
 
         // Check the refinement
 
-        bool  result = refines(*csp.normalized_lts(), SPEC,
+        trace_counterexample_t  counter;
+        bool  result = refines(counter,
+                               *csp.normalized_lts(), SPEC,
                                *csp.lts(), IMPL);
 
         cout << result << endl;
+        if (!result)
+        {
+            trace_t::const_iterator  tit;
+            bool  first = true;
+
+            cout << "<";
+
+            for (tit = counter.trace.begin();
+                 tit != counter.trace.end();
+                 ++tit)
+            {
+                event_t  event = *tit;
+
+                if (event != csp.tau())
+                {
+                    if (first)
+                        first = false;
+                    else
+                        cout << ",";
+
+                    cout << csp.lts()->get_event_name(*tit);
+                }
+            }
+
+            cout << ">: "
+                 << csp.lts()->get_event_name(counter.event)
+                 << endl;
+        }
     }
 }

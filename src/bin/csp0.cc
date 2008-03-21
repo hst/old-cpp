@@ -271,12 +271,46 @@ int do_assert(int argc, const char **argv)
 
             // Check the refinement.
 
-            bool  result = refines(*csp.normalized_lts(), spec,
+            trace_counterexample_t  counter;
+            bool  result = refines(counter, 
+                                   *csp.normalized_lts(), spec,
                                    *csp.lts(), impl);
 
             cout << spec_name << " [T= " << impl_name
                  << ": " << (result? "true": "false")
                  << endl;
+
+            if (!result)
+            {
+                cout << "After trace <";
+
+                trace_t::const_iterator  tit;
+                bool  first = true;
+
+                for (tit = counter.trace.begin();
+                     tit != counter.trace.end();
+                     ++tit)
+                {
+                    event_t  event = *tit;
+
+                    if (event != csp.tau())
+                    {
+                        if (first)
+                            first = false;
+                        else
+                            cout << ",";
+
+                        cout << csp.lts()->get_event_name(*tit);
+                    }
+                }
+
+                cout << ">," << endl
+                     << impl_name << " can execute "
+                     << csp.lts()->get_event_name(counter.event)
+                     << " but " << spec_name << " cannot."
+                     << endl;
+            }
+
         } else {
             cerr << "Unknown assertion flag " << flag << endl;
             return 2;

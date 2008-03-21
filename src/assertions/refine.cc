@@ -44,35 +44,96 @@ using namespace std;
 
 namespace hst
 {
-    typedef pair<state_t, state_t>  check_pair_t;
+    struct check_pair_t;
+    typedef shared_ptr<check_pair_t>        check_pair_p;
+    typedef shared_ptr<const check_pair_t>  check_pair_cp;
+
+    struct check_pair_t
+    {
+        state_t  spec;
+        state_t  impl;
+        event_t  inbound_event;
+        check_pair_cp  parent;
+
+        check_pair_t(state_t _spec, state_t _impl):
+            spec(_spec),
+            impl(_impl),
+            inbound_event(HST_ERROR_EVENT)
+        {
+        }
+
+        check_pair_t(state_t _spec, state_t _impl,
+                     event_t _inbound_event,
+                     check_pair_cp _parent):
+            spec(_spec),
+            impl(_impl),
+            inbound_event(_inbound_event),
+            parent(_parent)
+        {
+        }
+
+        bool operator == (const check_pair_t &other) const
+        {
+            return (spec == other.spec) && (impl == other.impl);
+        }
+    };
 
     struct check_pair_t_hasher
     {
         unsigned long operator () (const check_pair_t &pair) const
         {
-            return (pair.first * 33) + pair.second;
+            return (pair.spec * 33) + pair.impl;
         }
+
+        unsigned long operator () (check_pair_cp pair) const
+        {
+            return (pair->spec * 33) + pair->impl;
+        }
+
     };
+
+    static
+    void construct_counterexample(trace_counterexample_t &counter,
+                                  event_t event,
+                                  check_pair_cp pair)
+    {
+        trace_counterexample_t  result;
+
+        for (check_pair_cp  current = pair;
+             current->parent.get() != NULL;
+             current = current->parent)
+        {
+            result.trace.push_front(current->inbound_event);
+        }
+
+        result.event = event;
+        result.spec_state = pair->spec;
+        result.impl_state = pair->impl;
+
+        std::swap(counter,result);
+    }
 
     typedef judy_set_l<check_pair_t, check_pair_t_hasher>
         check_pair_set_t;
 
-    bool refines(const normalized_lts_t spec_norm, state_t spec_source,
+    bool refines(trace_counterexample_t &counter,
+                 const normalized_lts_t spec_norm, state_t spec_source,
                  const lts_t impl, state_t impl_source)
     {
         const lts_t  &spec = spec_norm.normalized();
 
-        check_pair_set_t     seen;
-        deque<check_pair_t>  pending;
+        check_pair_set_t      seen;
+        deque<check_pair_cp>  pending;
 
         /*
          * Initialize the BFS sets with the source pair.
          */
 
         {
-            check_pair_t  source(spec_source, impl_source);
+            check_pair_cp  source
+                (new check_pair_t(spec_source, impl_source));
 
-            seen.insert(source);
+            seen.insert(*source);
             pending.push_back(source);
         }
 
@@ -82,12 +143,12 @@ namespace hst
 
         while (!pending.empty())
         {
-            check_pair_t  pair = pending.front();
+            check_pair_cp  pair = pending.front();
             pending.pop_front();
 
 #if DEBUG_REFINEMENT
-            cerr << "Checking (" << pair.first
-                 << "," << pair.second << ")" << endl;
+            cerr << "Checking (" << pair->spec
+                 << "," << pair->impl << ")" << endl;
 #endif
 
             /*
@@ -97,12 +158,12 @@ namespace hst
 
             {
                 alphabet_t  spec_initials
-                    (spec.state_events_begin(pair.first),
-                     spec.state_events_end(pair.first));
+                    (spec.state_events_begin(pair->spec),
+                     spec.state_events_end(pair->spec));
 
                 alphabet_t  impl_initials
-                    (impl.state_events_begin(pair.second),
-                     impl.state_events_end(pair.second));
+                    (impl.state_events_begin(pair->impl),
+                     impl.state_events_end(pair->impl));
 
                 impl_initials -= spec_norm.tau();
 
@@ -111,11 +172,26 @@ namespace hst
                      << impl_initials << endl;
 #endif
 
-                if (!(spec_initials >= impl_initials))
+                /*
+                 * Remove all of the events that both IMPL and SPEC
+                 * can do.  If any are left over, the refinement
+                 * fails.
+                 */
+
+                impl_initials -= spec_initials;
+
+                if (impl_initials.size() > 0)
                 {
 #if DEBUG_REFINEMENT
                     cerr << "  Nope!  Refinement fails." << endl;
 #endif
+                    /*
+                     * We can use any of the events left in the set as
+                     * the counterexample event.
+                     */
+
+                    event_t  event = *(impl_initials.begin());
+                    construct_counterexample(counter, event, pair);
                     return false;
                 }
             }
@@ -126,8 +202,8 @@ namespace hst
              */
 
             for (lts_t::state_pairs_iterator sp_it =
-                     impl.state_pairs_begin(pair.second);
-                 sp_it != impl.state_pairs_end(pair.second);
+                     impl.state_pairs_begin(pair->impl);
+                 sp_it != impl.state_pairs_end(pair->impl);
                  ++sp_it)
             {
                 event_t  event = sp_it->first;
@@ -141,11 +217,13 @@ namespace hst
                      * includes a τ-closure.
                      */
 
-                    check_pair_t  next(pair.first, impl_prime);
+                    check_pair_cp  next
+                        (new check_pair_t(pair->spec, impl_prime,
+                                          spec_norm.tau(), pair));
 
-                    if (seen.find(next) == seen.end())
+                    if (seen.find(*next) == seen.end())
                     {
-                        seen.insert(next);
+                        seen.insert(*next);
                         pending.push_back(next);
                     }
                 } else {
@@ -159,9 +237,9 @@ namespace hst
                      */
 
                     lts_t::event_target_iterator  et_it =
-                        spec.event_targets_begin(pair.first, event);
+                        spec.event_targets_begin(pair->spec, event);
 
-                    if (et_it == spec.event_targets_end(pair.first,
+                    if (et_it == spec.event_targets_end(pair->spec,
                                                         event))
                     {
 #if DEBUG_REFINEMENT
@@ -174,7 +252,7 @@ namespace hst
                     state_t  spec_prime = *et_it;
                     ++et_it;
 
-                    if (et_it != spec.event_targets_end(pair.first,
+                    if (et_it != spec.event_targets_end(pair->spec,
                                                         event))
                     {
 #if DEBUG_REFINEMENT
@@ -184,11 +262,13 @@ namespace hst
                         return false;
                     }
 
-                    check_pair_t  next(spec_prime, impl_prime);
+                    check_pair_cp  next
+                        (new check_pair_t(spec_prime, impl_prime,
+                                          event, pair));
 
-                    if (seen.find(next) == seen.end())
+                    if (seen.find(*next) == seen.end())
                     {
-                        seen.insert(next);
+                        seen.insert(*next);
                         pending.push_back(next);
                     }
                 }
