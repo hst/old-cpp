@@ -93,14 +93,32 @@ namespace hst_parser
 
         loc->step();
 
+        ch = read_char_skip_ws(stream, loc);
+
         // If we hit EOF before reading a real character, then we
         // return the END token.  Once we read a real character, we
         // *don't* return an END token, because at the very least, we
         // can return a BAD_CHAR token with the real characters we
         // read.
 
-        ch = read_char_skip_ws(stream, loc);
         if (ch == EOF) return token::END;
+
+        // If we find any comments, go ahead and parse them.
+
+        while (ch == '#')
+        {
+            // This comment ends at the end of the current line.
+            do
+            {
+                ch = read_char(stream, loc);
+            } while (ch != '\n');
+
+            // Read the next character after the comment.  If it is
+            // yet another comment, we'll loop back through here to
+            // read it.
+
+            ch = read_char_skip_ws(stream, loc);
+        }
 
         // Let's get all the easy single-char tokens out of the way
         // first.

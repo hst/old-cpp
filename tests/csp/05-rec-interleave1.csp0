@@ -1,3 +1,13 @@
+# Recursion test
+#
+# t1 = a -> a -> t1
+# u1 = b -> b -> u1
+# P  = t1 ||| u1
+#
+# This is equivalent to:
+#
+# P = (a -> P) [] (b -> P)
+
 event a;
 event b;
 

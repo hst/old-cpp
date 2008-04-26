@@ -1,3 +1,11 @@
+# Recursion test
+#
+# t1 = a -> a -> t1
+# u1 = b -> b -> u1
+#
+# P can either do an infinite sequence of a's, or an infinite sequence
+# of b's, but it cannot do any combination of both.
+
 event a;
 event b;
 

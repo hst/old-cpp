@@ -1,3 +1,9 @@
+# Recursion test
+#
+# P = (a -> SKIP) ; P
+#
+# P can do an endless sequence of a's.
+
 event a;
 
 process $t1;

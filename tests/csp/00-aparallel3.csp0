@@ -1,3 +1,9 @@
+# Basic operator test
+# P =
+#   (a -> b -> STOP)
+#   [ {b} || {c} ]
+#   (a -> c -> STOP)
+
 event a;
 event b;
 event c;

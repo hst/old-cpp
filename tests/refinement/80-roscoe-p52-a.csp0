@@ -1,3 +1,8 @@
+# P = (a -> a -> STOP) [] (b -> STOP)
+# Q = (a -> STOP) [] (c -> a -> STOP)
+#
+# assert (P || Q) [T= (a -> STOP)
+
 event a;
 event b;
 event c;

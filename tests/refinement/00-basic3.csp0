@@ -1,3 +1,8 @@
+# P = (a -> P) |~| (b -> P)
+# Q = a -> b -> Q
+#
+# assert P [T= P
+
 event a;
 event b;
 

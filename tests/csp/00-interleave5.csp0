@@ -1,3 +1,9 @@
+# Basic operator test
+# (there are nine a1's and a2's)
+# P1 = a1 -> a1 -> a1 -> a1 -> a1 -> a1 -> a1 -> a1 -> a1 -> STOP
+# P2 = a2 -> a2 -> a2 -> a2 -> a2 -> a2 -> a2 -> a2 -> a2 -> STOP
+# P  = P1 ||| P2
+
 event a1;
 process $t1;
 prefix $t1 = a1 -> STOP;

@@ -1,3 +1,7 @@
+# Basic operator test
+# P' = (a -> b -> SKIP) ; (c -> b -> SKIP)
+# P  = P' \ {b}
+
 event a;
 event b;
 event c;

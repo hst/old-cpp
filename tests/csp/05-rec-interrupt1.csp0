@@ -1,3 +1,9 @@
+# Recursion test
+#
+# t1 = a -> a -> t1
+# u1 = b -> b -> u1
+# P  = t1 /\ u1
+
 event a;
 event b;
 

@@ -1,3 +1,8 @@
+# Basic operator test
+# (there are nine a's)
+# P' = a -> a -> a -> a -> a -> a -> a -> a -> a -> STOP
+# P  = P' ||| P'
+
 event a;
 process $t1;
 prefix $t1 = a -> STOP;
