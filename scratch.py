@@ -86,7 +86,7 @@ class Compose(Process):
 
         return frozenset(result)
 
-class Interrupt(Process):
+class Timeout(Process):
     def __init__(self, left, right):
         Process.__init__(self)
         self.left = left
@@ -98,11 +98,11 @@ class Interrupt(Process):
     def _after(self, event):
         result = set()
 
-        result.update(Interrupt(l, self.right)
+        result.update(Timeout(l, self.right)
                       for l in self.left.after(event))
 
         if event is TAU:
-            result.update(Interrupt(self.left, r)
+            result.update(Timeout(self.left, r)
                           for r = self.right.after(event))
         else:
             result.update(self.right.after(event))

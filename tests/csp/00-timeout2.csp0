@@ -1,5 +1,5 @@
 # Basic operator test
-# P = ((a -> STOP) [] (b -> STOP)) /\ (c -> STOP)
+# P = ((a -> STOP) [] (b -> STOP)) [> (c -> STOP)
 
 event a;
 event b;
@@ -13,4 +13,4 @@ prefix $t3 = c -> STOP;
 process $t4;
 extchoice $t4 = $t1 [] $t2;
 process P;
-interrupt P = $t4 /\ $t3;
+timeout P = $t4 [> $t3;

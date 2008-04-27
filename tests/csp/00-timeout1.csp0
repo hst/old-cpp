@@ -1,5 +1,5 @@
 # Basic operator test
-# P = (a -> STOP) /\ (b -> STOP)
+# P = (a -> STOP) [> (b -> STOP)
 
 event a;
 event b;
@@ -8,4 +8,4 @@ prefix $t1 = a -> STOP;
 process $t2;
 prefix $t2 = b -> STOP;
 process P;
-interrupt P = $t1 /\ $t2;
+timeout P = $t1 [> $t2;

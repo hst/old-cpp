@@ -21,8 +21,8 @@
  *----------------------------------------------------------------------
  */
 
-#ifndef HST_CSP_INTERRUPT_CC
-#define HST_CSP_INTERRUPT_CC
+#ifndef HST_CSP_TIMEOUT_CC
+#define HST_CSP_TIMEOUT_CC
 
 #include <iostream>
 
@@ -36,20 +36,20 @@ using namespace std;
 namespace hst
 {
     static
-    void do_interrupt(csp_t &csp, state_t dest, state_t P, state_t Q)
+    void do_timeout(csp_t &csp, state_t dest, state_t P, state_t Q)
     {
         lts_t  &_lts = *csp.lts();
 
 #if HST_CSP_DEBUG
-        cerr << "Interrupt " << dest
-             << " = " << P << " /\\ " << Q << endl;
+        cerr << "Timeout " << dest
+             << " = " << P << " [> " << Q << endl;
 #endif
 
         /*
          * ‘dest’ shouldn't be finalized, since this implies that it
          * already represents a different process.  ‘P’ and ‘Q’ should
          * be finalized, since we need their initial events to
-         * calculate [P▵Q].
+         * calculate [P▹Q].
          */
 
         REQUIRE_NOT_FINALIZED(dest);
@@ -57,7 +57,7 @@ namespace hst
         REQUIRE_FINALIZED(Q);
 
         /*
-         * Interrupt's ‘P’ operand behaves just like it would in
+         * Timeout's ‘P’ operand behaves just like it would in
          * external choice.  Two firing rules are of the form
          *
          *   P =E=> P' ⇒ something
@@ -86,19 +86,19 @@ namespace hst
                  * choice; P' is available, but so is Q.  This means
                  * we need to create a transition for
                  *
-                 *   P ▵ Q =τ=> P' ▵ Q
+                 *   P ▹ Q =τ=> P' ▹ Q
                  */
 
-                state_t  P_prime_interrupt_Q =
-                    csp.add_interrupt(P_prime, Q);
-                _lts.add_edge(dest, E, P_prime_interrupt_Q);
+                state_t  P_prime_timeout_Q =
+                    csp.add_timeout(P_prime, Q);
+                _lts.add_edge(dest, E, P_prime_timeout_Q);
             } else {
                 /*
                  * If the event is not τ, then it resolves the choice;
                  * the alternative is no longer available.  We need to
                  * create a transition for
                  *
-                 *   P ▵ Q =E=> P'
+                 *   P ▹ Q =E=> P'
                  */
 
                 _lts.add_edge(dest, E, P_prime);
@@ -106,7 +106,7 @@ namespace hst
         }
 
         /*
-         * Interrupt's ‘Q’ operand is more like internal choice, so we
+         * Timeout's ‘Q’ operand is more like internal choice, so we
          * only need a single τ action.
          */
 
@@ -119,13 +119,13 @@ namespace hst
         _lts.finalize(dest);
     }
 
-    state_t csp_t::add_interrupt(state_t P, state_t Q)
+    state_t csp_t::add_timeout(state_t P, state_t Q)
     {
         ostringstream  key;
         state_t        dest;
 
         // Create the memoization key.
-        key << P << "/\\" << Q;
+        key << P << "[>" << Q;
 
         dest = lookup_memoized_process(key.str());
         if (dest == HST_ERROR_STATE)
@@ -133,26 +133,26 @@ namespace hst
             // We haven't created this process yet, so do so.
             dest = add_temp_process();
             save_memoized_process(key.str(), dest);
-            do_interrupt(*this, dest, P, Q);
+            do_timeout(*this, dest, P, Q);
         }
 
         return dest;
     }
 
-    void csp_t::interrupt(state_t dest, state_t P, state_t Q)
+    void csp_t::timeout(state_t dest, state_t P, state_t Q)
     {
         ostringstream  key;
         state_t        old_dest;
 
         // Create the memoization key.
-        key << P << "/\\" << Q;
+        key << P << "[>" << Q;
 
         old_dest = lookup_memoized_process(key.str());
         if (old_dest == HST_ERROR_STATE)
         {
             // We haven't created this process yet, so do so.
             save_memoized_process(key.str(), dest);
-            do_interrupt(*this, dest, P, Q);
+            do_timeout(*this, dest, P, Q);
         } else {
             // We've already create this process, so let's just add a
             // single τ process to the previously calculated state.
@@ -162,4 +162,4 @@ namespace hst
     }
 }
 
-#endif // HST_CSP_INTERRUPT_CC
+#endif // HST_CSP_TIMEOUT_CC

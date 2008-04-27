@@ -37,7 +37,7 @@ set(LIBHST_SOURCES
   operators/prefix.cc
   operators/extchoice.cc
   operators/intchoice.cc
-  operators/interrupt.cc
+  operators/timeout.cc
   operators/seqcomp.cc
   operators/interleave.cc
   operators/interface-parallel.cc

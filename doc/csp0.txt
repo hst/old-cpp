@@ -130,10 +130,10 @@ subprocesses will be available, but the other might be refused.  _‹P›_
 must not be finalized. _‹Q›_ and _‹R›_ can either be finalized or not.
 
 ====
-+interrupt+ _‹P›_ +=+ _‹Q›_ +/\+ _‹R›_+;+
++timeout+ _‹P›_ +=+ _‹Q›_ +[>+ _‹R›_+;+
 ====
 
-Creates an interrupt process.  _‹P›_ behaves like _‹Q›_ initially, but
+Creates an timeout process.  _‹P›_ behaves like _‹Q›_ initially, but
 at any point in the future (nondeterministically), it can start to
 refuse _‹Q›_ and behave like _‹R›_ instead.  _‹P›_ must not be
 finalized.  _‹Q›_ must be finalized.  _‹R›_ can either be finalized or

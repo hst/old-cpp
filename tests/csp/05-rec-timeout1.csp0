@@ -2,7 +2,7 @@
 #
 # t1 = a -> a -> t1
 # u1 = b -> b -> u1
-# P  = t1 /\ u1
+# P  = t1 [> u1
 
 event a;
 event b;
@@ -18,4 +18,4 @@ prefix $u1 = b -> $u2;
 prefix $u2 = b -> $u1;
 
 process P;
-interrupt P = $t1 /\ $u1;
+timeout P = $t1 [> $u1;

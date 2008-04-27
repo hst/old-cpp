@@ -47,7 +47,7 @@ namespace hst
         PREFIX = 1,
         EXTCHOICE,
         INTCHOICE,
-        INTERRUPT,
+        TIMEOUT,
         SEQCOMP,
         INTERLEAVE,
         INTERFACE_PARALLEL,
@@ -335,9 +335,9 @@ namespace hst
         state_t add_intchoice(state_t P, state_t Q);
         void intchoice(state_t dest, state_t P, state_t Q);
 
-        /// [P▵Q]
-        state_t add_interrupt(state_t P, state_t Q);
-        void interrupt(state_t dest, state_t P, state_t Q);
+        /// [P▹Q]
+        state_t add_timeout(state_t P, state_t Q);
+        void timeout(state_t dest, state_t P, state_t Q);
 
         /// [P;Q]
         state_t add_seqcomp(state_t P, state_t Q);

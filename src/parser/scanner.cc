@@ -186,6 +186,10 @@ namespace hst_parser
                 // found a "[["
                 read_char(stream, loc);
                 return token::LMAP;
+            } else if (lookahead == '>') {
+                // found a "[>"
+                read_char(stream, loc);
+                return token::RTRIANGLE;
             }
 
             // found a bare "["
@@ -358,9 +362,9 @@ namespace hst_parser
             } else if (*id == "interleave") {
                 delete id;
                 return token::INTERLEAVE;
-            } else if (*id == "interrupt") {
+            } else if (*id == "timeout") {
                 delete id;
-                return token::INTERRUPT;
+                return token::TIMEOUT;
             } else if (*id == "iparallel") {
                 delete id;
                 return token::IPARALLEL;

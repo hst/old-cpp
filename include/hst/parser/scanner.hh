@@ -62,6 +62,7 @@ namespace hst_parser
             BACKSLASH  = 317,
             LMAP       = 318,
             RMAP       = 319,
+            RTRIANGLE  = 320,
 
             // keywords
             ALIAS      = 400,
@@ -71,7 +72,7 @@ namespace hst_parser
             HIDE       = 404,
             INTCHOICE  = 405,
             INTERLEAVE = 406,
-            INTERRUPT  = 407,
+            TIMEOUT    = 407,
             IPARALLEL  = 408,
             PREFIX     = 409,
             PROCESS    = 410,

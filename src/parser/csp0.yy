@@ -106,6 +106,7 @@ using namespace hst_parser;
 %token BACKSLASH  317 "\\"
 %token LMAP       318 "[["
 %token RMAP       319 "]]"
+%token RTRIANGLE  320 "[>"
 
 /* keywords */
 %token ALIAS      400 "alias"
@@ -115,7 +116,7 @@ using namespace hst_parser;
 %token HIDE       404 "hide"
 %token INTCHOICE  405 "intchoice"
 %token INTERLEAVE 406 "interleave"
-%token INTERRUPT  407 "interrupt"
+%token TIMEOUT    407 "timeout"
 %token IPARALLEL  408 "iparallel"
 %token PREFIX     409 "prefix"
 %token PROCESS    410 "process"
@@ -147,7 +148,7 @@ using namespace hst_parser;
 
 %type  <dummy>       csp stmt
 %type  <dummy>       process_def event_def prefix_stmt extchoice_stmt
-%type  <dummy>       intchoice_stmt interrupt_stmt seqcomp_stmt
+%type  <dummy>       intchoice_stmt timeout_stmt seqcomp_stmt
 %type  <dummy>       interleave_stmt iparallel_stmt aparallel_stmt
 %type  <dummy>       hide_stmt rename_stmt alias_stmt
 
@@ -193,7 +194,7 @@ stmt
     { $$ = $1; }
     | intchoice_stmt
     { $$ = $1; }
-    | interrupt_stmt
+    | timeout_stmt
     { $$ = $1; }
     | seqcomp_stmt
     { $$ = $1; }
@@ -366,11 +367,11 @@ intchoice_stmt
     }
     ;
 
-interrupt_stmt
-    : INTERRUPT process_id EQUALS
-      process_id TRIANGLE process_id SEMI
+timeout_stmt
+    : TIMEOUT process_id EQUALS
+      process_id RTRIANGLE process_id SEMI
     {
-        _result.interrupt($2, $4, $6);
+        _result.timeout($2, $4, $6);
     }
     ;
 

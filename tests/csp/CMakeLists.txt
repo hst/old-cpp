@@ -6,8 +6,8 @@ set(TESTS
   00-extchoice4
   00-intchoice1
   00-intchoice2
-  00-interrupt1
-  00-interrupt2
+  00-timeout1
+  00-timeout2
   00-seqcomp1
   00-seqcomp2
   00-interleave1
@@ -31,7 +31,7 @@ set(TESTS
   02-mem-prefix1
   02-mem-extchoice1
   02-mem-intchoice1
-  02-mem-interrupt1
+  02-mem-timeout1
   02-mem-seqcomp1
   02-mem-interleave1
   02-mem-iparallel1
@@ -42,7 +42,7 @@ set(TESTS
   05-rec-extchoice1
   05-rec-extchoice2
   05-rec-intchoice1
-  05-rec-interrupt1
+  05-rec-timeout1
   05-rec-seqcomp1
   05-rec-interleave1
   05-rec-iparallel1
