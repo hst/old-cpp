@@ -1,0 +1,4 @@
+processes {0:STOP, 1:SKIP}
+events {0:%TAU, 1:%TICK, 2:_initialunderscore, 3:internal_underscore, 4:several_under_scores_in_here, 5:repeated__underscores, 6:__repeated_initial_underscore}
+edges {1--1-->0}
+acceptances {0:{{}}, 1:{{1}}}
