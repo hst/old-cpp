@@ -1,0 +1,23 @@
+# Basic operator test
+#
+# P = (a -> a -> SKIP) ||| (b -> b -> SKIP)
+
+event a;
+event b;
+
+process $a1;
+process $a2;
+
+prefix $a2 = a -> SKIP;
+prefix $a1 = a -> $a2;
+
+process $b1;
+process $b2;
+
+prefix $b2 = b -> SKIP;
+prefix $b1 = b -> $b2;
+
+process P;
+
+interleave P = $a1 ||| $b1;
+

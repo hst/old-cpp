@@ -15,6 +15,7 @@ set(TESTS
   00-interleave3
   00-interleave4
   00-interleave5
+  00-interleave6
   00-iparallel1
   00-iparallel2
   00-iparallel3

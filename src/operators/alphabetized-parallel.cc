@@ -59,7 +59,6 @@ namespace hst
         alphabet_t  alpha = alphaP;
         alpha &= alphaQ;
 
-
         interface_parallel(dest, P, alpha, Q);
     }
 }
