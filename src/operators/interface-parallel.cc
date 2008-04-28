@@ -52,7 +52,7 @@ namespace hst
          * ‘dest’ shouldn't be finalized, since this implies that it
          * already represents a different process.  ‘P’ and ‘Q’ should
          * be finalized, since we need their initial events to
-         * calculate [P〚A〛Q].
+         * calculate [P〚α〛Q].
          */
 
         REQUIRE_NOT_FINALIZED(dest);
@@ -75,6 +75,7 @@ namespace hst
          * synchronization alphabet.
          */
 
+        bool  found_a_tau = false;
         lts_t::state_pairs_iterator  sp_it;
 
         /*
@@ -116,7 +117,7 @@ namespace hst
                      * now just found, we need to create a transition
                      * for
                      *
-                     *   P〚A〛Q =E=> P'〚A〛Q'
+                     *   P〚α〛Q =E=> P'〚α〛Q'
                      */
 
                     state_t  P_prime_parallel_Q_prime =
@@ -126,17 +127,22 @@ namespace hst
 
             } else {
                 /*
-                 * [P〚A〛Q] can perform any action of P not in the
+                 * [P〚α〛Q] can perform any action of P not in the
                  * synchronization alphabet (including τ), after which
-                 * it behaves like [P'〚A〛Q].  This means we need to
+                 * it behaves like [P'〚α〛Q].  This means we need to
                  * create a transition for
                  *
-                 *   P〚A〛Q =E=> P'〚A〛Q
+                 *   P〚α〛Q =E=> P'〚α〛Q
                  */
 
                 state_t  P_prime_parallel_Q =
                     csp.add_interface_parallel(P_prime, alpha, Q);
                 _lts.add_edge(dest, E, P_prime_parallel_Q);
+            }
+
+            if (E == csp.tau())
+            {
+                found_a_tau = true;
             }
         }
 
@@ -169,17 +175,78 @@ namespace hst
 
             } else {
                 /*
-                 * [P〚A〛Q] can perform any action of Q not in the
+                 * [P〚α〛Q] can perform any action of Q not in the
                  * synchronization alphabet (including τ), after which
-                 * it behaves like [P〚A〛Q'].  This means we need to
+                 * it behaves like [P〚α〛Q'].  This means we need to
                  * create a transition for
                  *
-                 *   P〚A〛Q =E=> P〚A〛Q'
+                 *   P〚α〛Q =E=> P〚α〛Q'
                  */
 
                 state_t  P_parallel_Q_prime =
                     csp.add_interface_parallel(P, alpha, Q_prime);
                 _lts.add_edge(dest, E, P_parallel_Q_prime);
+            }
+
+            if (E == csp.tau())
+            {
+                found_a_tau = true;
+            }
+        }
+
+        /*
+         * If there were any τ events for the parallel composition,
+         * then there shouldn't be any acceptances.  Otherwise, each
+         * pair of acceptances from ‘P’ and ‘Q’ are combined to create
+         * an acceptance for the composition.  Roughly speaking, the P
+         * and Q acceptances are unioned together to get the
+         * composition's acceptance — with the caveat that any event
+         * in the synchronization alphabet can only appear in the
+         * acceptance if its in the acceptances of both P and Q.
+         * One way to implement this is:
+         *
+         *   acc = ((accP ∪ accQ) ∖ α) ∪ (accP ∩ accQ ∩ α)
+         */
+
+        if (!found_a_tau)
+        {
+            alphabet_set_cp  P_alphas = _lts.get_acceptances(P);
+            alphabet_set_cp  Q_alphas = _lts.get_acceptances(Q);
+
+            for (alphabet_set_t::iterator Pa_it = P_alphas->begin();
+                 Pa_it != P_alphas->end();
+                 ++Pa_it)
+            {
+                for (alphabet_set_t::iterator Qa_it = Q_alphas->begin();
+                     Qa_it != Q_alphas->end();
+                     ++Qa_it)
+                {
+                    alphabet_t  acceptance;
+
+                    acceptance |= *Pa_it;
+                    acceptance |= *Qa_it;
+                    acceptance -= alpha;
+
+                    alphabet_t  synced;
+
+                    synced |= alpha;
+                    synced &= *Pa_it;
+                    synced &= *Qa_it;
+
+                    acceptance |= synced;
+
+                    // ✓ is also part of the synchronization alphabet.
+                    // It would be nice not to have to special-case
+                    // this...
+
+                    if ((!Pa_it->contains(csp.tick())) ||
+                        (!Qa_it->contains(csp.tick())))
+                    {
+                        acceptance -= csp.tick();
+                    }
+
+                    _lts.add_acceptance(dest, acceptance);
+                }
             }
         }
 
@@ -235,7 +302,7 @@ namespace hst
             save_memoized_process(key.str(), dest);
             do_interface_parallel(*this, dest, P, alpha, Q);
         } else {
-            // We've already create this process, so let's just add a
+            // We've already created this process, so let's just add a
             // single τ process to the previously calculated state.
             _lts.add_edge(dest, _tau, old_dest);
             _lts.finalize(dest);

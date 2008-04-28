@@ -66,6 +66,7 @@ namespace hst
          * on whether the event is a ✓ or not.
          */
 
+        bool  found_a_tau = false;
         lts_t::state_pairs_iterator  sp_it;
 
         /*
@@ -90,6 +91,8 @@ namespace hst
                  */
 
                 _lts.add_edge(dest, csp.tau(), Q);
+
+                found_a_tau = true;
             } else {
                 /*
                  * If the event is not a ✓, then the event does not
@@ -102,6 +105,35 @@ namespace hst
                 state_t  P_prime_seqcomp_Q =
                     csp.add_seqcomp(P_prime, Q);
                 _lts.add_edge(dest, E, P_prime_seqcomp_Q);
+
+                if (E == csp.tau())
+                {
+                    found_a_tau = true;
+                }
+            }
+        }
+
+        /*
+         * If there aren't any τ edges for the sequential composition,
+         * then it will have the same acceptances as P, but with any
+         * ✓s removed.  (Of course, if there are any ✓s in the
+         * acceptance sets, then we'll have created a τ previously...)
+         */
+
+        if (!found_a_tau)
+        {
+            alphabet_set_cp  P_alphas = _lts.get_acceptances(P);
+
+            for (alphabet_set_t::iterator Pa_it = P_alphas->begin();
+                 Pa_it != P_alphas->end();
+                 ++Pa_it)
+            {
+                alphabet_t  acceptance;
+
+                acceptance |= *Pa_it;
+                acceptance -= csp.tick();
+
+                _lts.add_acceptance(dest, acceptance);
             }
         }
 
@@ -147,7 +179,7 @@ namespace hst
             save_memoized_process(key.str(), dest);
             do_seqcomp(*this, dest, P, Q);
         } else {
-            // We've already create this process, so let's just add a
+            // We've already created this process, so let's just add a
             // single τ process to the previously calculated state.
             _lts.add_edge(dest, _tau, old_dest);
             _lts.finalize(dest);

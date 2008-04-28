@@ -140,6 +140,17 @@ namespace hst
         stateset_cp graph_deref2(state_t state, event_t event) const;
 
         /*
+         * The refusals of an LTS are stored as minimal acceptance
+         * sets.
+         */
+
+        typedef judy_map_l<state_t, intsetset_p,
+                           state_t_hasher>        acceptances_t;
+        typedef shared_ptr<acceptances_t>         acceptances_p;
+
+        acceptances_t  acceptances;
+
+        /*
          * The underlying iterator returns a (state_t,
          * graph_inner_map_p) pair, so we can get the state by taking
          * the first element of the pair.
@@ -176,6 +187,26 @@ namespace hst
             add_edge(edge.from, edge.event, edge.to);
         }
 
+        void add_acceptance(const state_t state,
+                            const alphabet_t &alphabet);
+
+        alphabet_set_cp get_acceptances(const state_t state) const
+        {
+            acceptances_t::const_iterator  it =
+                acceptances.find(state);
+
+            if (it == acceptances.end())
+            {
+                // There aren't any acceptances for this state yet, so
+                // return an empty (but not NULL) alphabet set.
+
+                alphabet_set_cp  alphabet_set(new alphabet_set_t);
+                return alphabet_set;
+            } else {
+                return it->second;
+            }
+        }
+
         void closure
         (event_t event, stateset_t &closure,
          const stateset_t &initial) const;
@@ -197,7 +228,8 @@ namespace hst
             num_events(other.num_events),
             event_names(other.event_names),
             finalized_states(other.finalized_states),
-            graph(other.graph)
+            graph(other.graph),
+            acceptances(other.acceptances)
         {
         }
 
@@ -209,6 +241,7 @@ namespace hst
             event_names.clear();
             finalized_states.clear();
             graph.clear();
+            acceptances.clear();
         }
 
         void swap(lts_t &other)
@@ -219,6 +252,7 @@ namespace hst
             event_names.swap(other.event_names);
             finalized_states.swap(other.finalized_states);            
             graph.swap(other.graph);
+            acceptances.swap(other.acceptances);
         }
 
         lts_t &operator = (const lts_t &other)

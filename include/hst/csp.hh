@@ -96,7 +96,28 @@ namespace hst
             _tau  = add_event("%TAU");
             _tick = add_event("%TICK");
 
+            /*
+             * STOP cannot accept any events, so we need to add the
+             * empty alphabet to its acceptances.
+             */
+
+            alphabet_t  empty_alpha;
+            _lts.add_acceptance(_stop, empty_alpha);
+
+            /*
+             * SKIP can accept exactly one event: ✓.  So we add {✓} to
+             * its acceptances.
+             */
+
+            alphabet_t  tick_alpha;
+            tick_alpha += _tick;
+
             _lts.add_edge(_skip, _tick, _stop);
+            _lts.add_acceptance(_skip, tick_alpha);
+
+            /*
+             * Finalize STOP and SKIP.
+             */
 
             _lts.finalize(_stop);
             _lts.finalize(_skip);
@@ -347,7 +368,7 @@ namespace hst
         state_t add_interleave(state_t P, state_t Q);
         void interleave(state_t dest, state_t P, state_t Q);
 
-        /// [P〚A〛Q]
+        /// [P〚α〛Q]
         state_t add_interface_parallel
         (state_t P, alphabet_t &alpha, state_t Q);
         void interface_parallel
@@ -367,7 +388,7 @@ namespace hst
         (state_t dest,
          state_t P, alphabet_t &alpha);
 
-        /// [P \ μ]
+        /// [P〚μ〛]
         state_t add_rename
         (state_t P, eventmap_t &map);
         void rename

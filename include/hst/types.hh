@@ -28,6 +28,7 @@
 #include <tr1/memory>
 
 #include <hst/intset.hh>
+#include <hst/intsetset.hh>
 
 /*
  * We will treat -1 (0xFFFFFFFF) as an error code, and will never
@@ -60,6 +61,10 @@ namespace hst
     typedef intset_t   alphabet_t;
     typedef intset_p   alphabet_p;
     typedef intset_cp  alphabet_cp;
+
+    typedef intsetset_t   alphabet_set_t;
+    typedef intsetset_p   alphabet_set_p;
+    typedef intsetset_cp  alphabet_set_cp;
 
     struct event_t_hasher
     {

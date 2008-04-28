@@ -2,5 +2,6 @@
   mapping {
     0={2,3}
   }
-  edges {0--2-->0}
+edges {0--2-->0}
+acceptances {0:{}}
 }

@@ -49,7 +49,7 @@ namespace hst
          * ‘dest’ shouldn't be finalized, since this implies that it
          * already represents a different process.  ‘P’ should be
          * finalized, since we need its initial events to calculate
-         * [P〚→〛].
+         * [P〚μ〛].
          */
 
         REQUIRE_NOT_FINALIZED(dest);
@@ -64,6 +64,7 @@ namespace hst
          * (E,P') pair from P.
          */
 
+        bool  found_a_tau = false;
         lts_t::state_pairs_iterator  sp_it;
 
         /*
@@ -84,7 +85,7 @@ namespace hst
                  * STOP.  This means we need to create a transition
                  * for
                  *
-                 *   P〚→〛 =✓=> STOP
+                 *   P〚μ〛 =✓=> STOP
                  */
 
                 _lts.add_edge(dest, E, csp.stop());
@@ -95,12 +96,14 @@ namespace hst
                  * renamed, so we don't check the eventmap at all.
                  * This means we need to create a transition for
                  *
-                 *   P〚→〛 =τ=> P'〚→〛
+                 *   P〚μ〛 =τ=> P'〚μ〛
                  */
 
                 state_t  P_prime_rename =
                     csp.add_rename(P_prime, map);
                 _lts.add_edge(dest, E, P_prime_rename);
+
+                found_a_tau = true;
             } else {
                 /*
                  * If the event is not ✓ or τ.  We can still execute
@@ -117,7 +120,7 @@ namespace hst
                      * The event needs to be renamed.  This means we
                      * need to create a transitions
                      *
-                     *   P〚→〛 =E'=> P'〚→〛 : ∀ (E,E') ∈ map
+                     *   P〚μ〛 =E'=> P'〚μ〛 : ∀ (E,E') ∈ map
                      *
                      * for every "renamed" event that the original
                      * maps to.
@@ -130,17 +133,68 @@ namespace hst
                     {
                         _lts.add_edge(dest, *i_it, P_prime_rename);
                     }
+
                 } else {
                     /*
                      * The event does not need to be renamed, so we
                      * can execute it directly.  This means we need to
                      * create a transition for
                      *
-                     *   P〚→〛 =E=> P'〚→〛
+                     *   P〚μ〛 =E=> P'〚μ〛
                      */
 
                     _lts.add_edge(dest, E, P_prime_rename);
                 }
+            }
+        }
+
+        /*
+         * If we didn't create any τ events for the renaming, then it
+         * will have the same set of acceptances as P, with events
+         * renamed according to the event map.  Otherwise, it will
+         * have no acceptances at all.
+         */
+
+        if (!found_a_tau)
+        {
+            alphabet_set_cp  P_alphas = _lts.get_acceptances(P);
+
+            for (alphabet_set_t::iterator Pa_it = P_alphas->begin();
+                 Pa_it != P_alphas->end();
+                 ++Pa_it)
+            {
+                // Create a new acceptance set
+
+                alphabet_t  acceptance;
+
+                // Loop through the events in P's acceptance set
+
+                for (alphabet_t::iterator a_it = Pa_it->begin();
+                     a_it != Pa_it->end();
+                     ++a_it)
+                {
+                    if (map.domain_contains(*a_it))
+                    {
+                        // If the current event is in the event map,
+                        // add all of the events it's mapped to to the
+                        // new acceptance.
+
+                        for (eventmap_t::image_iterator
+                                 i_it = map.image_begin(*a_it);
+                             i_it != map.image_end(*a_it); ++i_it)
+                        {
+                            acceptance += *i_it;
+                        }
+
+                    } else {
+                        // If it's not in the event map, add it to the
+                        // acceptance.
+
+                        acceptance += *a_it;
+                    }
+                }
+
+                _lts.add_acceptance(dest, acceptance);
             }
         }
 
@@ -186,7 +240,7 @@ namespace hst
             save_memoized_process(key.str(), dest);
             do_rename(*this, dest, P, map);
         } else {
-            // We've already create this process, so let's just add a
+            // We've already created this process, so let's just add a
             // single τ process to the previously calculated state.
             _lts.add_edge(dest, _tau, old_dest);
             _lts.finalize(dest);

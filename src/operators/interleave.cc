@@ -70,6 +70,7 @@ namespace hst
          * (E,P') pair from P, and each (E,Q') pair from Q.
          */
 
+        bool  found_a_tau = false;
         lts_t::state_pairs_iterator  sp_it;
 
         /*
@@ -93,6 +94,11 @@ namespace hst
             state_t  P_prime_interleave_Q =
                 csp.add_interleave(P_prime, Q);
             _lts.add_edge(dest, E, P_prime_interleave_Q);
+
+            if (E == csp.tau())
+            {
+                found_a_tau = true;
+            }
         }
 
         /*
@@ -116,6 +122,41 @@ namespace hst
             state_t  P_interleave_Q_prime =
                 csp.add_interleave(P, Q_prime);
             _lts.add_edge(dest, E, P_interleave_Q_prime);
+
+            if (E == csp.tau())
+            {
+                found_a_tau = true;
+            }
+        }
+
+        /*
+         * If there were any τ events for the interleaving, then there
+         * shouldn't be any acceptances.  Otherwise, each pair of
+         * acceptances from ‘P’ and ‘Q’ are unioned together to get
+         * the acceptances for the interleaving.
+         */
+
+        if (!found_a_tau)
+        {
+            alphabet_set_cp  P_alphas = _lts.get_acceptances(P);
+            alphabet_set_cp  Q_alphas = _lts.get_acceptances(Q);
+
+            for (alphabet_set_t::iterator Pa_it = P_alphas->begin();
+                 Pa_it != P_alphas->end();
+                 ++Pa_it)
+            {
+                for (alphabet_set_t::iterator Qa_it = Q_alphas->begin();
+                     Qa_it != Q_alphas->end();
+                     ++Qa_it)
+                {
+                    alphabet_t  acceptance;
+
+                    acceptance |= *Pa_it;
+                    acceptance |= *Qa_it;
+
+                    _lts.add_acceptance(dest, acceptance);
+                }
+            }
         }
 
         /*
@@ -168,7 +209,7 @@ namespace hst
             save_memoized_process(key.str(), dest);
             do_interleave(*this, dest, P, Q);
         } else {
-            // We've already create this process, so let's just add a
+            // We've already created this process, so let's just add a
             // single τ process to the previously calculated state.
             _lts.add_edge(dest, _tau, old_dest);
             _lts.finalize(dest);

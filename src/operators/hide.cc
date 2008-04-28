@@ -65,6 +65,7 @@ namespace hst
          * on whether the event is a ✓ or not.
          */
 
+        bool  found_a_tau = false;
         lts_t::state_pairs_iterator  sp_it;
 
         /*
@@ -102,6 +103,29 @@ namespace hst
                 state_t  P_prime_hide =
                     csp.add_hide(P_prime, alpha);
                 _lts.add_edge(dest, E, P_prime_hide);
+
+                if (E == csp.tau())
+                {
+                    found_a_tau = true;
+                }
+            }
+        }
+
+        /*
+         * If we didn't create any τ events for the hiding, then it
+         * will have the same set of acceptances as P.  Otherwise, it
+         * will have no acceptances at all.
+         */
+
+        if (!found_a_tau)
+        {
+            alphabet_set_cp  P_alphas = _lts.get_acceptances(P);
+
+            for (alphabet_set_t::iterator Pa_it = P_alphas->begin();
+                 Pa_it != P_alphas->end();
+                 ++Pa_it)
+            {
+                _lts.add_acceptance(dest, *Pa_it);
             }
         }
 
@@ -147,7 +171,7 @@ namespace hst
             save_memoized_process(key.str(), dest);
             do_hide(*this, dest, P, alpha);
         } else {
-            // We've already create this process, so let's just add a
+            // We've already created this process, so let's just add a
             // single τ process to the previously calculated state.
             _lts.add_edge(dest, _tau, old_dest);
             _lts.finalize(dest);

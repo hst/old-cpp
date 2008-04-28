@@ -61,6 +61,16 @@ namespace hst
 
         _lts.add_edge(dest, csp.tau(), P);
         _lts.add_edge(dest, csp.tau(), Q);
+
+        /*
+         * The internal choice does not have any acceptances, since it
+         * has a τ action.
+         */
+
+        /*
+         * Lastly, finalize the ‘dest’ process.
+         */
+
         _lts.finalize(dest);
     }
 
@@ -107,7 +117,7 @@ namespace hst
             save_memoized_process(key.str(), dest);
             do_intchoice(*this, dest, P, Q);
         } else {
-            // We've already create this process, so let's just add a
+            // We've already created this process, so let's just add a
             // single τ process to the previously calculated state.
             _lts.add_edge(dest, _tau, old_dest);
             _lts.finalize(dest);

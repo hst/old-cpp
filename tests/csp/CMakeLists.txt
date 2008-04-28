@@ -25,6 +25,7 @@ set(TESTS
   00-hide1
   00-hide2
   00-hide3
+  00-hide4
   00-rename1
   00-rename2
   00-rename3
