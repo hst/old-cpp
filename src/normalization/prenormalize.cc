@@ -43,8 +43,8 @@ namespace hst
         {
 #if DEBUG_PRENORMALIZE
             cerr << "Cannot prenormalize anymore!" << endl;
-            return HST_ERROR_STATE;
 #endif
+            return HST_ERROR_STATE;
         }
 
         /*
@@ -92,7 +92,7 @@ namespace hst
             if (prenormalized.contains(normalized_source))
             {
 #if DEBUG_PRENORMALIZE
-                cerr << normalized_closure
+                cerr << *source_closure
                      << " is already prenormalized." << endl;
 #endif
 
@@ -129,6 +129,10 @@ namespace hst
                  << "/" << *next_set << endl;
 #endif
 
+            /*************************************************************
+             * TRACES: always included
+             */
+
             /*
              * To create the successor edges, we first find all of the
              * non-τ targets of the source set, and place them in the
@@ -136,9 +140,8 @@ namespace hst
              */
 
             event_stateset_map_t  accumulator;
-            stateset_t::iterator  s_it;
 
-            for (s_it = next_set->begin();
+            for (stateset_t::iterator  s_it = next_set->begin();
                  s_it != next_set->end();
                  ++s_it)
             {
@@ -149,9 +152,8 @@ namespace hst
                      << state << endl;
 #endif
 
-                lts_t::state_pairs_iterator  sp_it;
-
-                for (sp_it = _source->state_pairs_begin(state);
+                for (lts_t::state_pairs_iterator
+                         sp_it = _source->state_pairs_begin(state);
                      sp_it != _source->state_pairs_end(state);
                      ++sp_it)
                 {
@@ -197,9 +199,9 @@ namespace hst
              */
 
             const event_stateset_map_t  &c_accumulator = accumulator;
-            event_stateset_map_t::events_iterator  e_it;
 
-            for (e_it = c_accumulator.events_begin();
+            for (event_stateset_map_t::events_iterator
+                     e_it = c_accumulator.events_begin();
                  e_it != c_accumulator.events_end();
                  ++e_it)
             {
@@ -260,6 +262,52 @@ namespace hst
 
                     pending += normalized_closure;
                 }
+            }
+
+            /*************************************************************
+             * FAILURES: only included in F and FD semantic models
+             */
+
+            if (_semantic_model == FAILURES ||
+                _semantic_model == FAILURES_DIVERGENCES)
+            {
+                /*
+                 * Calculate the acceptance set for the new normalized
+                 * node.  It will be the union of all of the
+                 * acceptance sets of its source nodes.
+                 */
+
+#if DEBUG_PRENORMALIZE
+                cerr << "  Creating acceptance set" << endl;
+#endif
+
+                for (stateset_t::iterator  s_it = next_set->begin();
+                     s_it != next_set->end();
+                     ++s_it)
+                {
+                    state_t  state = *s_it;
+                    alphabet_set_cp  alphas =
+                        _source->get_acceptances(state);
+
+#if DEBUG_PRENORMALIZE
+                    cerr << "    Adding " << *alphas
+                         << " from " << state << endl;
+#endif
+
+                    for (alphabet_set_t::iterator a_it = alphas->begin();
+                         a_it != alphas->end();
+                         ++a_it)
+                    {
+                        _normalized.add_acceptance(next, *a_it);
+                    }
+                }
+
+
+#if DEBUG_PRENORMALIZE
+                cerr << "  Final acceptance set: "
+                     << *_normalized.get_acceptances(next)
+                     << endl;
+#endif
             }
 
             /*

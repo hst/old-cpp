@@ -42,6 +42,13 @@ using namespace std;
 
 namespace hst
 {
+    enum semantic_model_t
+    {
+        TRACES,
+        FAILURES,
+        FAILURES_DIVERGENCES
+    };
+
     typedef unsigned long  state_t;
 
     typedef intset_t   stateset_t;

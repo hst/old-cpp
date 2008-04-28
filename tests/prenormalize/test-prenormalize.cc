@@ -31,7 +31,7 @@ using namespace hst;
 int main()
 {
     lts_t             lts;
-    normalized_lts_t  normalized(&lts, 0);
+    normalized_lts_t  normalized(&lts, 0, FAILURES_DIVERGENCES);
     state_t           source;
 
     cin >> lts;

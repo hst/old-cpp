@@ -37,7 +37,7 @@ using namespace std;
 using namespace hst;
 
 /*
- * Many of the commands can operator on an ifstream or on standard
+ * Many of the commands can operate on an ifstream or on standard
  * input.  The ifstream should be deleted after we're done, whereas
  * cin should not.  So this is a simple “destructor” object for use
  * with the shared_ptrs that doesn't actually free the object.
@@ -264,7 +264,7 @@ int do_assert(int argc, const char **argv)
 
             // Normalize the spec process.
 
-            csp.normalized_lts()->clear();
+            csp.normalized_lts()->clear(TRACES);
             csp.normalized_lts()->prenormalize(spec);
             csp.normalized_lts()->normalize();
             spec = csp.normalized_lts()->initial_normal_state(spec);

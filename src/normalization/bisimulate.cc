@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <iostream>
+#include <sstream>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_cell.h>
@@ -50,19 +51,24 @@ namespace hst
      */
 
     static
-    void initialize_equivalence(equivalences_t &equiv, const lts_t &lts)
+    void initialize_equivalence(equivalences_t &equiv, const lts_t &lts,
+                                semantic_model_t semantic_model)
     {
+        // Each state is marked to determine its initial equivalence
+        // class.  The marking depends on the semantic model used: it
+        // will always include the initials events, and might also
+        // include the acceptance sets and divergent flags.
+
 #if DEBUG_BISIMULATE
         cerr << "Initializing bisimulation relation" << endl;
 #endif
 
         // The map stores the first state that we find with a
-        // particular initials set.  Since we know that we walk
-        // through the states in order, the first one we find is the
-        // correct head of its equivalence class.
+        // particular marking.  Since we know that we walk through the
+        // states in order, the first one we find is the correct head
+        // of its equivalence class.
 
-        typedef judy_map_l<alphabet_t, state_t, intset_t_hasher>
-            map_t;
+        typedef judy_map_l<string, state_t, string_hasher>  map_t;
 
         map_t  initials_map;
 
@@ -70,22 +76,35 @@ namespace hst
 
         for (state_t state = 0; state < lts.state_count(); state++)
         {
+            ostringstream  marking;
+
 #if DEBUG_BISIMULATE
             cerr << "  Examining state " << state;
 #endif
 
-            // Get the initials alphabet for this state.
+            // Always include the initials alphabet for this state.
 
             alphabet_t alpha(lts.state_events_begin(state),
                              lts.state_events_end(state));
+            marking << "initials = " << alpha << endl;
+
+            // Include the acceptance sets in the F and FD models.
+            if (semantic_model == FAILURES ||
+                semantic_model == FAILURES_DIVERGENCES)
+            {
+                alphabet_set_cp  acceptances =
+                    lts.get_acceptances(state);
+                marking << "acceptances = " << *acceptances << endl;
+            }
 
 #if DEBUG_BISIMULATE
-            cerr << " (initials = " << alpha << ")" << endl;
+            cerr << ", marking:" << endl << "---" << endl
+                 << marking.str() << "---" << endl;
 #endif
 
             // Try to find this alphabet in the initials_map.
 
-            map_t::iterator  im_it = initials_map.find(alpha);
+            map_t::iterator  im_it = initials_map.find(marking.str());
 
             if (im_it == initials_map.end())
             {
@@ -97,7 +116,7 @@ namespace hst
 #endif
 
                 equiv.add(state, state);
-                initials_map.insert(make_pair(alpha, state));
+                initials_map.insert(make_pair(marking.str(), state));
             } else {
                 // We've seen this alphabet before.  Its entry in
                 // initials_map should be this state's head.
@@ -204,12 +223,13 @@ namespace hst
         return true;
     }
 
-    void lts_t::bisimulate(equivalences_t &equiv) const
+    void lts_t::bisimulate(equivalences_t &equiv,
+                           semantic_model_t semantic_model) const
     {
         // Initialize the equivalence classes.
 
         equivalences_t  prev_equiv;
-        initialize_equivalence(prev_equiv, *this);
+        initialize_equivalence(prev_equiv, *this, semantic_model);
 
         // Iterate through the fixed-point algorithm.
         bool changed;

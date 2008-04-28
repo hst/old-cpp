@@ -37,14 +37,50 @@
 using namespace std;
 using namespace hst;
 
-int main()
+static
+void usage()
 {
+    cerr << "Usage: test-normalize [model]" << endl
+         << "  model = T, F, or N" << endl;
+}
+
+int main(int argc, const char **argv)
+{
+    if (argc != 2)
+    {
+        usage();
+        return 1;
+    }
+
+    semantic_model_t  semantic_model;
+
+    switch (argv[1][0])
+    {
+      case 'T':
+        semantic_model = TRACES;
+        break;
+
+      case 'F':
+        semantic_model = FAILURES;
+        break;
+
+      case 'N':
+        semantic_model = FAILURES_DIVERGENCES;
+        break;
+
+      default:
+        usage();
+        return 2;
+    }
+
     csp_t  csp;
 
     read_csp0(cin, csp);
 
     if (!cin.fail())
     {
+        csp.normalized_lts()->clear(semantic_model);
+
         state_t  P;
 
         P = csp.get_process("P");

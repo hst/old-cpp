@@ -214,7 +214,8 @@ namespace hst
         void divergent_nodes
         (event_t event, stateset_t &divergent) const;
 
-        void bisimulate(equivalences_t &equiv) const;
+        void bisimulate(equivalences_t &equiv,
+                        semantic_model_t semantic_model) const;
 
         lts_t():
             num_states(0L),
@@ -427,6 +428,18 @@ namespace hst
             } else {
                 return inner_map->pairs_end();
             }
+        }
+
+        typedef acceptances_t::const_iterator  acceptances_iterator;
+
+        acceptances_iterator acceptances_begin() const
+        {
+            return acceptances.begin();
+        }
+
+        acceptances_iterator acceptances_end() const
+        {
+            return acceptances.end();
         }
     };
 

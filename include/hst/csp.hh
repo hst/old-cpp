@@ -127,7 +127,7 @@ namespace hst
         csp_t():
             _lts(),
             _next_temp_index(0L),
-            _normalized_lts(&_lts, 0L)
+            _normalized_lts(&_lts, 0L, TRACES)
         {
             define_standard_ops();
             _normalized_lts.tau(_tau);
