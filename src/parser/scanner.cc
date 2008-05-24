@@ -377,6 +377,9 @@ namespace hst_parser
             } else if (*id == "rename") {
                 delete id;
                 return token::RENAME;
+            } else if (*id == "rextchoice") {
+                delete id;
+                return token::REXTCHOICE;
             } else if (*id == "seqcomp") {
                 delete id;
                 return token::SEQCOMP;

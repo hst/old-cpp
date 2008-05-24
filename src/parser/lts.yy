@@ -121,6 +121,7 @@ using namespace hst_parser;
 %token PROCESS    410 "process"
 %token RENAME     411 "rename"
 %token SEQCOMP    412 "seqcomp"
+%token REXTCHOICE 413 "rextchoice"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"

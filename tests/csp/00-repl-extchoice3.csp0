@@ -1,0 +1,8 @@
+# Basic operator test
+# P = [] {STOP, (a -> STOP)}
+
+event a;
+process $t1;
+prefix $t1 = a -> STOP;
+process P;
+rextchoice P = [] {STOP, $t1};

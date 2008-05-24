@@ -4,6 +4,11 @@ set(TESTS
   00-extchoice2
   00-extchoice3
   00-extchoice4
+  00-repl-extchoice0
+  00-repl-extchoice1
+  00-repl-extchoice2
+  00-repl-extchoice3
+  00-repl-extchoice4
   00-intchoice1
   00-intchoice2
   00-timeout1

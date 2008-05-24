@@ -78,6 +78,7 @@ namespace hst_parser
             PROCESS    = 410,
             RENAME     = 411,
             SEQCOMP    = 412,
+            REXTCHOICE = 413,
 
             // literals
             ULONG      = 500,

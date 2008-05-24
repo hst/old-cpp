@@ -394,6 +394,10 @@ namespace hst
         void rename
         (state_t dest,
          state_t P, eventmap_t &map);
+
+        /// [□Ps]
+        state_t add_replicated_extchoice(stateset_t &Ps);
+        void replicated_extchoice(state_t dest, stateset_t &Ps);
     };
 
     typedef shared_ptr<csp_t>        csp_p;

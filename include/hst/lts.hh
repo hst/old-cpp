@@ -144,9 +144,9 @@ namespace hst
          * sets.
          */
 
-        typedef judy_map_l<state_t, intsetset_p,
-                           state_t_hasher>        acceptances_t;
-        typedef shared_ptr<acceptances_t>         acceptances_p;
+        typedef judy_map_l<state_t, alphabet_set_p,
+                           state_t_hasher>           acceptances_t;
+        typedef shared_ptr<acceptances_t>            acceptances_p;
 
         acceptances_t  acceptances;
 

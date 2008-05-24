@@ -1,0 +1,5 @@
+# Basic operator test
+# P = [] {}
+
+process P;
+rextchoice P = [] {};

@@ -85,6 +85,17 @@ An alphabet is a set of events (possibly empty), separated by commas,
 and surrounded by curly braces.  It isn't illegal for an event to
 appear in the alphabet more than once, but this has no effect.
 
+Process sets
+~~~~~~~~~~~~
+
+====
++{+ _‹P~1~›_+,+ __‹P~2~›__... +}+
+====
+
+A process set is a set of process names (possibly empty), separated by
+commas, and surrounded by curly braces.  It isn't illegal for a
+process to appear in the set more than once, but this has no effect.
+
 Event maps
 ~~~~~~~~~~
 
@@ -118,7 +129,7 @@ either be finalized or not.
 
 Creates an external choice process.  _‹P›_ presents the environment
 with the choice of acting like _‹Q›_ or _‹R›_.  _‹P›_ must not be
-finalized. _‹Q›_ and _‹R›_ must both be finalized.
+finalized.  _‹Q›_ and _‹R›_ must both be finalized.
 
 ====
 +intchoice+ _‹P›_ +=+ _‹Q›_ +|~|+ _‹R›_+;+
@@ -127,7 +138,8 @@ finalized. _‹Q›_ and _‹R›_ must both be finalized.
 Creates an internal choice process.  _‹P›_ nondeterministically
 chooses whether to behave like _‹Q›_ or _‹R›_.  At least one of the
 subprocesses will be available, but the other might be refused.  _‹P›_
-must not be finalized. _‹Q›_ and _‹R›_ can either be finalized or not.
+must not be finalized.  _‹Q›_ and _‹R›_ can either be finalized or
+not.
 
 ====
 +timeout+ _‹P›_ +=+ _‹Q›_ +[>+ _‹R›_+;+
@@ -155,7 +167,7 @@ can either be finalized or not.
 Creates an interleave process.  _‹P›_ behaves like _‹Q›_ and _‹R›_
 simultaneously.  The events of _‹Q›_ and _‹R›_ can occur in any order.
 _‹P›_ cannot terminate until both _‹Q›_ and _‹R›_ have terminated.
-_‹P›_ must not be finalized. _‹Q›_ and _‹R›_ must both be finalized.
+_‹P›_ must not be finalized.  _‹Q›_ and _‹R›_ must both be finalized.
 
 ====
 +aparallel+ _‹P›_ +=+ _‹Q›_ +[|+ _‹α›_ +|]+ _‹R›_+;+
@@ -165,7 +177,7 @@ Creates an alphabetized parallel process.  _‹P›_ behaves like _‹Q›_
 and _‹R›_ simultaneously; however, for all of the events in _‹α›_,
 _‹Q›_ and _‹R›_ must both be able to perform the event for _‹P›_ to be
 able to perform it.  _‹P›_ cannot terminate until both _‹Q›_ and _‹R›_
-have terminated.  _‹P›_ must not be finalized. _‹Q›_ and _‹R›_ must
+have terminated.  _‹P›_ must not be finalized.  _‹Q›_ and _‹R›_ must
 both be finalized.
 
 ====
@@ -177,7 +189,7 @@ _‹R›_ simultaneously; however, for all of the events in the
 intersection of _‹αQ›_ and _‹αR›_, _‹Q›_ and _‹R›_ must both be able
 to perform the event for _‹P›_ to be able to perform it.  _‹P›_ cannot
 terminate until both _‹Q›_ and _‹R›_ have terminated.  _‹P›_ must not
-be finalized. _‹Q›_ and _‹R›_ must both be finalized.
+be finalized.  _‹Q›_ and _‹R›_ must both be finalized.
 
 ====
 +hide+ _‹P›_ +=+ _‹Q›_ +\+ _‹α›_+;+
@@ -185,7 +197,7 @@ be finalized. _‹Q›_ and _‹R›_ must both be finalized.
 
 Creates a hiding process.  _‹P›_ behaves like _‹Q›_, but with all of
 the events in _‹α›_ hidden, and replaced with τs (which are invisible
-to the environment).  _‹P›_ must not be finalized. _‹Q›_ must be
+to the environment).  _‹P›_ must not be finalized.  _‹Q›_ must be
 finalized.
 
 ====
@@ -195,7 +207,16 @@ finalized.
 Creates a renaming process.  _‹P›_ behaves like _‹Q›_, but with all of
 the events renamed occording to _‹μ›_.  If one of _‹Q›_'s events
 appears in the map's domain, it is replaced with the events that it is
-mapped to.  _‹P›_ must not be finalized. _‹Q›_ must be finalized.
+mapped to.  _‹P›_ must not be finalized.  _‹Q›_ must be finalized.
+
+====
++rextchoice+ _‹P›_ +=+ +[]+ +{+ _‹φ›_ +};+
+====
+
+Creates a replicated external choice process.  _‹P›_ presents the
+environment with the choice of acting like any of the processes in
+_‹φ›_.  _‹P›_ must not be finalized.  Each process in _‹φ›_ must be
+finalized.
 
 
 References
