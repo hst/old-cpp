@@ -89,30 +89,6 @@ namespace hst
     }
 
     /**
-     * Containment of another set
-     */
-    bool intset_t::operator >= (const intset_t &other) const
-    {
-        // Loop through the elements in «other», verifying that each
-        // is also in «this».
-
-        for (intset_t::iterator it = other.begin();
-             it != other.end(); ++it)
-        {
-            // Check whether this element is also in «this».
-
-            if (!this->contains(*it))
-            {
-                // It's not, so the containment fails.
-                return false;
-            }
-        }
-
-        // No element failed the test, so the containment succeeds.
-        return true;
-    }
-
-    /**
      * Overlap with another set
      */
     bool intset_t::overlaps_with(const intset_t &other) const
