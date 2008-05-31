@@ -19,12 +19,18 @@ if(NOT XMLTO)
   message(FATAL_ERROR "Cannot find xmlto")
 endif(NOT XMLTO)
 
+message(STATUS "Looking for libjudy")
 find_package(Judy REQUIRED)
-find_package(Bison REQUIRED)
 include_directories(${JUDY_INCLUDE_DIR})
 
+message(STATUS "Looking for bison")
+find_package(Bison REQUIRED)
 set(BISON_PREFIX_OUTPUTS TRUE)
 set(BISON_GENERATE_DEFINES TRUE)
+
+message(STATUS "Looking for Boost")
+find_package(Boost)
+include_directories(${Boost_INCLUDE_DIRS})
 
 # The judyhash library is currently included directly in the source
 # tree.  That means we're responsible for installing it — plus, we

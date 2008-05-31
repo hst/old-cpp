@@ -25,9 +25,11 @@
 #define HST_LTS_HH
 
 #include <assert.h>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <tr1/memory>
+#include <boost/iterator/transform_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_cell.h>
@@ -149,33 +151,6 @@ namespace hst
         typedef shared_ptr<acceptances_t>            acceptances_p;
 
         acceptances_t  acceptances;
-
-        /*
-         * The underlying iterator returns a (state_t,
-         * graph_inner_map_p) pair, so we can get the state by taking
-         * the first element of the pair.
-         */
-
-        struct from_state_evaluator
-        {
-            state_t operator () (graph_t::const_iterator &it)
-            {
-                return it->first;
-            }
-        };
-
-        /*
-         * We only have to dereference the underlying iterator, since
-         * it already returns a state.
-         */
-
-        struct event_target_evaluator
-        {
-            state_t operator () (stateset_t::iterator &it)
-            {
-                return *it;
-            }
-        };
 
     public:
         void add_edge(const state_t from,
@@ -328,9 +303,26 @@ namespace hst
             finalized_states += state;
         }
 
-        typedef proxy_iterator<graph_t::const_iterator,
-                               state_t,
-                               from_state_evaluator>
+    protected:
+        /*
+         * The underlying iterator returns a (state_t,
+         * graph_inner_map_p) pair, so we can get the state by taking
+         * the first element of the pair.
+         */
+
+        struct from_state_evaluator:
+            public unary_function
+            <graph_t::const_iterator::const_reference, state_t>
+        {
+            result_type operator () (argument_type it) const
+            {
+                return it.first;
+            }
+        };
+
+    public:
+        typedef boost::transform_iterator
+        <from_state_evaluator, graph_t::const_iterator>
             from_state_iterator;
 
         from_state_iterator from_states_begin() const
@@ -370,10 +362,7 @@ namespace hst
             }
         }
 
-        typedef proxy_iterator<stateset_t::iterator,
-                               state_t,
-                               event_target_evaluator>
-            event_target_iterator;
+        typedef stateset_t::iterator  event_target_iterator;
 
         event_target_iterator event_targets_begin(state_t from,
                                                   event_t event) const
@@ -382,11 +371,9 @@ namespace hst
 
             if (stateset.get() == NULL)
             {
-                stateset_t::iterator  it;
-                return event_target_iterator(it);
+                return event_target_iterator();
             } else {
-                stateset_t::iterator  it = stateset->begin();
-                return event_target_iterator(it);
+                return stateset->begin();
             }
         }
 
@@ -397,11 +384,9 @@ namespace hst
 
             if (stateset.get() == NULL)
             {
-                stateset_t::iterator  it;
-                return event_target_iterator(it);
+                return event_target_iterator();
             } else {
-                stateset_t::iterator  it = stateset->end();
-                return event_target_iterator(it);
+                return stateset->end();
             }
         }
 

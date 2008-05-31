@@ -81,19 +81,6 @@ are used pretty often: +event_t+ → +stateset_t+ and +state_t+ →
 underlying type, this could be defined as a single class, but they're
 not.
 
-proxy-iterator.hh::
-
-Many of the data structure classes are defined in terms of another
-class; +intset_t+, for instance, contains an underlying +judy_map_l+
-instance.  The high-level iterators, then, are implemented in terms of
-the underlying class's iterators, and often some transformation needs
-to be done to the value before it's returned.  This pattern occurs a
-lot, so the +proxy_iterator+ template class makes it easy to define
-this — you just have to provide the underlying iterator type, and an
-evaluation function that can modify the value before it's returned.
-All of the other iterator methods are delegated directly to the
-underlying iterator.
-
 
 Labeled transition systems
 --------------------------

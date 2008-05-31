@@ -25,13 +25,14 @@
 #define HST_STATE_STATESET_MAP_HH
 
 #include <assert.h>
+#include <functional>
 #include <tr1/memory>
+#include <boost/iterator/transform_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_cell.h>
 #include <judy_map_l.h>
 
-#include <hst/proxy-iterator.hh>
 #include <hst/types.hh>
 
 using namespace std;
@@ -122,18 +123,19 @@ namespace hst
          * of the pair.
          */
 
-        struct states_evaluator
+        struct states_evaluator:
+            public unary_function
+            <map_t::const_iterator::const_reference, event_t>
         {
-            state_t operator () (map_t::const_iterator &it)
+            result_type operator () (argument_type it) const
             {
-                return it->first;
+                return it.first;
             }
         };
 
     public:
-        typedef proxy_iterator<map_t::const_iterator,
-                               state_t,
-                               states_evaluator>
+        typedef boost::transform_iterator
+        <states_evaluator, map_t::const_iterator>
             states_iterator;
 
         states_iterator states_begin() const
