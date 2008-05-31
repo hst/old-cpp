@@ -40,9 +40,9 @@ namespace hst
         state_t  impl_state;
     };
 
-    bool refines(trace_counterexample_t &counter,
-                 const normalized_lts_t spec, state_t spec_source,
-                 const lts_t impl, state_t impl_source);
+    bool trace_refines(trace_counterexample_t &counter,
+                       const normalized_lts_t &spec, state_t spec_source,
+                       const lts_t &impl, state_t impl_source);
 }
 
 #endif // HST_ASSERTIONS_H

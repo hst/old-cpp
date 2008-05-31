@@ -94,34 +94,46 @@ namespace hst
 
     };
 
-    static
-    void construct_counterexample(trace_counterexample_t &counter,
-                                  event_t event,
-                                  check_pair_cp pair)
-    {
-        trace_counterexample_t  result;
-
-        for (check_pair_cp  current = pair;
-             current->parent.get() != NULL;
-             current = current->parent)
-        {
-            result.trace.push_front(current->inbound_event);
-        }
-
-        result.event = event;
-        result.spec_state = pair->spec;
-        result.impl_state = pair->impl;
-
-        std::swap(counter,result);
-    }
+    //------------------------------------------------------------------
+    // The refinement checker is templated; it takes in a Refiner type
+    // that knows the specifics of how to check a (SPEC, IMPL) pair
+    // according to a particular semantic model, and how to construct
+    // a counterexample in case of a refinement failure.  This
+    // function contains the code that is the same regardless of
+    // semantic model; mostly this consists of doing a breadth-first
+    // search through the (SPEC, IMPL) pairs.
+    //
+    // The Counterexample type is completely opaque.  The Refiner
+    // type, on the other hand, should declare the following methods:
+    //
+    //   Refiner(const normalized_lts_t &spec_norm,
+    //           const lts_t &impl,
+    //           Counterexample &counter);
+    //
+    //     «spec_norm» and «impl» give the Refiner object access to
+    //     the LTSs of the SPEC and IMPL processes.  «counter» is
+    //     where the counterexample should be constructed if a state
+    //     pair fails the refinement.
+    //
+    //   bool check_pair(check_pair_cp pair) const;
+    //
+    //     Should verify that the (SPEC, IMPL) pair is part of a valid
+    //     refinement.  If it's not, it should construct a
+    //     counterexample into the Counterexample reference passed to
+    //     the constructor.
 
     typedef judy_set_l<check_pair_t, check_pair_t_hasher>
         check_pair_set_t;
 
-    bool refines(trace_counterexample_t &counter,
-                 const normalized_lts_t spec_norm, state_t spec_source,
-                 const lts_t impl, state_t impl_source)
+    template <typename Refiner,
+              typename Counterexample>
+    static
+    bool refines(Counterexample &counter,
+                 const normalized_lts_t &spec_norm, state_t spec_source,
+                 const lts_t &impl, state_t impl_source)
     {
+        Refiner  refiner(spec_norm, impl, counter);
+
         const lts_t  &spec = spec_norm.normalized();
 
         check_pair_set_t      seen;
@@ -154,73 +166,19 @@ namespace hst
 #endif
 
             /*
-             * TRACES: Check that impl's set of initial events is a
-             * subset of spec's (ignoring any τs in impl).
+             * Have the Refiner object check this pair and construct a
+             * counterexample if appropriate.
              */
 
+            if (!refiner.check_pair(pair))
             {
-#if DEBUG_REFINEMENT
-                {
-                    alphabet_t  spec_initials
-                        (spec.state_events_begin(pair->spec),
-                         spec.state_events_end(pair->spec));
-
-                    alphabet_t  impl_initials
-                        (impl.state_events_begin(pair->impl),
-                         impl.state_events_end(pair->impl));
-
-                    cerr << "  " << spec_initials << " ?>= "
-                         << impl_initials << endl;
-                }
-#endif
-
                 /*
-                 * We need to skip over any τ events when we look
-                 * through IMPL's initials set.
+                 * The Refiner says this pair fails the refinement.
+                 * It should have constructed a counterexample of the
+                 * appropriate type into the «counter» parameter.
                  */
 
-                skip_taus  skipper(spec_norm.tau());
-
-                typedef filter_iterator
-                    <skip_taus, lts_t::state_events_iterator>
-                    se_skip_iterator;
-
-                se_skip_iterator  impl_begin
-                    (skipper,
-                     impl.state_events_begin(pair->impl),
-                     impl.state_events_end(pair->impl));
-
-                se_skip_iterator  impl_end;
-
-                /*
-                 * See if SPEC ⊇ IMPL, skipping over any τs in IMPL.
-                 */
-
-                std::pair<bool, unsigned long>  proof =
-                    is_superset_with_proof
-                    (spec.state_events_begin(pair->spec),
-                     spec.state_events_end(pair->spec),
-                     impl_begin,
-                     impl_end);
-
-                /*
-                 * If SPEC ⊉ IMPL, then the refinement fails.
-                 */
-
-                if (!proof.first)
-                {
-#if DEBUG_REFINEMENT
-                    cerr << "  Nope!  Refinement fails." << endl;
-#endif
-
-                    /*
-                     * We can use any of the events left in the set as
-                     * the counterexample event.
-                     */
-
-                    construct_counterexample(counter, proof.second, pair);
-                    return false;
-                }
+                return false;
             }
 
             /*
@@ -270,7 +228,8 @@ namespace hst
                                                         event))
                     {
 #if DEBUG_REFINEMENT
-                        cerr << "ERROR: Spec and impl aren't consistent!"
+                        cerr << "ERROR: Spec and impl aren't consistent "
+                             << "on event " << event << "!"
                              << endl;
 #endif
                         return false;
@@ -309,6 +268,137 @@ namespace hst
          */
 
         return true;
+    }
+
+    //------------------------------------------------------------------
+    // Traces refinement
+    //
+    // For a traces refinement, each (SPEC, IMPL) pair must satisfy
+    // the following condition:
+    //
+    //   initials(SPEC) ⊇ initials(IMPL)
+    //
+    // If this doesn't hold, then the counterexample consists of the
+    // trace seen so far, along with an event that is in
+    // initials(IMPL) but not in initials(SPEC).
+
+    struct __trace_refinement
+    {
+    protected:
+        const normalized_lts_t  &spec_norm;
+        const lts_t  &spec;
+        const lts_t  &impl;
+        skip_taus  skipper;
+        trace_counterexample_t  &counter;
+
+        typedef filter_iterator
+        <skip_taus, lts_t::state_events_iterator>
+            se_skip_iterator;
+
+        void construct_counterexample(event_t event,
+                                      check_pair_cp pair) const
+        {
+            trace_counterexample_t  result;
+
+            for (check_pair_cp  current = pair;
+                 current->parent.get() != NULL;
+                 current = current->parent)
+            {
+                result.trace.push_front(current->inbound_event);
+            }
+
+            result.event = event;
+            result.spec_state = pair->spec;
+            result.impl_state = pair->impl;
+
+            std::swap(counter, result);
+        }
+
+    public:
+        __trace_refinement(const normalized_lts_t &_spec_norm,
+                           const lts_t &_impl,
+                           trace_counterexample_t &_counter):
+            spec_norm(_spec_norm),
+            spec(_spec_norm.normalized()),
+            impl(_impl),
+            skipper(_spec_norm.tau()),
+            counter(_counter)
+        {
+        }
+
+        bool check_pair(check_pair_cp pair) const
+        {
+            /*
+             * TRACES: Check that impl's set of initial events is a
+             * subset of spec's (ignoring any τs in impl).
+             */
+
+#if DEBUG_REFINEMENT
+            alphabet_t  spec_initials
+                (spec.state_events_begin(pair->spec),
+                 spec.state_events_end(pair->spec));
+
+            alphabet_t  impl_initials
+                (impl.state_events_begin(pair->impl),
+                 impl.state_events_end(pair->impl));
+
+            cerr << "  " << spec_initials << " ?>= "
+                 << impl_initials << endl;
+#endif
+
+            /*
+             * We need to skip over any τ events when we look
+             * through IMPL's initials set.
+             */
+
+            se_skip_iterator  impl_begin
+                (skipper,
+                 impl.state_events_begin(pair->impl),
+                 impl.state_events_end(pair->impl));
+
+            se_skip_iterator  impl_end;
+
+            /*
+             * See if SPEC ⊇ IMPL, skipping over any τs in IMPL.
+             */
+
+            std::pair<bool, unsigned long>  proof =
+                is_superset_with_proof
+                (spec.state_events_begin(pair->spec),
+                 spec.state_events_end(pair->spec),
+                 impl_begin,
+                 impl_end);
+
+            /*
+             * If SPEC ⊉ IMPL, then the refinement fails.
+             */
+
+            if (!proof.first)
+            {
+#if DEBUG_REFINEMENT
+                cerr << "  Nope!  Refinement fails." << endl;
+#endif
+
+                /*
+                 * We asked for proof when we checked the superset
+                 * condition; this proof can be used as the
+                 * counterexample event.
+                 */
+
+                construct_counterexample(proof.second, pair);
+                return false;
+            } else {
+                return true;
+            }
+        }
+    };
+
+    bool trace_refines(trace_counterexample_t &counter,
+                       const normalized_lts_t &spec, state_t spec_source,
+                       const lts_t &impl, state_t impl_source)
+    {
+        return refines<__trace_refinement, trace_counterexample_t>
+            (counter, spec, spec_source, impl, impl_source);
     }
 }
 

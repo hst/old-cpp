@@ -65,9 +65,9 @@ int main()
         // Check the refinement
 
         trace_counterexample_t  counter;
-        bool  result = refines(counter,
-                               *csp.normalized_lts(), SPEC,
-                               *csp.lts(), IMPL);
+        bool  result = trace_refines(counter,
+                                     *csp.normalized_lts(), SPEC,
+                                     *csp.lts(), IMPL);
 
         cout << result << endl;
         if (!result)

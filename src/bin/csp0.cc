@@ -272,9 +272,9 @@ int do_assert(int argc, const char **argv)
             // Check the refinement.
 
             trace_counterexample_t  counter;
-            bool  result = refines(counter, 
-                                   *csp.normalized_lts(), spec,
-                                   *csp.lts(), impl);
+            bool  result = trace_refines(counter,
+                                         *csp.normalized_lts(), spec,
+                                         *csp.lts(), impl);
 
             cout << spec_name << " [T= " << impl_name
                  << ": " << (result? "true": "false")
