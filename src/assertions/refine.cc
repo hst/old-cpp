@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <deque>
 #include <iostream>
+#include <boost/iterator/filter_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_l.h>
@@ -37,6 +38,7 @@
 #include <hst/assertions.hh>
 
 using namespace std;
+using namespace boost;
 
 #ifndef DEBUG_REFINEMENT
 #define DEBUG_REFINEMENT 0
@@ -157,41 +159,66 @@ namespace hst
              */
 
             {
-                alphabet_t  spec_initials
-                    (spec.state_events_begin(pair->spec),
-                     spec.state_events_end(pair->spec));
-
-                alphabet_t  impl_initials
-                    (impl.state_events_begin(pair->impl),
-                     impl.state_events_end(pair->impl));
-
-                impl_initials -= spec_norm.tau();
-
 #if DEBUG_REFINEMENT
-                cerr << "  " << spec_initials << " ?>= "
-                     << impl_initials << endl;
+                {
+                    alphabet_t  spec_initials
+                        (spec.state_events_begin(pair->spec),
+                         spec.state_events_end(pair->spec));
+
+                    alphabet_t  impl_initials
+                        (impl.state_events_begin(pair->impl),
+                         impl.state_events_end(pair->impl));
+
+                    cerr << "  " << spec_initials << " ?>= "
+                         << impl_initials << endl;
+                }
 #endif
 
                 /*
-                 * Remove all of the events that both IMPL and SPEC
-                 * can do.  If any are left over, the refinement
-                 * fails.
+                 * We need to skip over any τ events when we look
+                 * through IMPL's initials set.
                  */
 
-                impl_initials -= spec_initials;
+                skip_taus  skipper(spec_norm.tau());
 
-                if (impl_initials.size() > 0)
+                typedef filter_iterator
+                    <skip_taus, lts_t::state_events_iterator>
+                    se_skip_iterator;
+
+                se_skip_iterator  impl_begin
+                    (skipper,
+                     impl.state_events_begin(pair->impl),
+                     impl.state_events_end(pair->impl));
+
+                se_skip_iterator  impl_end;
+
+                /*
+                 * See if SPEC ⊇ IMPL, skipping over any τs in IMPL.
+                 */
+
+                std::pair<bool, unsigned long>  proof =
+                    is_superset_with_proof
+                    (spec.state_events_begin(pair->spec),
+                     spec.state_events_end(pair->spec),
+                     impl_begin,
+                     impl_end);
+
+                /*
+                 * If SPEC ⊉ IMPL, then the refinement fails.
+                 */
+
+                if (!proof.first)
                 {
 #if DEBUG_REFINEMENT
                     cerr << "  Nope!  Refinement fails." << endl;
 #endif
+
                     /*
                      * We can use any of the events left in the set as
                      * the counterexample event.
                      */
 
-                    event_t  event = *(impl_initials.begin());
-                    construct_counterexample(counter, event, pair);
+                    construct_counterexample(counter, proof.second, pair);
                     return false;
                 }
             }

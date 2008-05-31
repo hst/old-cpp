@@ -25,6 +25,7 @@
 #define HST_TYPES_HH
 
 #include <deque>
+#include <functional>
 #include <tr1/memory>
 
 #include <hst/intset.hh>
@@ -78,6 +79,33 @@ namespace hst
         unsigned long operator () (const event_t event) const
         {
             return event;
+        }
+    };
+
+    /**
+     * A filter functor that can be used with Boost's filter_transform
+     * to skip over τ events.
+     */
+
+    struct skip_taus:
+        public unary_function<event_t, bool>
+    {
+    protected:
+        event_t  tau;
+
+    public:
+        skip_taus()
+        {
+        }
+
+        skip_taus(event_t _tau):
+            tau(_tau)
+        {
+        }
+
+        result_type operator () (argument_type event)
+        {
+            return (event != tau);
         }
     };
 
