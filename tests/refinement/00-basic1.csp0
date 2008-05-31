@@ -2,6 +2,7 @@
 # Q = a -> Q
 #
 # assert P [T= Q
+# assert P [F= Q
 
 event a;
 event b;

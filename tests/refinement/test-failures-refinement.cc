@@ -39,7 +39,7 @@ int main()
 
     if (!cin.fail())
     {
-        csp.normalized_lts()->clear(TRACES);
+        csp.normalized_lts()->clear(FAILURES);
 
         state_t  SPEC;
 
@@ -66,10 +66,10 @@ int main()
 
         // Check the refinement
 
-        trace_counterexample_t  counter;
-        bool  result = trace_refines(counter,
-                                     *csp.normalized_lts(), SPEC,
-                                     *csp.lts(), IMPL);
+        failures_counterexample_t  counter;
+        bool  result = failures_refines(counter,
+                                        *csp.normalized_lts(), SPEC,
+                                        *csp.lts(), IMPL);
 
         cout << result << endl;
         if (!result)
@@ -96,9 +96,22 @@ int main()
                 }
             }
 
-            cout << ">: "
-                 << csp.lts()->get_event_name(counter.event)
-                 << endl;
+            cout << ">: {";
+
+            first = true;
+            for (alphabet_t::iterator a_it = counter.acceptance.begin();
+                 a_it != counter.acceptance.end();
+                 ++a_it)
+            {
+                if (first)
+                    first = false;
+                else
+                    cout << ",";
+
+                cout << csp.lts()->get_event_name(*a_it);
+            }
+
+            cout << "}" << endl;
         }
     }
 }

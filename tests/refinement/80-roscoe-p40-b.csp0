@@ -2,6 +2,7 @@
 # P2 = up -> down -> up -> down -> P2
 #
 # assert P2 [T= P1
+# assert P2 [F= P1
 
 event up;
 event down;

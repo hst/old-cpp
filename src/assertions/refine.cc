@@ -328,11 +328,6 @@ namespace hst
 
         bool check_pair(check_pair_cp pair) const
         {
-            /*
-             * TRACES: Check that impl's set of initial events is a
-             * subset of spec's (ignoring any τs in impl).
-             */
-
 #if DEBUG_REFINEMENT
             alphabet_t  spec_initials
                 (spec.state_events_begin(pair->spec),
@@ -398,6 +393,142 @@ namespace hst
                        const lts_t &impl, state_t impl_source)
     {
         return refines<__trace_refinement, trace_counterexample_t>
+            (counter, spec, spec_source, impl, impl_source);
+    }
+
+
+    //------------------------------------------------------------------
+    // Failures refinement
+    //
+    // For a failures refinement, each (SPEC, IMPL) pair must satisfy
+    // the following condition:
+    //
+    //   ∀ α: accs(IMPL) • ∃ β: accs(SPEC) • α ⊇ β
+    //
+    // If this doesn't hold, then the counterexample consists of the
+    // trace seen so far, along with an alphabet α which failed the
+    // existential quantification.
+
+    struct __failures_refinement
+    {
+    protected:
+        const normalized_lts_t  &spec_norm;
+        const lts_t  &spec;
+        const lts_t  &impl;
+        failures_counterexample_t  &counter;
+
+        void construct_counterexample(alphabet_t &acceptance,
+                                      check_pair_cp pair) const
+        {
+            failures_counterexample_t  result;
+
+            for (check_pair_cp  current = pair;
+                 current->parent.get() != NULL;
+                 current = current->parent)
+            {
+                result.trace.push_front(current->inbound_event);
+            }
+
+            result.acceptance = acceptance;
+            result.spec_state = pair->spec;
+            result.impl_state = pair->impl;
+
+            std::swap(counter, result);
+        }
+
+    public:
+        __failures_refinement(const normalized_lts_t &_spec_norm,
+                              const lts_t &_impl,
+                              failures_counterexample_t &_counter):
+            spec_norm(_spec_norm),
+            spec(_spec_norm.normalized()),
+            impl(_impl),
+            counter(_counter)
+        {
+        }
+
+        bool check_pair(check_pair_cp pair) const
+        {
+            alphabet_set_cp  spec_accs =
+                spec.get_acceptances(pair->spec);
+
+            alphabet_set_cp  impl_accs =
+                impl.get_acceptances(pair->impl);
+
+#if DEBUG_REFINEMENT
+            cerr << "  Spec: " << *spec_accs << endl
+                 << "  Impl: " << *impl_accs << endl;
+#endif
+
+            for (alphabet_set_t::iterator ia_it = impl_accs->begin();
+                 ia_it != impl_accs->end();
+                 ++ia_it)
+            {
+#if DEBUG_REFINEMENT
+                cerr << "    Checking " << *ia_it << endl;
+#endif
+
+                /*
+                 * Verify that there is some SPEC acceptance that this
+                 * IMPL acceptance is a superset of.
+                 */
+
+                bool found_one = false;
+
+                for (alphabet_set_t::iterator sa_it = spec_accs->begin();
+                     sa_it != spec_accs->end();
+                     ++sa_it)
+                {
+#if DEBUG_REFINEMENT
+                    cerr << "      " << *ia_it << " ?>= "
+                         << *sa_it << endl;
+#endif
+
+                    if (is_superset(ia_it->begin(), ia_it->end(),
+                                    sa_it->begin(), sa_it->end()))
+                    {
+                        /*
+                         * Excellent, this SPEC acceptance is a subset
+                         * of the IMPL acceptance.  We can move on to
+                         * the next IMPL acceptance.
+                         */
+
+                        found_one = true;
+                        break;
+                    }
+                }
+
+                /*
+                 * If we didn't find any SPEC acceptances that were a
+                 * subset of this IMPL acceptance, so this IMPL
+                 * acceptance fails the refinement.
+                 */
+
+                if (!found_one)
+                {
+#if DEBUG_REFINEMENT
+                        cerr << "      Nope!  Refinement fails." << endl;
+#endif
+
+                    construct_counterexample(*ia_it, pair);
+                    return false;
+                }
+            }
+
+            /*
+             * All of the IMPL acceptances passed, so this pair is
+             * okay.
+             */
+
+            return true;
+        }
+    };
+
+    bool failures_refines(failures_counterexample_t &counter,
+                          const normalized_lts_t &spec, state_t spec_source,
+                          const lts_t &impl, state_t impl_source)
+    {
+        return refines<__failures_refinement, failures_counterexample_t>
             (counter, spec, spec_source, impl, impl_source);
     }
 }

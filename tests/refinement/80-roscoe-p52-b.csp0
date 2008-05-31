@@ -2,6 +2,7 @@
 # Q = (a -> STOP) [] (c -> a -> STOP)
 #
 # assert (a -> STOP) [T= (P || Q)
+# assert (a -> STOP) [F= (P || Q)
 
 event a;
 event b;

@@ -40,9 +40,21 @@ namespace hst
         state_t  impl_state;
     };
 
+    struct failures_counterexample_t
+    {
+        trace_t     trace;
+        alphabet_t  acceptance;
+        state_t     spec_state;
+        state_t     impl_state;
+    };
+
     bool trace_refines(trace_counterexample_t &counter,
                        const normalized_lts_t &spec, state_t spec_source,
                        const lts_t &impl, state_t impl_source);
+
+    bool failures_refines(failures_counterexample_t &counter,
+                          const normalized_lts_t &spec, state_t spec_source,
+                          const lts_t &impl, state_t impl_source);
 }
 
 #endif // HST_ASSERTIONS_H
