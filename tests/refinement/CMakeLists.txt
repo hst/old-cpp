@@ -9,6 +9,7 @@ set(TESTS
   80-roscoe-p40-b
   80-roscoe-p52-a
   80-roscoe-p52-b
+  bugs-9-superset
 )
 
 # Copy the test data from the source directory to the build directory.

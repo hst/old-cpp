@@ -1,0 +1,11 @@
+event a; event b; event c;
+process P;
+process Pa; prefix Pa = a -> P;
+process Pc; prefix Pc = c -> P;
+extchoice P = Pa [] Pc;
+process Q;
+process Qa; prefix Qa = a -> Q;
+process Qb; prefix Qb = b -> Q;
+extchoice Q = Qa [] Qb;
+alias SPEC = P;
+alias IMPL = Q;

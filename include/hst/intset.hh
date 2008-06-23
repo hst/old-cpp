@@ -69,7 +69,7 @@ namespace hst
                 // *it2 in set1.  This means that *it2 cannot be in
                 // set1, violating the superset constraint.
 
-                return make_pair(false, *it1);
+                return make_pair(false, *it2);
             } else if (*it1 < *it2) {
                 // We've advanced it2 further than it1 without seeing
                 // *it1 in set2.  This means the *it1 cannot be in
