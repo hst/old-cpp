@@ -116,8 +116,8 @@ namespace hst
          * Then print the normalized LTS's edges.
          */
 
-        stream << "  edges " << normalized._normalized
-               << endl << "}" << endl;
+        stream << normalized._normalized
+               << "}" << endl;
 
         return stream;
     }

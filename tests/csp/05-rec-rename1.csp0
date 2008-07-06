@@ -1,3 +1,8 @@
+# Recursion test
+#
+# t1 = a -> b -> t1
+# P  = t1[[ a->c, a->d ]]
+
 event a;
 event b;
 event c;

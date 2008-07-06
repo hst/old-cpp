@@ -25,9 +25,11 @@
 #define HST_LTS_HH
 
 #include <assert.h>
+#include <functional>
 #include <iostream>
 #include <string>
 #include <tr1/memory>
+#include <boost/iterator/transform_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_cell.h>
@@ -140,31 +142,15 @@ namespace hst
         stateset_cp graph_deref2(state_t state, event_t event) const;
 
         /*
-         * The underlying iterator returns a (state_t,
-         * graph_inner_map_p) pair, so we can get the state by taking
-         * the first element of the pair.
+         * The refusals of an LTS are stored as minimal acceptance
+         * sets.
          */
 
-        struct from_state_evaluator
-        {
-            state_t operator () (graph_t::const_iterator &it)
-            {
-                return it->first;
-            }
-        };
+        typedef judy_map_l<state_t, alphabet_set_p,
+                           state_t_hasher>           acceptances_t;
+        typedef shared_ptr<acceptances_t>            acceptances_p;
 
-        /*
-         * We only have to dereference the underlying iterator, since
-         * it already returns a state.
-         */
-
-        struct event_target_evaluator
-        {
-            state_t operator () (stateset_t::iterator &it)
-            {
-                return *it;
-            }
-        };
+        acceptances_t  acceptances;
 
     public:
         void add_edge(const state_t from,
@@ -176,6 +162,26 @@ namespace hst
             add_edge(edge.from, edge.event, edge.to);
         }
 
+        void add_acceptance(const state_t state,
+                            const alphabet_t &alphabet);
+
+        alphabet_set_cp get_acceptances(const state_t state) const
+        {
+            acceptances_t::const_iterator  it =
+                acceptances.find(state);
+
+            if (it == acceptances.end())
+            {
+                // There aren't any acceptances for this state yet, so
+                // return an empty (but not NULL) alphabet set.
+
+                alphabet_set_cp  alphabet_set(new alphabet_set_t);
+                return alphabet_set;
+            } else {
+                return it->second;
+            }
+        }
+
         void closure
         (event_t event, stateset_t &closure,
          const stateset_t &initial) const;
@@ -183,7 +189,8 @@ namespace hst
         void divergent_nodes
         (event_t event, stateset_t &divergent) const;
 
-        void bisimulate(equivalences_t &equiv) const;
+        void bisimulate(equivalences_t &equiv,
+                        semantic_model_t semantic_model) const;
 
         lts_t():
             num_states(0L),
@@ -197,7 +204,8 @@ namespace hst
             num_events(other.num_events),
             event_names(other.event_names),
             finalized_states(other.finalized_states),
-            graph(other.graph)
+            graph(other.graph),
+            acceptances(other.acceptances)
         {
         }
 
@@ -209,6 +217,7 @@ namespace hst
             event_names.clear();
             finalized_states.clear();
             graph.clear();
+            acceptances.clear();
         }
 
         void swap(lts_t &other)
@@ -219,6 +228,7 @@ namespace hst
             event_names.swap(other.event_names);
             finalized_states.swap(other.finalized_states);            
             graph.swap(other.graph);
+            acceptances.swap(other.acceptances);
         }
 
         lts_t &operator = (const lts_t &other)
@@ -293,9 +303,26 @@ namespace hst
             finalized_states += state;
         }
 
-        typedef proxy_iterator<graph_t::const_iterator,
-                               state_t,
-                               from_state_evaluator>
+    protected:
+        /*
+         * The underlying iterator returns a (state_t,
+         * graph_inner_map_p) pair, so we can get the state by taking
+         * the first element of the pair.
+         */
+
+        struct from_state_evaluator:
+            public unary_function
+            <graph_t::const_iterator::const_reference, state_t>
+        {
+            result_type operator () (argument_type it) const
+            {
+                return it.first;
+            }
+        };
+
+    public:
+        typedef boost::transform_iterator
+        <from_state_evaluator, graph_t::const_iterator>
             from_state_iterator;
 
         from_state_iterator from_states_begin() const
@@ -335,10 +362,7 @@ namespace hst
             }
         }
 
-        typedef proxy_iterator<stateset_t::iterator,
-                               state_t,
-                               event_target_evaluator>
-            event_target_iterator;
+        typedef stateset_t::iterator  event_target_iterator;
 
         event_target_iterator event_targets_begin(state_t from,
                                                   event_t event) const
@@ -347,11 +371,9 @@ namespace hst
 
             if (stateset.get() == NULL)
             {
-                stateset_t::iterator  it;
-                return event_target_iterator(it);
+                return event_target_iterator();
             } else {
-                stateset_t::iterator  it = stateset->begin();
-                return event_target_iterator(it);
+                return stateset->begin();
             }
         }
 
@@ -362,11 +384,9 @@ namespace hst
 
             if (stateset.get() == NULL)
             {
-                stateset_t::iterator  it;
-                return event_target_iterator(it);
+                return event_target_iterator();
             } else {
-                stateset_t::iterator  it = stateset->end();
-                return event_target_iterator(it);
+                return stateset->end();
             }
         }
 
@@ -393,6 +413,18 @@ namespace hst
             } else {
                 return inner_map->pairs_end();
             }
+        }
+
+        typedef acceptances_t::const_iterator  acceptances_iterator;
+
+        acceptances_iterator acceptances_begin() const
+        {
+            return acceptances.begin();
+        }
+
+        acceptances_iterator acceptances_end() const
+        {
+            return acceptances.end();
         }
     };
 

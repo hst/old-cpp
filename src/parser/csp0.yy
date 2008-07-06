@@ -72,6 +72,7 @@ using namespace hst_parser;
     string         *str_val;
     bool           dummy;
     alphabet_t     *alpha_val;
+    stateset_t     *stateset_val;
     eventmap_t     *map_val;
 }
 
@@ -106,6 +107,7 @@ using namespace hst_parser;
 %token BACKSLASH  317 "\\"
 %token LMAP       318 "[["
 %token RMAP       319 "]]"
+%token RTRIANGLE  320 "[>"
 
 /* keywords */
 %token ALIAS      400 "alias"
@@ -115,12 +117,13 @@ using namespace hst_parser;
 %token HIDE       404 "hide"
 %token INTCHOICE  405 "intchoice"
 %token INTERLEAVE 406 "interleave"
-%token INTERRUPT  407 "interrupt"
+%token TIMEOUT    407 "timeout"
 %token IPARALLEL  408 "iparallel"
 %token PREFIX     409 "prefix"
 %token PROCESS    410 "process"
 %token RENAME     411 "rename"
 %token SEQCOMP    412 "seqcomp"
+%token REXTCHOICE 413 "rextchoice"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"
@@ -141,15 +144,20 @@ using namespace hst_parser;
 %printer { debug_stream() << *$$; }  alphabet event_list
 %destructor { delete $$; }  alphabet event_list
 
+%type  <stateset_val>  stateset state_list
+%printer { debug_stream() << *$$; }  stateset state_list
+%destructor { delete $$; }  stateset state_list
+
 %type  <map_val>  map pair_list
 %printer { debug_stream() << *$$; }  map pair_list
 %destructor { delete $$; }  map pair_list
 
 %type  <dummy>       csp stmt
 %type  <dummy>       process_def event_def prefix_stmt extchoice_stmt
-%type  <dummy>       intchoice_stmt interrupt_stmt seqcomp_stmt
+%type  <dummy>       intchoice_stmt timeout_stmt seqcomp_stmt
 %type  <dummy>       interleave_stmt iparallel_stmt aparallel_stmt
 %type  <dummy>       hide_stmt rename_stmt alias_stmt
+%type  <dummy>       rextchoice_stmt
 
 %{ /*** C/C++ Declarations in code file ***/
 #include <hst/parser/scanner.hh>
@@ -193,7 +201,7 @@ stmt
     { $$ = $1; }
     | intchoice_stmt
     { $$ = $1; }
-    | interrupt_stmt
+    | timeout_stmt
     { $$ = $1; }
     | seqcomp_stmt
     { $$ = $1; }
@@ -206,6 +214,8 @@ stmt
     | hide_stmt
     { $$ = $1; }
     | rename_stmt
+    { $$ = $1; }
+    | rextchoice_stmt
     { $$ = $1; }
     ;
 
@@ -295,6 +305,26 @@ event_list
     }
     ;
 
+stateset
+    : LBRACE RBRACE
+    { $$ = new stateset_t(); }
+    | LBRACE state_list RBRACE
+    { $$ = $2; }
+    ;
+
+state_list
+    : process_id
+    {
+        $$ = new stateset_t();
+        *$$ += $1;
+    }
+    | state_list COMMA process_id
+    {
+        $$ = $1;
+        *$$ += $3;
+    }
+    ;
+
 map
     : LMAP RMAP
     { $$ = new eventmap_t(); }
@@ -366,11 +396,11 @@ intchoice_stmt
     }
     ;
 
-interrupt_stmt
-    : INTERRUPT process_id EQUALS
-      process_id TRIANGLE process_id SEMI
+timeout_stmt
+    : TIMEOUT process_id EQUALS
+      process_id RTRIANGLE process_id SEMI
     {
-        _result.interrupt($2, $4, $6);
+        _result.timeout($2, $4, $6);
     }
     ;
 
@@ -424,6 +454,15 @@ rename_stmt
       process_id map SEMI
     {
         _result.rename($2, $4, *$5);
+        delete $5;
+    }
+    ;
+
+rextchoice_stmt
+    : REXTCHOICE process_id EQUALS
+      BOX stateset SEMI
+    {
+        _result.replicated_extchoice($2, *$5);
         delete $5;
     }
     ;

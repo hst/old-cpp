@@ -1,3 +1,9 @@
+# P = (a -> P) |~| (b -> P)
+# Q = a -> b -> Q
+#
+# assert not Q [T= P
+# assert not Q [F= P
+
 event a;
 event b;
 

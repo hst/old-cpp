@@ -24,9 +24,12 @@
 #ifndef HST_TYPES_HH
 #define HST_TYPES_HH
 
+#include <deque>
+#include <functional>
 #include <tr1/memory>
 
 #include <hst/intset.hh>
+#include <hst/intsetset.hh>
 
 /*
  * We will treat -1 (0xFFFFFFFF) as an error code, and will never
@@ -40,6 +43,13 @@ using namespace std;
 
 namespace hst
 {
+    enum semantic_model_t
+    {
+        TRACES,
+        FAILURES,
+        FAILURES_DIVERGENCES
+    };
+
     typedef unsigned long  state_t;
 
     typedef intset_t   stateset_t;
@@ -60,6 +70,10 @@ namespace hst
     typedef intset_p   alphabet_p;
     typedef intset_cp  alphabet_cp;
 
+    typedef intsetset_t   alphabet_set_t;
+    typedef intsetset_p   alphabet_set_p;
+    typedef intsetset_cp  alphabet_set_cp;
+
     struct event_t_hasher
     {
         unsigned long operator () (const event_t event) const
@@ -67,6 +81,37 @@ namespace hst
             return event;
         }
     };
+
+    /**
+     * A filter functor that can be used with Boost's filter_transform
+     * to skip over τ events.
+     */
+
+    struct skip_taus:
+        public unary_function<event_t, bool>
+    {
+    protected:
+        event_t  tau;
+
+    public:
+        skip_taus()
+        {
+        }
+
+        skip_taus(event_t _tau):
+            tau(_tau)
+        {
+        }
+
+        result_type operator () (argument_type event)
+        {
+            return (event != tau);
+        }
+    };
+
+    typedef deque<event_t>             trace_t;
+    typedef shared_ptr<trace_t>        trace_p;
+    typedef shared_ptr<const trace_t>  trace_cp;
 
     typedef pair<state_t, state_t>           state_state_t;
     typedef shared_ptr<state_state_t>        state_state_p;

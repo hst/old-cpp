@@ -67,6 +67,12 @@ namespace hst
         } _stage;
 
         /**
+         * The semantic model used for this normalized LTS.
+         */
+
+        semantic_model_t  _semantic_model;
+
+        /**
          * The source LTS that this is a normalization of.
          */
 
@@ -133,8 +139,10 @@ namespace hst
         ostream &operator <<
         (ostream &stream, const normalized_lts_t &normalized);
 
-        normalized_lts_t(lts_t *__source, event_t __tau):
+        normalized_lts_t(lts_t *__source, event_t __tau,
+                         semantic_model_t __semantic_model):
             _stage(PRENORMALIZING),
+            _semantic_model(__semantic_model),
             _source(__source),
             _tau(__tau),
             _normalized(),
@@ -147,6 +155,7 @@ namespace hst
 
         normalized_lts_t(const normalized_lts_t &other):
             _stage(other._stage),
+            _semantic_model(other._semantic_model),
             _source(other._source),
             _tau(other._tau),
             _normalized(other._normalized),
@@ -157,9 +166,10 @@ namespace hst
         {
         }
 
-        void clear()
+        void clear(semantic_model_t __semantic_model)
         {
             _stage = PRENORMALIZING;
+            _semantic_model = __semantic_model;
             _normalized.clear();
             states.clear();
             sets.clear();
@@ -167,9 +177,15 @@ namespace hst
             prenormalized.clear();
         }
 
+        void clear()
+        {
+            clear(_semantic_model);
+        }
+
         void swap(normalized_lts_t &other)
         {
             std::swap(_stage, other._stage);
+            std::swap(_semantic_model, other._semantic_model);
             std::swap(_source, other._source);
             std::swap(_tau, other._tau);
             _normalized.swap(other._normalized);
@@ -219,6 +235,11 @@ namespace hst
         void tau(event_t __tau)
         {
             _tau = __tau;
+        }
+
+        semantic_model_t semantic_model() const
+        {
+            return _semantic_model;
         }
 
         state_t initial_normal_state(state_t initial_source)

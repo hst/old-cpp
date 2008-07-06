@@ -1,3 +1,7 @@
+# Basic operator test
+# P' = a -> b -> STOP
+# P  = P' ||| P'
+
 event a;
 event b;
 process $t1;

@@ -5,7 +5,8 @@ set(TESTS
 # Copy the test data from the source directory to the build directory.
 
 foreach(_test ${TESTS})
-  foreach(_ext input output diff-input int-input overlap-input union-input)
+  foreach(_ext input output diff-input int-input overlap-input
+          union-input superset-input)
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/${_test}.${_ext}
       ${CMAKE_CURRENT_BINARY_DIR}/${_test}.${_ext}
@@ -58,5 +59,14 @@ foreach(_test ${TESTS})
   add_test(
     intset:union:${_test}
     bash -c "./test-union < ${_test}.union-input"
+  )
+endforeach(_test)
+
+add_executable(test-superset test-superset.cc)
+target_link_libraries(test-superset hst)
+foreach(_test ${TESTS})
+  add_test(
+    intset:superset:${_test}
+    bash -c "./test-superset < ${_test}.superset-input"
   )
 endforeach(_test)

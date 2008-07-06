@@ -36,143 +36,25 @@ using namespace std;
 
 namespace hst
 {
-    static
-    void do_interleave(csp_t &csp, state_t dest, state_t P, state_t Q)
-    {
-        lts_t  &_lts = *csp.lts();
-
-#if HST_CSP_DEBUG
-        cerr << "Interleave " << dest
-             << " = " << P << " ||| " << Q << endl;
-#endif
-
-        /*
-         * ‘dest’ shouldn't be finalized, since this implies that it
-         * already represents a different process.  ‘P’ and ‘Q’ should
-         * be finalized, since we need their initial events to
-         * calculate [P ||| Q].
-         */
-
-        REQUIRE_NOT_FINALIZED(dest);
-        REQUIRE_FINALIZED(P);
-        REQUIRE_FINALIZED(Q);
-
-        /*
-         * All of the firing rules are of the form
-         *
-         *   P =E=> P' ⇒ something
-         *
-         * or
-         *
-         *   Q =E=> Q' ⇒ something
-         *
-         * We add the appropriate transitions by walking through each
-         * (E,P') pair from P, and each (E,Q') pair from Q.
-         */
-
-        lts_t::state_pairs_iterator  sp_it;
-
-        /*
-         * First walk through P's outgoing edges.
-         */
-
-        for (sp_it = _lts.state_pairs_begin(P);
-             sp_it != _lts.state_pairs_end(P); ++sp_it)
-        {
-            event_t  E       = sp_it->first;
-            state_t  P_prime = sp_it->second;
-
-            /*
-             * P ||| Q can always perform any action of P, after which
-             * it behaves like P' ||| Q.  This means we need to create
-             * a transition for
-             *
-             *   P ||| Q =event=> P' ||| Q
-             */
-
-            state_t  P_prime_interleave_Q =
-                csp.add_interleave(P_prime, Q);
-            _lts.add_edge(dest, E, P_prime_interleave_Q);
-        }
-
-        /*
-         * Now repeat the same process for Q's outgoing edges.
-         */
-
-        for (sp_it = _lts.state_pairs_begin(Q);
-             sp_it != _lts.state_pairs_end(Q); ++sp_it)
-        {
-            event_t  E       = sp_it->first;
-            state_t  Q_prime = sp_it->second;
-
-            /*
-             * P ||| Q can always perform any action of Q, after which
-             * it behaves like P ||| Q'.  This means we need to create
-             * a transition for
-             *
-             *   P ||| Q =event=> P ||| Q'
-             */
-
-            state_t  P_interleave_Q_prime =
-                csp.add_interleave(P, Q_prime);
-            _lts.add_edge(dest, E, P_interleave_Q_prime);
-        }
-
-        /*
-         * Lastly, finalize the ‘dest’ process.
-         */
-
-        _lts.finalize(dest);
-    }
+    /*
+     * We can implement interleaving in terms of interface parallel —
+     * just use an empty synchronization alphabet.
+     */
 
     state_t csp_t::add_interleave(state_t P, state_t Q)
     {
-        ostringstream  key;
-        state_t        dest;
-
-        // Interleaving is commutative, so always memoize with the
-        // lower-numbered process first.
-        if (Q < P) std::swap(P,Q);
-
-        // Create the memoization key.
-        key << P << "|||" << Q;
-
-        dest = lookup_memoized_process(key.str());
-        if (dest == HST_ERROR_STATE)
-        {
-            // We haven't created this process yet, so do so.
-            dest = add_temp_process();
-            save_memoized_process(key.str(), dest);
-            do_interleave(*this, dest, P, Q);
-        }
-
-        return dest;
+        alphabet_t  alpha;
+        return add_interface_parallel(P, alpha, Q);
     }
 
     void csp_t::interleave(state_t dest, state_t P, state_t Q)
     {
-        ostringstream  key;
-        state_t        old_dest;
+#if HST_CSP_DEBUG
+        cerr << "Interleaving:" << endl;
+#endif
 
-        // Interleaving is commutative, so always memoize with the
-        // lower-numbered process first.
-        if (Q < P) std::swap(P,Q);
-
-        // Create the memoization key.
-        key << P << "|||" << Q;
-
-        old_dest = lookup_memoized_process(key.str());
-        if (old_dest == HST_ERROR_STATE)
-        {
-            // We haven't created this process yet, so do so.
-            save_memoized_process(key.str(), dest);
-            do_interleave(*this, dest, P, Q);
-        } else {
-            // We've already create this process, so let's just add a
-            // single τ process to the previously calculated state.
-            _lts.add_edge(dest, _tau, old_dest);
-            _lts.finalize(dest);
-        }
+        alphabet_t  alpha;
+        interface_parallel(dest, P, alpha, Q);
     }
 }
 

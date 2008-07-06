@@ -41,7 +41,7 @@ int main()
     cin >> lts;
     while (!cin.fail())
     {
-        cout << lts << endl;
+        cout << lts;
         cin >> lts;
     }
 }

@@ -4,7 +4,6 @@ set(HST_INCLUDE_FILES
   intsetset.hh
   types.hh
   eventmap.hh
-  proxy-iterator.hh
   event-stateset-map.hh
   state-stateset-map.hh
   equivalence.hh

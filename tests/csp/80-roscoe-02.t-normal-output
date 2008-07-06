@@ -1,0 +1,7 @@
+{
+  mapping {
+    0={0,2,3,4}
+  }
+edges {0--2-->0}
+acceptances {0:{}}
+}

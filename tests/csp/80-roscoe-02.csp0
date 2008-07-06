@@ -1,3 +1,14 @@
+# From [Roscoe94], page 6
+#
+# Q0 = (a -> STOP) [] (a -> Q1)
+# Q1 = (a -> STOP) [] (a -> Q2)
+# Q2 = (a -> Q0)   [] (a -> Q1)
+#
+# [Roscoe94] A. W. Roscoe.  "Model-checking CSP".  In A. W. Roscoe,
+#   editor, /A classical mind: Essays in honour of C. A. R. Hoare/,
+#   pages 353–378.  Prentice-Hall, 1994.
+
+
 event a;
 
 process Q0;

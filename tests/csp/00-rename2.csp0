@@ -1,3 +1,8 @@
+# Basic operator test
+# P'' = c -> STOP
+# P'  = (a -> P'') [] (b -> P'')
+# P   = P'[[ a->d, b->d ]]
+
 event a;
 event b;
 event c;

@@ -25,15 +25,16 @@
 #define HST_EQUIVALENCE_HH
 
 #include <assert.h>
+#include <functional>
 #include <iostream>
 #include <tr1/memory>
+#include <boost/iterator/transform_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_cell.h>
 #include <judy_map_l.h>
 
 #include <hst/types.hh>
-#include <hst/proxy-iterator.hh>
 #include <hst/state-stateset-map.hh>
 
 namespace hst
@@ -147,17 +148,19 @@ namespace hst
          * of the pair.
          */
 
-        struct range_evaluator
+        struct range_evaluator:
+            public unary_function
+            <head_map_t::const_iterator::const_reference, state_t>
         {
-            state_t operator () (head_map_t::const_iterator &it)
+            result_type operator () (argument_type it) const
             {
-                return it->first;
+                return it.first;
             }
         };
 
     public:
-        typedef proxy_iterator<head_map_t::const_iterator, state_t,
-                               range_evaluator>
+        typedef boost::transform_iterator
+        <range_evaluator, head_map_t::const_iterator>
             range_iterator;
 
         range_iterator range_begin() const

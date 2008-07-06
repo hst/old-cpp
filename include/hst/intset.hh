@@ -42,6 +42,120 @@ using namespace std::tr1;
 
 namespace hst
 {
+    // Containment of sets
+    //
+    // Returns true if intset(begin1, end1) would be a superset of
+    // intset(begin2, end2).  Each iterator is expected to return the
+    // contents of its set in sorted order.  The result is a pair.
+    // The car of the pair is (set1 >= set2).  If this is false, the
+    // cdr of the pair is some element of set1 that is not in set2.
+
+    template <class I1, class I2>
+    pair<bool, unsigned long>
+    is_superset_with_proof(const I1 &begin1, const I1 &end1,
+                           const I2 &begin2, const I2 &end2)
+    {
+        I1  it1 = begin1;
+        I2  it2 = begin2;
+
+        // Verify that there is no element in set2 that is not also in
+        // set1.
+
+        while (it1 != end1 && it2 != end2)
+        {
+            if (*it1 > *it2)
+            {
+                // We've advanced it1 further than it2 without seeing
+                // *it2 in set1.  This means that *it2 cannot be in
+                // set1, violating the superset constraint.
+
+                return make_pair(false, *it2);
+            } else if (*it1 < *it2) {
+                // We've advanced it2 further than it1 without seeing
+                // *it1 in set2.  This means the *it1 cannot be in
+                // set2.  But this is okay, so advance it1 and
+                // continue the check.
+
+                ++it1;
+            } else {
+                // We've found *it2 in set1, which is good.  Advance
+                // it2 to get the next element to check.  While we're
+                // at it, we advance it1, as well; since we're
+                // checking sets, we know that *it1 won't appear
+                // again, so we don't need it anymore.
+
+                ++it1;
+                ++it2;
+            }
+        }
+
+        // We made it through one of the iterators.  If it2 has
+        // finished, then we're golden, since we verified that all of
+        // set2's elements were in set1.  If it's not, then we reached
+        // the end of set1 even though we still had set2 elements to
+        // check, which means the superset fails.
+
+        if (it2 == end2)
+        {
+            return make_pair(true, 0);
+        } else {
+            return make_pair(false, *it2);
+        }
+    }
+
+    // A version of is_superset that only returns the boolean result.
+
+    template <class I1, class I2>
+    bool is_superset(const I1 &begin1, const I1 &end1,
+                     const I2 &begin2, const I2 &end2)
+    {
+        return is_superset_with_proof(begin1, end1, begin2, end2).first;
+    }
+
+    // Equality of sets
+    //
+    // Returns true if intset(begin1, end1) would be equal to
+    // intset(begin2, end2).  Each iterator is expected to return the
+    // contents of its set in sorted order.
+
+    template <class I1, class I2>
+    bool sets_equal(const I1 &begin1, const I1 &end1,
+                    const I2 &begin2, const I2 &end2)
+    {
+        I1  it1 = begin1;
+        I2  it2 = begin2;
+
+        // Verify that there is no element in set2 that is not also in
+        // set1, and vice versa.
+
+        while (it1 != end1 && it2 != end2)
+        {
+            if (*it1 != *it2)
+            {
+                // We've advanced it1 further than it2 without seeing
+                // *it2 in set1, or vice versa.  This means that the
+                // current value of the iterator that's further along
+                // can't be in the other set; therefore, the sets are
+                // not equal.
+
+                return false;
+            } else {
+                // The current value is in both sets, which is good.
+                // Advance the two iterators to the next value to
+                // check.
+
+                ++it1;
+                ++it2;
+            }
+        }
+
+        // We made it through one at least one of the iterators.  The
+        // sets are equal if they're *both* at the end; if not, then
+        // one of the two sets has an extra element.
+
+        return (it1 == end1 && it2 == end2);
+    }
+
     typedef judy_set_cell<const unsigned long>  ulong_set;
 
     class intset_t
@@ -67,11 +181,6 @@ namespace hst
          * Difference of another set
          */
         intset_t &operator -= (const intset_t &other);
-
-        /**
-         * Containment of another set
-         */
-        bool operator >= (const intset_t &other) const;
 
         /**
          * Overlap with another set
@@ -231,6 +340,15 @@ namespace hst
         }
 
         /**
+         * Containment of another set
+         */
+        bool operator >= (const intset_t &other) const
+        {
+            return is_superset(begin(), end(),
+                               other.begin(), other.end());
+        }
+
+        /**
          * Set equality
          */
         bool operator == (const intset_t &other) const
@@ -249,7 +367,7 @@ namespace hst
             // likely equal, but we still have to check the individual
             // elements to be certain.
 
-            return (*this >= other) && (other >= *this);
+            return sets_equal(begin(), end(), other.begin(), other.end());
         }
 
         typedef ulong_set::iterator  iterator;

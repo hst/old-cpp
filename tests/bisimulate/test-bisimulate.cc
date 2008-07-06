@@ -38,7 +38,7 @@ int main()
     {
         equivalences_t  equiv;
 
-        lts.bisimulate(equiv);
+        lts.bisimulate(equiv, FAILURES_DIVERGENCES);
         cout << equiv;
 
         cin >> lts;

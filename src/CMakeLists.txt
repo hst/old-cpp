@@ -37,13 +37,14 @@ set(LIBHST_SOURCES
   operators/prefix.cc
   operators/extchoice.cc
   operators/intchoice.cc
-  operators/interrupt.cc
+  operators/timeout.cc
   operators/seqcomp.cc
   operators/interleave.cc
   operators/interface-parallel.cc
   operators/alphabetized-parallel.cc
   operators/hide.cc
   operators/rename.cc
+  operators/replicated-extchoice.cc
   parser/scanner.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/intset.tab.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/intsetset.tab.cc

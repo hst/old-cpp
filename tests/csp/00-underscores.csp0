@@ -1,0 +1,5 @@
+event _initialunderscore;
+event internal_underscore;
+event several_under_scores_in_here;
+event repeated__underscores;
+event __repeated_initial_underscore;

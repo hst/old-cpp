@@ -105,6 +105,7 @@ using namespace hst_parser;
 %token BACKSLASH  317 "\\"
 %token LMAP       318 "[["
 %token RMAP       319 "]]"
+%token RTRIANGLE  320 "[>"
 
 /* keywords */
 %token ALIAS      400 "alias"
@@ -114,12 +115,13 @@ using namespace hst_parser;
 %token HIDE       404 "hide"
 %token INTCHOICE  405 "intchoice"
 %token INTERLEAVE 406 "interleave"
-%token INTERRUPT  407 "interrupt"
+%token TIMEOUT    407 "timeout"
 %token IPARALLEL  408 "iparallel"
 %token PREFIX     409 "prefix"
 %token PROCESS    410 "process"
 %token RENAME     411 "rename"
 %token SEQCOMP    412 "seqcomp"
+%token REXTCHOICE 413 "rextchoice"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"

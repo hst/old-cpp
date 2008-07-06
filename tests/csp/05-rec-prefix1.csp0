@@ -1,3 +1,7 @@
+# Recursion test
+#
+# P = a -> a -> P
+
 event a;
 
 process $t1;

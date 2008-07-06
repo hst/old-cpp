@@ -60,6 +60,19 @@ namespace hst
          */
 
         _lts.add_edge(dest, a, P);
+
+        /*
+         * The only alphabet a prefix can accept is the prefix event.
+         */
+
+        alphabet_t  acceptance;
+        acceptance += a;
+        _lts.add_acceptance(dest, acceptance);
+
+        /*
+         * Lastly, finalize the ‘dest’ process.
+         */
+
         _lts.finalize(dest);
     }
 
@@ -98,7 +111,7 @@ namespace hst
             save_memoized_process(key.str(), dest);
             do_prefix(*this, dest, a, P);
         } else {
-            // We've already create this process, so let's just add a
+            // We've already created this process, so let's just add a
             // single τ process to the previously calculated state.
             _lts.add_edge(dest, _tau, old_dest);
             _lts.finalize(dest);

@@ -1,3 +1,10 @@
+# Recursion test
+#
+# P =
+#   ((a -> STOP) [] (c -> STOP))
+#   |~|
+#   ((b -> STOP) [] (c -> STOP))
+
 event a;
 event b;
 event c;

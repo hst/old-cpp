@@ -56,7 +56,7 @@ namespace hst
         // First, bisimulate the prenormalized LTS.
 
         equivalences_t  equiv;
-        _normalized.bisimulate(equiv);
+        _normalized.bisimulate(equiv, _semantic_model);
 
         // Next, compose the initials map with the bisimulation
         // relation.
@@ -131,12 +131,11 @@ namespace hst
 
             new_states.insert(make_pair(old_set, new_node));
 
-            // Finally, all of the old normalized state's targets
-            // should be added to the new state.
+            // Finally, all of the old normalized state's edges and
+            // acceptances should be added to the new state.
 
-            lts_t::state_pairs_iterator  sp_it;
-
-            for (sp_it = _normalized.state_pairs_begin(state);
+            for (lts_t::state_pairs_iterator
+                     sp_it = _normalized.state_pairs_begin(state);
                  sp_it != _normalized.state_pairs_end(state);
                  ++sp_it)
             {
@@ -147,6 +146,26 @@ namespace hst
                     new_head_map.find(target_head)->second;
 
                 new_lts.add_edge(new_node, event, new_target);
+            }
+
+            for (lts_t::acceptances_iterator
+                     a_it = _normalized.acceptances_begin();
+                 a_it != _normalized.acceptances_end();
+                 ++a_it)
+            {
+                state_t  old_state = a_it->first;
+                state_t  state_head = equiv.head(old_state);
+                state_t  new_state =
+                    new_head_map.find(state_head)->second;
+
+                alphabet_set_cp  acceptance = a_it->second;
+                for (alphabet_set_t::iterator
+                         acc_it = acceptance->begin();
+                     acc_it != acceptance->end();
+                     ++acc_it)
+                {
+                    new_lts.add_acceptance(new_state, *acc_it);
+                }
             }
         }
 

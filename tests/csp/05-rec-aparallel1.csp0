@@ -1,3 +1,11 @@
+# Recursion test
+#
+# t1 = a -> b -> t1
+# u1 = c -> b -> u1
+# P  = t1 [ {b} || {b} ] u1
+#
+# P can do a and c in any order, and then must do b; and then repeats.
+
 event a;
 event b;
 event c;

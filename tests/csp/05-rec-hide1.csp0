@@ -1,3 +1,12 @@
+# Recursion test
+#
+# t1 = a -> b -> c -> t1
+# P  = t1 \ {b,c}
+#
+# This is equivalent to:
+#
+# P = a -> P
+
 event a;
 event b;
 event c;

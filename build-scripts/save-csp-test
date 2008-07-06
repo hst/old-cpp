@@ -14,5 +14,7 @@ fi
 TEST=$1
 
 tests/csp/test-csp0 < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.output
-tests/csp/test-prenormalize < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.prenormal-output
-tests/csp/test-normalize < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.normal-output
+tests/csp/test-prenormalize T < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.t-prenormal-output
+tests/csp/test-normalize T < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.t-normal-output
+tests/csp/test-prenormalize F < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.f-prenormal-output
+tests/csp/test-normalize F < ../tests/csp/$TEST.csp0 > ../tests/csp/$TEST.f-normal-output

@@ -1,3 +1,9 @@
+# P1 = up -> down -> P1
+# P2 = up -> down -> up -> down -> P2
+#
+# assert P1 [T= P2
+# assert P1 [F= P2
+
 event up;
 event down;
 

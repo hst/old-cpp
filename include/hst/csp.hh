@@ -47,7 +47,7 @@ namespace hst
         PREFIX = 1,
         EXTCHOICE,
         INTCHOICE,
-        INTERRUPT,
+        TIMEOUT,
         SEQCOMP,
         INTERLEAVE,
         INTERFACE_PARALLEL,
@@ -96,7 +96,28 @@ namespace hst
             _tau  = add_event("%TAU");
             _tick = add_event("%TICK");
 
+            /*
+             * STOP cannot accept any events, so we need to add the
+             * empty alphabet to its acceptances.
+             */
+
+            alphabet_t  empty_alpha;
+            _lts.add_acceptance(_stop, empty_alpha);
+
+            /*
+             * SKIP can accept exactly one event: ✓.  So we add {✓} to
+             * its acceptances.
+             */
+
+            alphabet_t  tick_alpha;
+            tick_alpha += _tick;
+
             _lts.add_edge(_skip, _tick, _stop);
+            _lts.add_acceptance(_skip, tick_alpha);
+
+            /*
+             * Finalize STOP and SKIP.
+             */
 
             _lts.finalize(_stop);
             _lts.finalize(_skip);
@@ -106,7 +127,7 @@ namespace hst
         csp_t():
             _lts(),
             _next_temp_index(0L),
-            _normalized_lts(&_lts, 0L)
+            _normalized_lts(&_lts, 0L, TRACES)
         {
             define_standard_ops();
             _normalized_lts.tau(_tau);
@@ -335,9 +356,9 @@ namespace hst
         state_t add_intchoice(state_t P, state_t Q);
         void intchoice(state_t dest, state_t P, state_t Q);
 
-        /// [P▵Q]
-        state_t add_interrupt(state_t P, state_t Q);
-        void interrupt(state_t dest, state_t P, state_t Q);
+        /// [P▹Q]
+        state_t add_timeout(state_t P, state_t Q);
+        void timeout(state_t dest, state_t P, state_t Q);
 
         /// [P;Q]
         state_t add_seqcomp(state_t P, state_t Q);
@@ -347,7 +368,7 @@ namespace hst
         state_t add_interleave(state_t P, state_t Q);
         void interleave(state_t dest, state_t P, state_t Q);
 
-        /// [P〚A〛Q]
+        /// [P〚α〛Q]
         state_t add_interface_parallel
         (state_t P, alphabet_t &alpha, state_t Q);
         void interface_parallel
@@ -367,12 +388,16 @@ namespace hst
         (state_t dest,
          state_t P, alphabet_t &alpha);
 
-        /// [P \ μ]
+        /// [P〚μ〛]
         state_t add_rename
         (state_t P, eventmap_t &map);
         void rename
         (state_t dest,
          state_t P, eventmap_t &map);
+
+        /// [□Ps]
+        state_t add_replicated_extchoice(stateset_t &Ps);
+        void replicated_extchoice(state_t dest, stateset_t &Ps);
     };
 
     typedef shared_ptr<csp_t>        csp_p;

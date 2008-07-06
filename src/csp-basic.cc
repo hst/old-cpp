@@ -49,7 +49,7 @@ namespace hst
             if (first)
                 first = false;
             else
-                stream << ",";
+                stream << ", ";
 
             stream << i << ":" << csp.lts()->get_state_name(i);
         }
@@ -66,7 +66,7 @@ namespace hst
             if (first)
                 first = false;
             else
-                stream << ",";
+                stream << ", ";
 
             stream << i << ":" << csp.lts()->get_event_name(i);
         }
@@ -75,7 +75,7 @@ namespace hst
 
         // Output the LTS
 
-        stream << *csp.lts() << endl;
+        stream << *csp.lts();
 
         return stream;
     }

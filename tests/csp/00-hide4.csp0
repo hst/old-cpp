@@ -1,3 +1,7 @@
+# Basic operator test
+# P' = (c -> d -> STOP) [] (a -> b -> STOP)
+# P  = P' \ {a,c}
+
 event a;
 event b;
 event c;

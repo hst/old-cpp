@@ -93,14 +93,32 @@ namespace hst_parser
 
         loc->step();
 
+        ch = read_char_skip_ws(stream, loc);
+
         // If we hit EOF before reading a real character, then we
         // return the END token.  Once we read a real character, we
         // *don't* return an END token, because at the very least, we
         // can return a BAD_CHAR token with the real characters we
         // read.
 
-        ch = read_char_skip_ws(stream, loc);
         if (ch == EOF) return token::END;
+
+        // If we find any comments, go ahead and parse them.
+
+        while (ch == '#')
+        {
+            // This comment ends at the end of the current line.
+            do
+            {
+                ch = read_char(stream, loc);
+            } while (ch != '\n');
+
+            // Read the next character after the comment.  If it is
+            // yet another comment, we'll loop back through here to
+            // read it.
+
+            ch = read_char_skip_ws(stream, loc);
+        }
 
         // Let's get all the easy single-char tokens out of the way
         // first.
@@ -168,6 +186,10 @@ namespace hst_parser
                 // found a "[["
                 read_char(stream, loc);
                 return token::LMAP;
+            } else if (lookahead == '>') {
+                // found a "[>"
+                read_char(stream, loc);
+                return token::RTRIANGLE;
             }
 
             // found a bare "["
@@ -296,7 +318,7 @@ namespace hst_parser
 
                 int lookahead = peek_char(stream);
 
-                if (isalpha(lookahead) || isdigit(lookahead))
+                if (isalpha(lookahead) || isdigit(lookahead) || ch == '_')
                 {
                     read_char(stream, loc);
                     *id += lookahead;
@@ -306,7 +328,7 @@ namespace hst_parser
             }
 
             ch = peek_char(stream);
-            while (isalpha(ch) || isdigit(ch))
+            while (isalpha(ch) || isdigit(ch) || ch == '_')
             {
                 read_char(stream, loc);
                 *id += ch;
@@ -340,9 +362,9 @@ namespace hst_parser
             } else if (*id == "interleave") {
                 delete id;
                 return token::INTERLEAVE;
-            } else if (*id == "interrupt") {
+            } else if (*id == "timeout") {
                 delete id;
-                return token::INTERRUPT;
+                return token::TIMEOUT;
             } else if (*id == "iparallel") {
                 delete id;
                 return token::IPARALLEL;
@@ -355,6 +377,9 @@ namespace hst_parser
             } else if (*id == "rename") {
                 delete id;
                 return token::RENAME;
+            } else if (*id == "rextchoice") {
+                delete id;
+                return token::REXTCHOICE;
             } else if (*id == "seqcomp") {
                 delete id;
                 return token::SEQCOMP;

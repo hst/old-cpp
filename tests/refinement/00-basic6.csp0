@@ -1,0 +1,17 @@
+# P = (a -> P) |~| (b -> P)
+# Q = (a -> P) [] (b -> P)
+#
+# assert Q [T= P
+# assert not Q [F= P
+
+event a;
+event b;
+
+process $a;  prefix $a = a -> STOP;
+process $b;  prefix $b = b -> STOP;
+
+process P;  intchoice P = $a |~| $b;
+process Q;  extchoice Q = $a [] $b;
+
+alias SPEC = Q;
+alias IMPL = P;

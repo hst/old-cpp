@@ -1,3 +1,15 @@
+# Memoization test
+#
+# t1 = b -> SKIP
+# t2 = a -> t1
+# u1 = c -> STOP
+# P  = t2 ; u1             (a -> b -> c -> STOP)
+# Q  = t1 ; u1             (b -> c -> STOP)
+#
+# Q should already be defined as part of the expansion of P.
+# Therefore, it shouldn't create its own expansion, and should instead
+# have a single τ transition to the appropriate P state.
+
 event a;
 event b;
 event c;

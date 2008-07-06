@@ -1,3 +1,6 @@
+# Basic operator test
+# P = (a -> b -> a -> STOP) \ {a}
+
 event a;
 event b;
 

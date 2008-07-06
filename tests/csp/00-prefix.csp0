@@ -1,3 +1,6 @@
+# Basic operator test
+# P = a -> b -> STOP
+
 event a;
 event b;
 process P;

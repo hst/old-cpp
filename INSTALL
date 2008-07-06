@@ -5,10 +5,11 @@ package, you need:
  * bison
  * asciidoc
  * xmlto
+ * Boost
  * libjudy
 
-The first four are only needed at build-time.  The last is required at
-runtime as well.
+The first four are only needed at build-time.  The last two are
+required at runtime as well.
 
 It's highly recommended that you perform an out-of-source build.
 Decide on values for the following:

@@ -1,0 +1,22 @@
+#!/bin/bash
+# save-refinement-test [test name]
+
+# Assumes that the test programs in tests/refinement generate the
+# correct output for [test name], and saves this test output.  The
+# script should be run from your CMake build directory, which is
+# assumed to be a subdirectory of the project source tree.
+
+if [ x$1 == x ]; then
+    echo "Usage: save-refinement-test [test name]"
+    exit 1
+fi
+
+TEST=$1
+
+tests/refinement/test-traces-refinement \
+    < ../tests/refinement/$TEST.csp0 \
+    > ../tests/refinement/$TEST.traces
+
+tests/refinement/test-failures-refinement \
+    < ../tests/refinement/$TEST.csp0 \
+    > ../tests/refinement/$TEST.failures

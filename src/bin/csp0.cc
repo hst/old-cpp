@@ -37,7 +37,7 @@ using namespace std;
 using namespace hst;
 
 /*
- * Many of the commands can operator on an ifstream or on standard
+ * Many of the commands can operate on an ifstream or on standard
  * input.  The ifstream should be deleted after we're done, whereas
  * cin should not.  So this is a simple “destructor” object for use
  * with the shared_ptrs that doesn't actually free the object.
@@ -96,6 +96,7 @@ void print_assert_usage(ostream &stream)
            << "be of the following form:" << endl
            << endl
            << "    --traces-refinement [spec] [impl]" << endl
+           << "    --failures-refinement [spec] [impl]" << endl
         ;
 }
 
@@ -180,6 +181,180 @@ int do_lts(int argc, const char **argv)
  * The “assert” command tests assertions on a CSP0 script.
  */
 
+int do_traces_refinement(csp_t &csp,
+                         const char *spec_name,
+                         const char *impl_name)
+{
+    // Look up the process names in the CSP script.
+
+    state_t  spec, impl;
+
+    spec = csp.get_process(spec_name);
+    if (spec == HST_ERROR_STATE)
+    {
+        cerr << "Specification process "
+             << spec_name << " does not exist."
+             << endl;
+        return 3;
+    }
+
+    impl = csp.get_process(impl_name);
+    if (impl == HST_ERROR_STATE)
+    {
+        cerr << "Implementation process "
+             << impl_name << " does not exist."
+             << endl;
+        return 3;
+    }
+
+    // Normalize the spec process.
+
+    csp.normalized_lts()->clear(TRACES);
+    csp.normalized_lts()->prenormalize(spec);
+    csp.normalized_lts()->normalize();
+    spec = csp.normalized_lts()->initial_normal_state(spec);
+
+    // Check the refinement.
+
+    trace_counterexample_t  counter;
+    bool  result = trace_refines(counter,
+                                 *csp.normalized_lts(), spec,
+                                 *csp.lts(), impl);
+
+    cout << spec_name << " [T= " << impl_name
+         << ": " << (result? "true": "false")
+         << endl;
+
+    if (!result)
+    {
+        cout << "After trace <";
+
+        trace_t::const_iterator  tit;
+        bool  first = true;
+
+        for (tit = counter.trace.begin();
+             tit != counter.trace.end();
+             ++tit)
+        {
+            event_t  event = *tit;
+
+            if (event != csp.tau())
+            {
+                if (first)
+                    first = false;
+                else
+                    cout << ",";
+
+                cout << csp.lts()->get_event_name(*tit);
+            }
+        }
+
+        cout << ">," << endl
+             << impl_name << " can execute "
+             << csp.lts()->get_event_name(counter.event)
+             << " but " << spec_name << " cannot."
+             << endl;
+    }
+
+    return 0;
+}
+
+int do_failures_refinement(csp_t &csp,
+                           const char *spec_name,
+                           const char *impl_name)
+{
+    // Look up the process names in the CSP script.
+
+    state_t  spec, impl;
+
+    spec = csp.get_process(spec_name);
+    if (spec == HST_ERROR_STATE)
+    {
+        cerr << "Specification process "
+             << spec_name << " does not exist."
+             << endl;
+        return 3;
+    }
+
+    impl = csp.get_process(impl_name);
+    if (impl == HST_ERROR_STATE)
+    {
+        cerr << "Implementation process "
+             << impl_name << " does not exist."
+             << endl;
+        return 3;
+    }
+
+    // Normalize the spec process.
+
+    csp.normalized_lts()->clear(FAILURES);
+    csp.normalized_lts()->prenormalize(spec);
+    csp.normalized_lts()->normalize();
+    spec = csp.normalized_lts()->initial_normal_state(spec);
+
+    // Check the refinement.
+
+    failures_counterexample_t  counter;
+    bool  result = failures_refines(counter,
+                                    *csp.normalized_lts(), spec,
+                                    *csp.lts(), impl);
+
+    cout << spec_name << " [F= " << impl_name
+         << ": " << (result? "true": "false")
+         << endl;
+
+    if (!result)
+    {
+        cout << "After trace <";
+
+        bool first = true;
+
+        for (trace_t::const_iterator tit = counter.trace.begin();
+             tit != counter.trace.end();
+             ++tit)
+        {
+            event_t  event = *tit;
+
+            if (event != csp.tau())
+            {
+                if (first)
+                    first = false;
+                else
+                    cout << ",";
+
+                cout << csp.lts()->get_event_name(event);
+            }
+        }
+
+        cout << ">," << endl
+             << impl_name << " can accept {";
+
+        first = true;
+
+        for (alphabet_t::iterator ait = counter.acceptance.begin();
+             ait != counter.acceptance.end();
+             ++ait)
+        {
+            event_t  event = *ait;
+
+            if (event != csp.tau())
+            {
+                if (first)
+                    first = false;
+                else
+                    cout << ",";
+
+                cout << csp.lts()->get_event_name(event);
+            }
+        }
+
+        cout << "} but " << spec_name << " cannot."
+             << endl;
+    }
+
+    return 0;
+}
+
 int do_assert(int argc, const char **argv)
 {
     if (argc < 1)
@@ -240,43 +415,28 @@ int do_assert(int argc, const char **argv)
             const char  *impl_name = *argv++;
             argc -= 2;
 
-            // Look up the process names in the CSP script.
+            int result = do_traces_refinement(csp, spec_name, impl_name);
+            if (result != 0)
+                return result;
 
-            state_t  spec, impl;
+        } else if (strcmp(flag, "--failures-refinement") == 0) {
 
-            spec = csp.get_process(spec_name);
-            if (spec == HST_ERROR_STATE)
+            // We need two process names
+
+            if (argc < 2)
             {
-                cerr << "Specification process "
-                     << spec_name << " does not exist."
+                cerr << "Need two processes for a failures refinement!"
                      << endl;
-                return 3;
+                return 2;
             }
 
-            impl = csp.get_process(impl_name);
-            if (impl == HST_ERROR_STATE)
-            {
-                cerr << "Implementation process "
-                     << impl_name << " does not exist."
-                     << endl;
-                return 3;
-            }
+            const char  *spec_name = *argv++;
+            const char  *impl_name = *argv++;
+            argc -= 2;
 
-            // Normalize the spec process.
-
-            csp.normalized_lts()->clear();
-            csp.normalized_lts()->prenormalize(spec);
-            csp.normalized_lts()->normalize();
-            spec = csp.normalized_lts()->initial_normal_state(spec);
-
-            // Check the refinement.
-
-            bool  result = refines(*csp.normalized_lts(), spec,
-                                   *csp.lts(), impl);
-
-            cout << spec_name << " [T= " << impl_name
-                 << ": " << (result? "true": "false")
-                 << endl;
+            int result = do_failures_refinement(csp, spec_name, impl_name);
+            if (result != 0)
+                return result;
         } else {
             cerr << "Unknown assertion flag " << flag << endl;
             return 2;

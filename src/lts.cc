@@ -177,6 +177,46 @@ namespace hst
         *stateset += to;
     }
 
+    void lts_t::add_acceptance(const state_t state,
+                               const alphabet_t &alphabet)
+    {
+        if (is_finalized(state))
+            return;
+
+#if HST_LTS_DEBUG
+        cerr << "Adding acceptance to "
+             << state << ": " << alphabet << endl;
+#endif
+
+        alphabet_set_p  alphabet_set;
+        pair<acceptances_t::iterator, bool>  insert_result;
+
+        // Try to insert a NULL alphabet set.  This will tell us
+        // whether there's already an alphabet set for this state.
+
+        insert_result =
+            acceptances.insert(make_pair(state, alphabet_set));
+
+        if (insert_result.second)
+        {
+            // The insert succeeded, so there's currently a NULL
+            // pointer in the acceptance map for this state.  We need
+            // to change this NULL to a pointer to an actual alphabet
+            // set; luckily, we've got an iterator we can use to do
+            // this, though it's a bit tricky.
+
+            insert_result.first->second.reset(new alphabet_set_t);
+        } else {
+            // The insert failed because there's already an alphabet
+            // set.  Moreover, the iterator points to the alphabet
+            // set's smart_ptr, so there's not really anything to do
+            // here.
+        }
+
+        // Now we can add the alphabet to this alphabet set.
+        *(insert_result.first->second) += alphabet;
+    }
+
     ostream &operator << (ostream &stream, const lts_t &lts)
     {
         lts_t::from_state_iterator   fs_it, fs_end;
@@ -184,7 +224,8 @@ namespace hst
 
         bool  first = true;
 
-        stream << "{";
+        stream << "edges {";
+
         fs_end = lts.from_states_end();
         for (fs_it = lts.from_states_begin();
              fs_it != fs_end; ++fs_it)
@@ -201,7 +242,7 @@ namespace hst
                 if (first)
                     first = false;
                 else
-                    stream << ",";
+                    stream << ", ";
 
                 stream << from_state << "--"
                        << event << "-->"
@@ -209,7 +250,25 @@ namespace hst
             }
         }
 
-        stream << "}";
+        stream << "}" << endl << "acceptances {";
+
+        first = true;
+
+        fs_end = lts.from_states_end();
+        for (state_t  state = 0;
+             state < lts.state_count();
+             ++state)
+        {
+            if (first)
+                first = false;
+            else
+                stream << ", ";
+
+            stream << state << ":"
+                   << *lts.get_acceptances(state);
+        }
+
+        stream << "}" << endl;
 
         return stream;
     }

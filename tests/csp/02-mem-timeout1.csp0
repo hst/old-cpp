@@ -1,0 +1,25 @@
+# Memoization test
+#
+# t1 = a -> STOP
+# t2 = b -> STOP
+# P  = t1 [> t2
+# Q  = t1 [> t2
+#
+# Q should already be defined as part of the expansion of P.
+# Therefore, it shouldn't create its own expansion, and should instead
+# have a single τ transition to the appropriate P state.
+
+event a;
+event b;
+
+process $t1;
+prefix $t1 = a -> STOP;
+
+process $t2;
+prefix $t2 = b -> STOP;
+
+process P;
+timeout P = $t1 [> $t2;
+
+process Q;
+timeout Q = $t1 [> $t2;
