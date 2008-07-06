@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PACKAGE="hst"
-VERSION="0.1-α1"
+VERSION="0.1-α2"
 
 USAGE="create-source-package"
 SUBDIRECTORY_OK=1

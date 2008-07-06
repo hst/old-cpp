@@ -1,0 +1,17 @@
+Douglas Creager (15):
+      Adding counterexamples to the traces refinement check
+      Adding comments to CSP₀ scripts
+      Current “interrupt” operator is actually “timeout”
+      Adding acceptance sets for LTSs
+      Interleave now synchronizes on ✓
+      Failures normalization
+      CSP₀ can now contain internal underscores
+      Replicated external choice
+      Better equality and superset comparisons for intsets
+      Replacing custom proxy_iterator with Boost's transform_iterator
+      Using new superset algorithm in traces refinement
+      Refactoring refinement code to support multiple semantic models
+      Failures refinement
+      Fixed superset proof for integer sets
+      Adding failures refinement option to csp0 script
+
