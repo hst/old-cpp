@@ -1,0 +1,26 @@
+Name:            HST
+Version:         1.0-a1
+Cabal-Version:   >= 1.2
+Build-Type:      Simple
+License:         LGPL
+License-File:    LICENSE
+Author:          Douglas Creager
+
+Library
+  HS-Source-Dirs:  src, tests
+  Build-Depends:    base, haskell98, QuickCheck >= 1.1
+  Exposed-Modules:  HST.CSPM
+  Other-Modules:    HST.CSPM.Evaluate,
+                    HST.CSPM.Expressions,
+                    HST.CSPM.Values
+
+Executable tests
+  HS-Source-Dirs:  src, tests
+  Main-Is:          HST/CSPM/Tests.hs
+  Other-Modules:    HST.CSPM,
+                    HST.CSPM.Evaluate,
+                    HST.CSPM.Expressions,
+                    HST.CSPM.Values,
+                    HST.CSPM.Tests.Generators,
+                    HST.CSPM.Tests.Numbers,
+                    HST.CSPM.Tests.Sequences

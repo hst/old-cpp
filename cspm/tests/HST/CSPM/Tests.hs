@@ -20,11 +20,11 @@
 --
 ------------------------------------------------------------------------
 
-module HST.CSPM.Tests where
+module Main where
 
 import qualified HST.CSPM.Tests.Numbers as Numbers
 import qualified HST.CSPM.Tests.Sequences as Sequences
 
-testAll = do
+main = do
   Numbers.testAll
   Sequences.testAll
