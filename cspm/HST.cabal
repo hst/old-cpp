@@ -17,11 +17,3 @@ Library
 Executable tests
   HS-Source-Dirs:  src, tests
   Main-Is:          HST/CSPM/Tests.hs
-  Other-Modules:    HST.CSPM,
-                    HST.CSPM.Evaluate,
-                    HST.CSPM.Expressions,
-                    HST.CSPM.Values,
-                    HST.CSPM.Tests.Generators,
-                    HST.CSPM.Tests.Numbers,
-                    HST.CSPM.Tests.Sequences,
-                    HST.CSPM.Tests.Sets

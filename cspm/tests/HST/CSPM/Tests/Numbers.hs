@@ -38,6 +38,14 @@ testAll = do
   quickCheck prop_NumDiff
   putStr "NumProd: "
   quickCheck prop_NumProd
+  putStr "NumLT: "
+  quickCheck prop_NumLT
+  putStr "NumGT: "
+  quickCheck prop_NumGT
+  putStr "NumLTE: "
+  quickCheck prop_NumLTE
+  putStr "NumGTE: "
+  quickCheck prop_NumGTE
 
 prop_NumLiteral i = v1 == v2
     where
@@ -73,5 +81,41 @@ prop_NumProd = forAll (two enumber) tester
       tester (n1, n2) = i0 == i1 * i2
           where
             VNumber i0 = eval (ENumber (NProd n1 n2))
+            VNumber i1 = eval n1
+            VNumber i2 = eval n2
+
+prop_NumLT = forAll (two enumber) tester
+    where
+      tester (n1, n2) = b0 == (i1 < i2)
+          where
+            v0 = eval (EBoolean (ELT n1 n2))
+            VBoolean b0 = v0
+            VNumber i1 = eval n1
+            VNumber i2 = eval n2
+
+prop_NumGT = forAll (two enumber) tester
+    where
+      tester (n1, n2) = b0 == (i1 > i2)
+          where
+            v0 = eval (EBoolean (EGT n1 n2))
+            VBoolean b0 = v0
+            VNumber i1 = eval n1
+            VNumber i2 = eval n2
+
+prop_NumLTE = forAll (two enumber) tester
+    where
+      tester (n1, n2) = b0 == (i1 <= i2)
+          where
+            v0 = eval (EBoolean (ELTE n1 n2))
+            VBoolean b0 = v0
+            VNumber i1 = eval n1
+            VNumber i2 = eval n2
+
+prop_NumGTE = forAll (two enumber) tester
+    where
+      tester (n1, n2) = b0 == (i1 >= i2)
+          where
+            v0 = eval (EBoolean (EGTE n1 n2))
+            VBoolean b0 = v0
             VNumber i1 = eval n1
             VNumber i2 = eval n2

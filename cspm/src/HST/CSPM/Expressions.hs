@@ -142,7 +142,23 @@ data Boolean
     | QIn Expression Expression
     | SIn Expression Expression
     | SEmpty Expression
-    deriving Show
+
+instance Show Boolean where
+    show BTrue             = "true"
+    show BFalse            = "false"
+    show (BAnd b1 b2)      = "(" ++ show b1 ++ " && " ++ show b2 ++ ")"
+    show (BOr b1 b2)       = "(" ++ show b1 ++ " || " ++ show b2 ++ ")"
+    show (BNot b1)         = "(!" ++ show b1 ++ ")"
+    show (EEqual e1 e2)    = "(" ++ show e1 ++ " == " ++ show e2 ++ ")"
+    show (ENotEqual e1 e2) = "(" ++ show e1 ++ " != " ++ show e2 ++ ")"
+    show (ELT e1 e2)       = "(" ++ show e1 ++ " < " ++ show e2 ++ ")"
+    show (EGT e1 e2)       = "(" ++ show e1 ++ " > " ++ show e2 ++ ")"
+    show (ELTE e1 e2)      = "(" ++ show e1 ++ " <= " ++ show e2 ++ ")"
+    show (EGTE e1 e2)      = "(" ++ show e1 ++ " >= " ++ show e2 ++ ")"
+    show (QEmpty q0)       = "null(" ++ show q0 ++ ")"
+    show (QIn x q0)        = "elem(" ++ show x ++ ", " ++ show q0 ++ ")"
+    show (SIn x s0)        = "member(" ++ show x ++ ", " ++ show s0 ++ ")"
+    show (SEmpty s0)       = "empty(" ++ show s0 ++ ")"
 
 -- Tuples
 

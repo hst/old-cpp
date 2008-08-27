@@ -22,11 +22,13 @@
 
 module Main where
 
+import qualified HST.CSPM.Tests.Booleans as Booleans
 import qualified HST.CSPM.Tests.Numbers as Numbers
 import qualified HST.CSPM.Tests.Sequences as Sequences
 import qualified HST.CSPM.Tests.Sets as Sets
 
 main = do
+  Booleans.testAll
   Numbers.testAll
   Sequences.testAll
   Sets.testAll

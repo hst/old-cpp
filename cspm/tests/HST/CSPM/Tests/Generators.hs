@@ -54,3 +54,16 @@ listOf g = sized listOf'
       listOf' n = sequence [g | i <- [1..n]]
 
 esequence = listOf enumber
+
+boolean :: Gen Boolean
+boolean = sized boolean'
+    where
+      boolean' 0         = oneof [return BTrue, return BFalse]
+      boolean' n | n > 0 = oneof [liftM2 BAnd subbool subbool,
+                                  liftM2 BOr subbool subbool,
+                                  liftM  BNot subbool
+                                 ]
+                 where
+                   subbool = liftM EBoolean $ boolean' (n `div` 2)
+
+eboolean = liftM EBoolean boolean
