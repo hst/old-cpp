@@ -23,4 +23,5 @@ Executable tests
                     HST.CSPM.Values,
                     HST.CSPM.Tests.Generators,
                     HST.CSPM.Tests.Numbers,
-                    HST.CSPM.Tests.Sequences
+                    HST.CSPM.Tests.Sequences,
+                    HST.CSPM.Tests.Sets

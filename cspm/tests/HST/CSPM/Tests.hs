@@ -24,7 +24,9 @@ module Main where
 
 import qualified HST.CSPM.Tests.Numbers as Numbers
 import qualified HST.CSPM.Tests.Sequences as Sequences
+import qualified HST.CSPM.Tests.Sets as Sets
 
 main = do
   Numbers.testAll
   Sequences.testAll
+  Sets.testAll

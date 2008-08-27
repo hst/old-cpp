@@ -89,7 +89,7 @@ data Sequence
     -- TODO: sequence comprehension
 
 instance Show Sequence where
-    show (QLit xs) = "<" ++ show xs ++ ">"
+    show (QLit xs)          = "<" ++ show xs ++ ">"
     show (QClosedRange m n) = "<" ++ show m ++ ".." ++ show n ++ ">"
     show (QOpenRange m)     = "<" ++ show m ++ "..>"
     show (QConcat s t)      = "concat(" ++ show s ++ ", " ++ show t ++ ")"
@@ -110,7 +110,19 @@ data Set
     | SPowerset Expression
     | SSequenceset Expression
     -- TODO: set comprehension
-    deriving Show
+
+instance Show Set where
+    show (SLit xs)              = "{" ++ show xs ++ "}"
+    show (SClosedRange m n)     = "{" ++ show m ++ ".." ++ show n ++ "}"
+    show (SOpenRange m)         = "{" ++ show m ++ "..}"
+    show (SUnion s1 s2)         = "union(" ++ show s1 ++ ", " ++ show s2 ++ "}"
+    show (SIntersection s1 s2)  = "inter(" ++ show s1 ++ ", " ++ show s2 ++ "}"
+    show (SDifference s1 s2)    = "diff(" ++ show s1 ++ ", " ++ show s2 ++ "}"
+    show (SDistUnion s1)        = "Union(" ++ show s1 ++ ")"
+    show (SDistIntersection s1) = "Inter(" ++ show s1 ++ ")"
+    show (QSet q0)              = "set(" ++ show q0 ++ ")"
+    show (SPowerset s1)         = "Set(" ++ show s1 ++ ")"
+    show (SSequenceset s1)      = "Seq(" ++ show s1 ++ ")"
 
 -- Booleans
 

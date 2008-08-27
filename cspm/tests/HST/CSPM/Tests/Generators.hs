@@ -34,8 +34,8 @@ number :: Gen Number
 number = sized number'
     where
       number' 0         = liftM NLit arbitrary
-      number' n | n > 0 = oneof [liftM NLit arbitrary,
-                                 liftM NNeg subnum,
+      number' n | n > 0 = oneof [liftM  NLit arbitrary,
+                                 liftM  NNeg subnum,
                                  liftM2 NSum subnum subnum,
                                  liftM2 NDiff subnum subnum,
                                  liftM2 NProd subnum subnum
