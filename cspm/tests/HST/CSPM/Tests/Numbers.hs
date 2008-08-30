@@ -49,7 +49,7 @@ testAll = do
 
 prop_NumLiteral i = v1 == v2
     where
-      v1 = eval (ENLit i)
+      v1 = eval $ bind rootEnv (ENLit i)
       v2 = VNumber i
       types = i :: Int
 
@@ -57,61 +57,61 @@ prop_NumNeg = forAll enumber tester
     where
       tester n = i0 == negate i1
           where
-            i0 = evalAsNumber (ENNeg n)
-            i1 = evalAsNumber n
+            i0 = evalAsNumber $ bind rootEnv (ENNeg n)
+            i1 = evalAsNumber $ bind rootEnv n
 
 prop_NumSum = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 + i2
           where
-            i0 = evalAsNumber (ENSum n1 n2)
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            i0 = evalAsNumber $ bind rootEnv (ENSum n1 n2)
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2
 
 prop_NumDiff = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 - i2
           where
-            i0 = evalAsNumber (ENDiff n1 n2)
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            i0 = evalAsNumber $ bind rootEnv (ENDiff n1 n2)
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2
 
 prop_NumProd = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 * i2
           where
-            i0 = evalAsNumber (ENProd n1 n2)
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            i0 = evalAsNumber $ bind rootEnv (ENProd n1 n2)
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2
 
 prop_NumLT = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 < i2)
           where
-            b0 = evalAsBoolean (ELT n1 n2)
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            b0 = evalAsBoolean $ bind rootEnv (ELT n1 n2)
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2
 
 prop_NumGT = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 > i2)
           where
-            b0 = evalAsBoolean (EGT n1 n2)
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            b0 = evalAsBoolean $ bind rootEnv (EGT n1 n2)
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2
 
 prop_NumLTE = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 <= i2)
           where
-            b0 = evalAsBoolean (ELTE n1 n2)
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            b0 = evalAsBoolean $ bind rootEnv (ELTE n1 n2)
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2
 
 prop_NumGTE = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 >= i2)
           where
-            b0 = evalAsBoolean (EGTE n1 n2)
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            b0 = evalAsBoolean $ bind rootEnv (EGTE n1 n2)
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2

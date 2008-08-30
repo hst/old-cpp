@@ -41,8 +41,8 @@ prop_SeqLiteral = forAll (listOf enumber) tester
     where
       tester ns = q0 == q1
           where
-            q0 = eval (EQLit ns)
-            q1 = VSequence (map eval ns)
+            q0 = eval $ bind rootEnv (EQLit ns)
+            q1 = VSequence (map (eval . bind rootEnv) ns)
 
 prop_SeqClosedRange = forAll (two enumber) tester
     where
@@ -53,18 +53,18 @@ prop_SeqClosedRange = forAll (two enumber) tester
       -- equality.
       tester (n1, n2) = (i2 - i1 <= 1000) ==> q0 == q1
           where
-            q0 = eval (EQClosedRange n1 n2)
+            q0 = eval $ bind rootEnv (EQClosedRange n1 n2)
             q1 = VSequence (map VNumber [i1 .. i2])
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2
 
 prop_SeqConcat = forAll (two esequence) tester
     where
       tester (eq1, eq2) = v0 == v12
           where
-            v0 = eval (EQConcat eq1 eq2)
-            q1 = evalAsSequence eq1
-            q2 = evalAsSequence eq2
+            v0 = eval $ bind rootEnv (EQConcat eq1 eq2)
+            q1 = evalAsSequence $ bind rootEnv eq1
+            q2 = evalAsSequence $ bind rootEnv eq2
             v12 = VSequence (q1 ++ q2)
 
 prop_SeqTail = forAll esequence tester
@@ -72,8 +72,8 @@ prop_SeqTail = forAll esequence tester
       tester eq = (length ns > 0) ==> v0 == v1
           where
             eq0 = EQTail eq
-            v0  = eval eq0
+            v0  = eval $ bind rootEnv eq0
 
             EQLit ns = eq
             eq1      = EQLit (tail ns)
-            v1       = eval eq1
+            v1       = eval $ bind rootEnv eq1

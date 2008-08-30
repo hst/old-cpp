@@ -20,17 +20,21 @@
 --
 ------------------------------------------------------------------------
 
-module Main where
+module HST.CSPM.Tests.Lets where
 
-import qualified HST.CSPM.Tests.Booleans as Booleans
-import qualified HST.CSPM.Tests.Numbers as Numbers
-import qualified HST.CSPM.Tests.Sequences as Sequences
-import qualified HST.CSPM.Tests.Sets as Sets
-import qualified HST.CSPM.Tests.Lets as Lets
+import Test.QuickCheck
 
-main = do
-  Booleans.testAll
-  Numbers.testAll
-  Sequences.testAll
-  Sets.testAll
-  Lets.testAll
+import HST.CSPM
+import HST.CSPM.Tests.Generators
+
+testAll = do
+  putStr "LetSingle: "
+  quickCheck prop_LetSingle
+
+prop_LetSingle = forAll (pair identifier expression) tester
+    where
+      tester (id, x) = v0 == v1
+          where
+            e0 = ELet [Binding id x] (EVar id)
+            v0 = eval $ bind rootEnv e0
+            v1 = eval $ bind rootEnv x

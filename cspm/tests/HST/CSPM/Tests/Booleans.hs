@@ -39,24 +39,25 @@ prop_BoolAnd = forAll (two eboolean) tester
     where
       tester (eb1, eb2) = v0 == v12
           where
-            v0 = eval (EBAnd eb1 eb2)
-            b1 = evalAsBoolean eb1
-            b2 = evalAsBoolean eb2
+            bb1 = bind rootEnv eb1
+            v0 = eval $ bind rootEnv (EBAnd eb1 eb2)
+            b1 = evalAsBoolean $ bind rootEnv eb1
+            b2 = evalAsBoolean $ bind rootEnv eb2
             v12 = VBoolean (b1 && b2)
 
 prop_BoolOr = forAll (two eboolean) tester
     where
       tester (eb1, eb2) = v0 == v12
           where
-            v0 = eval (EBOr eb1 eb2)
-            b1 = evalAsBoolean eb1
-            b2 = evalAsBoolean eb2
+            v0 = eval $ bind rootEnv (EBOr eb1 eb2)
+            b1 = evalAsBoolean $ bind rootEnv eb1
+            b2 = evalAsBoolean $ bind rootEnv eb2
             v12 = VBoolean (b1 || b2)
 
 prop_BoolNot = forAll eboolean tester
     where
       tester eb1 = v0 == v1
           where
-            v0 = eval (EBNot eb1)
-            b1 = evalAsBoolean eb1
+            v0 = eval $ bind rootEnv (EBNot eb1)
+            b1 = evalAsBoolean $ bind rootEnv eb1
             v1 = VBoolean (not b1)

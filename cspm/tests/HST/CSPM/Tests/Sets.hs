@@ -38,8 +38,8 @@ prop_SetLiteral = forAll (listOf enumber) tester
     where
       tester ns = s0 == s1
           where
-            s0 = eval (ESLit ns)
-            s1 = VSet (nub (map eval ns))
+            s0 = eval $ bind rootEnv (ESLit ns)
+            s1 = VSet (nub (map (eval . bind rootEnv) ns))
 
 prop_SetClosedRange = forAll (two enumber) tester
     where
@@ -50,7 +50,7 @@ prop_SetClosedRange = forAll (two enumber) tester
       -- equality.
       tester (n1, n2) = (i2 - i1 <= 1000) ==> s0 == s1
           where
-            s0 = eval (ESClosedRange n1 n2)
+            s0 = eval $ bind rootEnv(ESClosedRange n1 n2)
             s1 = VSet (map VNumber [i1 .. i2])
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+            i1 = evalAsNumber $ bind rootEnv n1
+            i2 = evalAsNumber $ bind rootEnv n2

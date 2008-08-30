@@ -24,12 +24,14 @@ module HST.CSPM
     (
      module HST.CSPM.Expressions,
      module HST.CSPM.Values,
-     module HST.CSPM.Evaluate,
-     module HST.CSPM.Environments
+     module HST.CSPM.Environments,
+     module HST.CSPM.BoundExpressions,
+     module HST.CSPM.Evaluate
     )
     where
 
 import HST.CSPM.Expressions
 import HST.CSPM.Values
-import HST.CSPM.Evaluate
 import HST.CSPM.Environments
+import HST.CSPM.BoundExpressions
+import HST.CSPM.Evaluate

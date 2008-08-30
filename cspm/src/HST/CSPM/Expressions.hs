@@ -29,7 +29,7 @@ newtype Identifier
     deriving (Eq, Ord)
 
 instance Show Identifier where
-    show (Identifier s) = show s
+    show (Identifier s) = s
 
 data Binding
     = Binding Identifier Expression
@@ -97,6 +97,8 @@ data Expression
     | ETLit [Expression]
 
     -- Expressions which can evaluate to anything
+    | EVar Identifier
+    | ELet [Binding] Expression
     | EQHead Expression
     | EIfThenElse Expression Expression Expression
 
@@ -151,6 +153,8 @@ instance Show Expression where
 
     show (ETLit xs) = "(" ++ show xs ++ ")"
 
+    show (EVar id) = show id
+    show (ELet bs x) = "let " ++ show bs ++ " within " ++ show x
     show (EQHead x) = "head(" ++ show x ++ ")"
     show (EIfThenElse b x y) = "if (" ++ show b ++ ") then " ++
                                show x ++ " else " ++ show y

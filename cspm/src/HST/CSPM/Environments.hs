@@ -35,6 +35,7 @@ data Env
         table  :: Map Identifier Expression,
         parent :: Maybe Env
       }
+    deriving (Eq, Ord)
 
 rootEnv :: Env
 rootEnv = Env Map.empty Nothing

@@ -25,97 +25,100 @@ module HST.CSPM.Evaluate where
 import Data.List
 
 import HST.CSPM.Utils
-import HST.CSPM.Expressions
 import HST.CSPM.Values
+import HST.CSPM.Environments
+import HST.CSPM.BoundExpressions
 
-evalAsNumber :: Expression -> Int
+evalAsNumber :: BoundExpression -> Int
 evalAsNumber = coerceNumber . eval
 
-evalAsSequence :: Expression -> [Value]
+evalAsSequence :: BoundExpression -> [Value]
 evalAsSequence = coerceSequence . eval
 
-evalAsSet :: Expression -> [Value]
+evalAsSet :: BoundExpression -> [Value]
 evalAsSet = coerceSet . eval
 
-evalAsBoolean :: Expression -> Bool
+evalAsBoolean :: BoundExpression -> Bool
 evalAsBoolean = coerceBoolean . eval
 
-evalAsTuple :: Expression -> [Value]
+evalAsTuple :: BoundExpression -> [Value]
 evalAsTuple = coerceTuple . eval
 
-eval :: Expression -> Value
+eval :: BoundExpression -> Value
 
-eval EBottom = VBottom
+eval BBottom = VBottom
 
 -- Expressions that evaluate to a number
 
-eval (ENLit i)         = VNumber $ i
-eval (ENNeg m)         = VNumber $ -(evalAsNumber m)
-eval (ENSum m n)       = VNumber $ (evalAsNumber m) + (evalAsNumber n)
-eval (ENDiff m n)      = VNumber $ (evalAsNumber m) - (evalAsNumber n)
-eval (ENProd m n)      = VNumber $ (evalAsNumber m) * (evalAsNumber n)
-eval (ENQuot m n)      = VNumber $ (evalAsNumber m) `quot` (evalAsNumber n)
-eval (ENRem m n)       = VNumber $ (evalAsNumber m) `rem` (evalAsNumber n)
-eval (EQLength s)      = VNumber $ length (evalAsSequence s)
-eval (ESCardinality a) = VNumber $ length (evalAsSet a)
+eval (BNLit i)         = VNumber $ i
+eval (BNNeg m)         = VNumber $ -(evalAsNumber m)
+eval (BNSum m n)       = VNumber $ (evalAsNumber m) + (evalAsNumber n)
+eval (BNDiff m n)      = VNumber $ (evalAsNumber m) - (evalAsNumber n)
+eval (BNProd m n)      = VNumber $ (evalAsNumber m) * (evalAsNumber n)
+eval (BNQuot m n)      = VNumber $ (evalAsNumber m) `quot` (evalAsNumber n)
+eval (BNRem m n)       = VNumber $ (evalAsNumber m) `rem` (evalAsNumber n)
+eval (BQLength s)      = VNumber $ length (evalAsSequence s)
+eval (BSCardinality a) = VNumber $ length (evalAsSet a)
 
 -- Expressions that evaluate to a sequence
 
-eval (EQLit xs)          = VSequence $ map eval xs
-eval (EQClosedRange m n) = VSequence $
+eval (BQLit xs)          = VSequence $ map eval xs
+eval (BQClosedRange m n) = VSequence $
                            map VNumber
                            [evalAsNumber m .. evalAsNumber n]
-eval (EQOpenRange m)     = VSequence $
+eval (BQOpenRange m)     = VSequence $
                            map VNumber
                            [evalAsNumber m .. ]
-eval (EQConcat s t)      = VSequence $
+eval (BQConcat s t)      = VSequence $
                            (evalAsSequence s) ++ (evalAsSequence t)
-eval (EQTail s)          = VSequence $ tail (evalAsSequence s)
+eval (BQTail s)          = VSequence $ tail (evalAsSequence s)
 
 -- Expressions that evaluate to a set
 
-eval (ESLit xs)              = VSet $ nub (map eval xs)
-eval (ESClosedRange m n)     = VSet $ map VNumber
+eval (BSLit xs)              = VSet $ nub (map eval xs)
+eval (BSClosedRange m n)     = VSet $ map VNumber
                                [evalAsNumber m .. evalAsNumber n]
-eval (ESOpenRange m)         = VSet $ map VNumber [evalAsNumber m ..]
-eval (ESUnion a b)           = VSet $ (evalAsSet a) `union` (evalAsSet b)
-eval (ESIntersection a b)    = VSet $ (evalAsSet a) `intersect` (evalAsSet b)
-eval (ESDifference a b)      = VSet $ (evalAsSet a) \\ (evalAsSet b)
-eval (ESDistUnion aa)        = VSet $ distUnion
+eval (BSOpenRange m)         = VSet $ map VNumber [evalAsNumber m ..]
+eval (BSUnion a b)           = VSet $ (evalAsSet a) `union` (evalAsSet b)
+eval (BSIntersection a b)    = VSet $ (evalAsSet a) `intersect` (evalAsSet b)
+eval (BSDifference a b)      = VSet $ (evalAsSet a) \\ (evalAsSet b)
+eval (BSDistUnion aa)        = VSet $ distUnion
                                (map coerceSet (evalAsSet aa))
-eval (ESDistIntersection aa) = VSet $ distIntersect
+eval (BSDistIntersection aa) = VSet $ distIntersect
                                (map coerceSet (evalAsSet aa))
-eval (EQSet s)               = VSet $ nub (evalAsSequence s)
-eval (ESPowerset a)          = VSet $ map VSet (powerset (evalAsSet a))
-eval (ESSequenceset a)       = VSet $ map VSequence (sequenceset (evalAsSet a))
+eval (BQSet s)               = VSet $ nub (evalAsSequence s)
+eval (BSPowerset a)          = VSet $ map VSet (powerset (evalAsSet a))
+eval (BSSequenceset a)       = VSet $ map VSequence (sequenceset (evalAsSet a))
 
 -- Expressions that evaluate to a boolean
 
-eval EBTrue          = VBoolean $ True
-eval EBFalse         = VBoolean $ False
-eval (EBAnd b1 b2)   = VBoolean $ (evalAsBoolean b1) && (evalAsBoolean b2)
-eval (EBOr b1 b2)    = VBoolean $ (evalAsBoolean b1) || (evalAsBoolean b2)
-eval (EBNot b)       = VBoolean $ not (evalAsBoolean b)
-eval (EEqual x y)    = VBoolean $ (eval x) == (eval y)
-eval (ENotEqual x y) = VBoolean $ (eval x) /= (eval y)
-eval (ELT x y)       = VBoolean $ (eval x) < (eval y)
-eval (EGT x y)       = VBoolean $ (eval x) > (eval y)
-eval (ELTE x y)      = VBoolean $ (eval x) <= (eval y)
-eval (EGTE x y)      = VBoolean $ (eval x) >= (eval y)
-eval (EQEmpty s)     = VBoolean $ null (evalAsSequence s)
-eval (EQIn x s)      = VBoolean $ (eval x) `elem` (evalAsSequence s)
-eval (ESIn x a)      = VBoolean $ (eval x) `elem` (evalAsSet a)
-eval (ESEmpty a)     = VBoolean $ null (evalAsSet a)
+eval BBTrue          = VBoolean $ True
+eval BBFalse         = VBoolean $ False
+eval (BBAnd b1 b2)   = VBoolean $ (evalAsBoolean b1) && (evalAsBoolean b2)
+eval (BBOr b1 b2)    = VBoolean $ (evalAsBoolean b1) || (evalAsBoolean b2)
+eval (BBNot b)       = VBoolean $ not (evalAsBoolean b)
+eval (BEqual x y)    = VBoolean $ (eval x) == (eval y)
+eval (BNotEqual x y) = VBoolean $ (eval x) /= (eval y)
+eval (BLT x y)       = VBoolean $ (eval x) < (eval y)
+eval (BGT x y)       = VBoolean $ (eval x) > (eval y)
+eval (BLTE x y)      = VBoolean $ (eval x) <= (eval y)
+eval (BGTE x y)      = VBoolean $ (eval x) >= (eval y)
+eval (BQEmpty s)     = VBoolean $ null (evalAsSequence s)
+eval (BQIn x s)      = VBoolean $ (eval x) `elem` (evalAsSequence s)
+eval (BSIn x a)      = VBoolean $ (eval x) `elem` (evalAsSet a)
+eval (BSEmpty a)     = VBoolean $ null (evalAsSet a)
 
 -- Expressions that evaluate to a tuple
 
-eval (ETLit xs) = VTuple $ map eval xs
+eval (BTLit xs) = VTuple $ map eval xs
 
 -- Expressions that can evaluate to anything
 
-eval (EQHead s) = head (evalAsSequence s)
+eval (BQHead s) = head (evalAsSequence s)
 
-eval (EIfThenElse b x y) = if (evalAsBoolean b) then
+eval (BIfThenElse b x y) = if (evalAsBoolean b) then
                                eval x
                            else
                                eval y
+
+eval (BVar e id) = eval $ bind e $ lookupExpr e id
