@@ -42,23 +42,116 @@ instance Show Binding where
 
 data Expression
     = EBottom
-    | ENumber Number
-    | ESequence Sequence
-    | ESet Set
-    | EBoolean Boolean
-    | ETuple Tuple
-    | QHead Expression
+
+    -- Expressions which evaluate to a number
+    | ENLit Int
+    | ENNeg Expression
+    | ENSum Expression Expression
+    | ENDiff Expression Expression
+    | ENProd Expression Expression
+    | ENQuot Expression Expression
+    | ENRem Expression Expression
+    | EQLength Expression
+    | ESCardinality Expression
+
+    -- Expressions which evaluate to a sequence
+    | EQLit [Expression]
+    | EQClosedRange Expression Expression
+    | EQOpenRange Expression
+    | EQConcat Expression Expression
+    | EQTail Expression
+    -- TODO: sequence comprehension
+
+    -- Expressions which evaluate to a set
+    | ESLit [Expression]
+    | ESClosedRange Expression Expression
+    | ESOpenRange Expression
+    | ESUnion Expression Expression
+    | ESIntersection Expression Expression
+    | ESDifference Expression Expression
+    | ESDistUnion Expression
+    | ESDistIntersection Expression
+    | EQSet Expression
+    | ESPowerset Expression
+    | ESSequenceset Expression
+    -- TODO: set comprehension
+
+    -- Expressions which evaluate to a boolean
+    | EBTrue
+    | EBFalse
+    | EBAnd Expression Expression
+    | EBOr Expression Expression
+    | EBNot Expression
+    | EEqual Expression Expression
+    | ENotEqual Expression Expression
+    | ELT Expression Expression
+    | EGT Expression Expression
+    | ELTE Expression Expression
+    | EGTE Expression Expression
+    | EQEmpty Expression
+    | EQIn Expression Expression
+    | ESIn Expression Expression
+    | ESEmpty Expression
+
+    -- Expressions which evaluate to a tuple
+    | ETLit [Expression]
+
+    -- Expressions which can evaluate to anything
+    | EQHead Expression
     | EIfThenElse Expression Expression Expression
+
     deriving (Eq, Ord)
 
 instance Show Expression where
     show EBottom = "Bottom"
-    show (ENumber n) = show n
-    show (ESequence s) = show s
-    show (ESet a) = show a
-    show (EBoolean b) = show b
-    show (ETuple t) = show t
-    show (QHead x) = "head(" ++ show x ++ ")"
+
+    show (ENLit i)         = show i
+    show (ENNeg m)         = "(-" ++ show m ++ ")"
+    show (ENSum m n)       = "(" ++ show m ++ " + " ++ show n ++ ")"
+    show (ENDiff m n)      = "(" ++ show m ++ " - " ++ show n ++ ")"
+    show (ENProd m n)      = "(" ++ show m ++ " * " ++ show n ++ ")"
+    show (ENQuot m n)      = "(" ++ show m ++ " / " ++ show n ++ ")"
+    show (ENRem m n)       = "(" ++ show m ++ " % " ++ show n ++ ")"
+    show (EQLength s)      = "(#" ++ show s ++ ")"
+    show (ESCardinality a) = "(#" ++ show a ++ ")"
+
+    show (EQLit xs)          = "<" ++ show xs ++ ">"
+    show (EQClosedRange m n) = "<" ++ show m ++ ".." ++ show n ++ ">"
+    show (EQOpenRange m)     = "<" ++ show m ++ "..>"
+    show (EQConcat s t)      = "concat(" ++ show s ++ ", " ++ show t ++ ")"
+    show (EQTail s)          = "tail(" ++ show s ++ ")"
+
+    show (ESLit xs)              = "{" ++ show xs ++ "}"
+    show (ESClosedRange m n)     = "{" ++ show m ++ ".." ++ show n ++ "}"
+    show (ESOpenRange m)         = "{" ++ show m ++ "..}"
+    show (ESUnion s1 s2)         = "union(" ++ show s1 ++ ", " ++ show s2 ++ "}"
+    show (ESIntersection s1 s2)  = "inter(" ++ show s1 ++ ", " ++ show s2 ++ "}"
+    show (ESDifference s1 s2)    = "diff(" ++ show s1 ++ ", " ++ show s2 ++ "}"
+    show (ESDistUnion s1)        = "Union(" ++ show s1 ++ ")"
+    show (ESDistIntersection s1) = "Inter(" ++ show s1 ++ ")"
+    show (EQSet q0)              = "set(" ++ show q0 ++ ")"
+    show (ESPowerset s1)         = "Set(" ++ show s1 ++ ")"
+    show (ESSequenceset s1)      = "Seq(" ++ show s1 ++ ")"
+
+    show EBTrue            = "true"
+    show EBFalse           = "false"
+    show (EBAnd b1 b2)     = "(" ++ show b1 ++ " && " ++ show b2 ++ ")"
+    show (EBOr b1 b2)      = "(" ++ show b1 ++ " || " ++ show b2 ++ ")"
+    show (EBNot b1)        = "(!" ++ show b1 ++ ")"
+    show (EEqual e1 e2)    = "(" ++ show e1 ++ " == " ++ show e2 ++ ")"
+    show (ENotEqual e1 e2) = "(" ++ show e1 ++ " != " ++ show e2 ++ ")"
+    show (ELT e1 e2)       = "(" ++ show e1 ++ " < " ++ show e2 ++ ")"
+    show (EGT e1 e2)       = "(" ++ show e1 ++ " > " ++ show e2 ++ ")"
+    show (ELTE e1 e2)      = "(" ++ show e1 ++ " <= " ++ show e2 ++ ")"
+    show (EGTE e1 e2)      = "(" ++ show e1 ++ " >= " ++ show e2 ++ ")"
+    show (EQEmpty q0)      = "null(" ++ show q0 ++ ")"
+    show (EQIn x q0)       = "elem(" ++ show x ++ ", " ++ show q0 ++ ")"
+    show (ESIn x s0)       = "member(" ++ show x ++ ", " ++ show s0 ++ ")"
+    show (ESEmpty s0)      = "empty(" ++ show s0 ++ ")"
+
+    show (ETLit xs) = "(" ++ show xs ++ ")"
+
+    show (EQHead x) = "head(" ++ show x ++ ")"
     show (EIfThenElse b x y) = "if (" ++ show b ++ ") then " ++
                                show x ++ " else " ++ show y
 
@@ -72,119 +165,3 @@ instance Show Expression where
                       where
                         showl []     = id
                         showl (x:xs) = showChar ',' . shows x . showl xs
-
--- Numbers
-
-data Number
-    = NLit Int
-    | NNeg Expression
-    | NSum Expression Expression
-    | NDiff Expression Expression
-    | NProd Expression Expression
-    | NQuot Expression Expression
-    | NRem Expression Expression
-    | QLength Expression
-    | SCardinality Expression
-    deriving (Eq, Ord)
-
-instance Show Number where
-    show (NLit i)         = show i
-    show (NNeg m)         = "(-" ++ show m ++ ")"
-    show (NSum m n)       = "(" ++ show m ++ " + " ++ show n ++ ")"
-    show (NDiff m n)      = "(" ++ show m ++ " - " ++ show n ++ ")"
-    show (NProd m n)      = "(" ++ show m ++ " * " ++ show n ++ ")"
-    show (NQuot m n)      = "(" ++ show m ++ " / " ++ show n ++ ")"
-    show (NRem m n)       = "(" ++ show m ++ " % " ++ show n ++ ")"
-    show (QLength s)      = "(#" ++ show s ++ ")"
-    show (SCardinality a) = "(#" ++ show a ++ ")"
-
--- Sequences
-
-data Sequence
-    = QLit [Expression]
-    | QClosedRange Expression Expression
-    | QOpenRange Expression
-    | QConcat Expression Expression
-    | QTail Expression
-    -- TODO: sequence comprehension
-    deriving (Eq, Ord)
-
-instance Show Sequence where
-    show (QLit xs)          = "<" ++ show xs ++ ">"
-    show (QClosedRange m n) = "<" ++ show m ++ ".." ++ show n ++ ">"
-    show (QOpenRange m)     = "<" ++ show m ++ "..>"
-    show (QConcat s t)      = "concat(" ++ show s ++ ", " ++ show t ++ ")"
-    show (QTail s)          = "tail(" ++ show s ++ ")"
-
--- Sets
-
-data Set
-    = SLit [Expression]
-    | SClosedRange Expression Expression
-    | SOpenRange Expression
-    | SUnion Expression Expression
-    | SIntersection Expression Expression
-    | SDifference Expression Expression
-    | SDistUnion Expression
-    | SDistIntersection Expression
-    | QSet Expression
-    | SPowerset Expression
-    | SSequenceset Expression
-    -- TODO: set comprehension
-    deriving (Eq, Ord)
-
-instance Show Set where
-    show (SLit xs)              = "{" ++ show xs ++ "}"
-    show (SClosedRange m n)     = "{" ++ show m ++ ".." ++ show n ++ "}"
-    show (SOpenRange m)         = "{" ++ show m ++ "..}"
-    show (SUnion s1 s2)         = "union(" ++ show s1 ++ ", " ++ show s2 ++ "}"
-    show (SIntersection s1 s2)  = "inter(" ++ show s1 ++ ", " ++ show s2 ++ "}"
-    show (SDifference s1 s2)    = "diff(" ++ show s1 ++ ", " ++ show s2 ++ "}"
-    show (SDistUnion s1)        = "Union(" ++ show s1 ++ ")"
-    show (SDistIntersection s1) = "Inter(" ++ show s1 ++ ")"
-    show (QSet q0)              = "set(" ++ show q0 ++ ")"
-    show (SPowerset s1)         = "Set(" ++ show s1 ++ ")"
-    show (SSequenceset s1)      = "Seq(" ++ show s1 ++ ")"
-
--- Booleans
-
-data Boolean
-    = BTrue
-    | BFalse
-    | BAnd Expression Expression
-    | BOr Expression Expression
-    | BNot Expression
-    | EEqual Expression Expression
-    | ENotEqual Expression Expression
-    | ELT Expression Expression
-    | EGT Expression Expression
-    | ELTE Expression Expression
-    | EGTE Expression Expression
-    | QEmpty Expression
-    | QIn Expression Expression
-    | SIn Expression Expression
-    | SEmpty Expression
-    deriving (Eq, Ord)
-
-instance Show Boolean where
-    show BTrue             = "true"
-    show BFalse            = "false"
-    show (BAnd b1 b2)      = "(" ++ show b1 ++ " && " ++ show b2 ++ ")"
-    show (BOr b1 b2)       = "(" ++ show b1 ++ " || " ++ show b2 ++ ")"
-    show (BNot b1)         = "(!" ++ show b1 ++ ")"
-    show (EEqual e1 e2)    = "(" ++ show e1 ++ " == " ++ show e2 ++ ")"
-    show (ENotEqual e1 e2) = "(" ++ show e1 ++ " != " ++ show e2 ++ ")"
-    show (ELT e1 e2)       = "(" ++ show e1 ++ " < " ++ show e2 ++ ")"
-    show (EGT e1 e2)       = "(" ++ show e1 ++ " > " ++ show e2 ++ ")"
-    show (ELTE e1 e2)      = "(" ++ show e1 ++ " <= " ++ show e2 ++ ")"
-    show (EGTE e1 e2)      = "(" ++ show e1 ++ " >= " ++ show e2 ++ ")"
-    show (QEmpty q0)       = "null(" ++ show q0 ++ ")"
-    show (QIn x q0)        = "elem(" ++ show x ++ ", " ++ show q0 ++ ")"
-    show (SIn x s0)        = "member(" ++ show x ++ ", " ++ show s0 ++ ")"
-    show (SEmpty s0)       = "empty(" ++ show s0 ++ ")"
-
--- Tuples
-
-data Tuple
-    = TLit [Expression]
-    deriving (Eq, Ord, Show)

@@ -20,37 +20,24 @@
 --
 ------------------------------------------------------------------------
 
-module HST.CSPM.Tests.Sets where
+module HST.CSPM.Utils where
 
 import Data.List
-import Test.QuickCheck
 
-import HST.CSPM
-import HST.CSPM.Tests.Generators
+distUnion :: Eq a => [[a]] -> [a]
+distUnion xss = foldr union [] xss
 
-testAll = do
-  putStr "SetLiteral: "
-  quickCheck prop_SetLiteral
-  putStr "SetClosedRange: "
-  quickCheck prop_SetClosedRange
+distIntersect :: Eq a => [[a]] -> [a]
+distIntersect []  = []
+distIntersect xss = foldr1 intersect xss
 
-prop_SetLiteral = forAll (listOf enumber) tester
-    where
-      tester ns = s0 == s1
-          where
-            s0 = eval (ESLit ns)
-            s1 = VSet (nub (map eval ns))
+powerset :: [a] -> [[a]]
 
-prop_SetClosedRange = forAll (two enumber) tester
-    where
-      -- Don't test that i1 <= i2, because we want to ensure that we
-      -- correctly get an empty set in that case.  Do ensure that the
-      -- difference between the numbers isn't too large, so that we
-      -- don't have to spend too much time verifying the sequence
-      -- equality.
-      tester (n1, n2) = (i2 - i1 <= 1000) ==> s0 == s1
-          where
-            s0 = eval (ESClosedRange n1 n2)
-            s1 = VSet (map VNumber [i1 .. i2])
-            i1 = evalAsNumber n1
-            i2 = evalAsNumber n2
+powerset []     = [[]]
+powerset (x:xs) = ps ++ map (x:) ps
+                  where
+                    ps = powerset xs
+
+sequenceset :: [a] -> [[a]]
+sequenceset as = [[]] ++
+                 concat (map (\xs -> (map (:xs) as)) (sequenceset as))

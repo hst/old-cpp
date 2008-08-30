@@ -30,48 +30,45 @@ import HST.CSPM
 checkAll checker props =
     foldl (>>) (return ()) $ map checker props
 
-number :: Gen Number
-number = sized number'
-    where
-      number' 0         = liftM NLit arbitrary
-      number' n | n > 0 = oneof [liftM  NLit arbitrary,
-                                 liftM  NNeg subnum,
-                                 liftM2 NSum subnum subnum,
-                                 liftM2 NDiff subnum subnum,
-                                 liftM2 NProd subnum subnum
-                                 --liftM2 NQuot subnum subnum,
-                                 --liftM2 NRem subnum subnum
-                                ]
-                where
-                  subnum = liftM ENumber $ number' (n `div` 2)
-
-enumber :: Gen Expression
-enumber = liftM ENumber number
 
 listOf :: Gen a -> Gen [a]
 listOf g = sized listOf'
     where
       listOf' n = sequence [g | i <- [1..n]]
 
-qsequence = listOf enumber
-esequence = liftM (ESequence . QLit) qsequence
+pair :: Gen a -> Gen b -> Gen (a, b)
+pair = liftM2 (curry id)
 
-boolean :: Gen Boolean
-boolean = sized boolean'
+
+enumber :: Gen Expression
+enumber = sized number'
     where
-      boolean' 0         = oneof [return BTrue, return BFalse]
-      boolean' n | n > 0 = oneof [liftM2 BAnd subbool subbool,
-                                  liftM2 BOr subbool subbool,
-                                  liftM  BNot subbool
+      number' 0         = liftM ENLit arbitrary
+      number' n | n > 0 = oneof [liftM  ENLit arbitrary,
+                                 liftM  ENNeg subnum,
+                                 liftM2 ENSum subnum subnum,
+                                 liftM2 ENDiff subnum subnum,
+                                 liftM2 ENProd subnum subnum
+                                 --liftM2 ENQuot subnum subnum,
+                                 --liftM2 ENRem subnum subnum
+                                ]
+                where
+                  subnum = number' (n `div` 2)
+
+
+esequence = liftM EQLit $ listOf enumber
+
+eboolean :: Gen Expression
+eboolean = sized boolean'
+    where
+      boolean' 0         = oneof [return EBTrue, return EBFalse]
+      boolean' n | n > 0 = oneof [liftM2 EBAnd subbool subbool,
+                                  liftM2 EBOr subbool subbool,
+                                  liftM  EBNot subbool
                                  ]
                  where
-                   subbool = liftM EBoolean $ boolean' (n `div` 2)
-
-eboolean = liftM EBoolean boolean
+                   subbool = boolean' (n `div` 2)
 
 expression = oneof [enumber, esequence, eboolean]
 
 identifier = elements $ map (Identifier . (:[])) ['a'..'z']
-
-pair :: Gen a -> Gen b -> Gen (a, b)
-pair = liftM2 (curry id)

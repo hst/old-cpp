@@ -41,7 +41,7 @@ prop_SeqLiteral = forAll (listOf enumber) tester
     where
       tester ns = q0 == q1
           where
-            q0 = eval (ESequence (QLit ns))
+            q0 = eval (EQLit ns)
             q1 = VSequence (map eval ns)
 
 prop_SeqClosedRange = forAll (two enumber) tester
@@ -53,31 +53,27 @@ prop_SeqClosedRange = forAll (two enumber) tester
       -- equality.
       tester (n1, n2) = (i2 - i1 <= 1000) ==> q0 == q1
           where
-            q0 = eval (ESequence (QClosedRange n1 n2))
+            q0 = eval (EQClosedRange n1 n2)
             q1 = VSequence (map VNumber [i1 .. i2])
-            VNumber i1 = eval n1
-            VNumber i2 = eval n2
+            i1 = evalAsNumber n1
+            i2 = evalAsNumber n2
 
-prop_SeqConcat = forAll (two qsequence) tester
+prop_SeqConcat = forAll (two esequence) tester
     where
-      tester (ns1, ns2) = v0 == v12
+      tester (eq1, eq2) = v0 == v12
           where
-            eq1 = ESequence (QLit ns1)
-            eq2 = ESequence (QLit ns2)
-            v0 = eval (ESequence (QConcat eq1 eq2))
-            v1 = eval eq1
-            v2 = eval eq2
-            VSequence q1 = v1
-            VSequence q2 = v2
+            v0 = eval (EQConcat eq1 eq2)
+            q1 = evalAsSequence eq1
+            q2 = evalAsSequence eq2
             v12 = VSequence (q1 ++ q2)
 
-prop_SeqTail = forAll qsequence tester
+prop_SeqTail = forAll esequence tester
     where
-      tester ns = (length ns > 0) ==> v0 == v1
+      tester eq = (length ns > 0) ==> v0 == v1
           where
-            eq0 = ESequence (QTail eq1)
-            eq1 = ESequence (QLit ns)
-            v0 = eval eq0
-            v1' = eval eq1
-            VSequence q1' = v1'
-            v1 = VSequence (tail q1')
+            eq0 = EQTail eq
+            v0  = eval eq0
+
+            EQLit ns = eq
+            eq1      = EQLit (tail ns)
+            v1       = eval eq1

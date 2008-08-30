@@ -49,7 +49,7 @@ testAll = do
 
 prop_NumLiteral i = v1 == v2
     where
-      v1 = eval (ENumber (NLit i))
+      v1 = eval (ENLit i)
       v2 = VNumber i
       types = i :: Int
 
@@ -57,65 +57,61 @@ prop_NumNeg = forAll enumber tester
     where
       tester n = i0 == negate i1
           where
-            VNumber i0 = eval (ENumber (NNeg n))
-            VNumber i1 = eval n
+            i0 = evalAsNumber (ENNeg n)
+            i1 = evalAsNumber n
 
 prop_NumSum = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 + i2
           where
-            VNumber i0 = eval (ENumber (NSum n1 n2))
-            VNumber i1 = eval n1
-            VNumber i2 = eval n2
+            i0 = evalAsNumber (ENSum n1 n2)
+            i1 = evalAsNumber n1
+            i2 = evalAsNumber n2
 
 prop_NumDiff = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 - i2
           where
-            VNumber i0 = eval (ENumber (NDiff n1 n2))
-            VNumber i1 = eval n1
-            VNumber i2 = eval n2
+            i0 = evalAsNumber (ENDiff n1 n2)
+            i1 = evalAsNumber n1
+            i2 = evalAsNumber n2
 
 prop_NumProd = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 * i2
           where
-            VNumber i0 = eval (ENumber (NProd n1 n2))
-            VNumber i1 = eval n1
-            VNumber i2 = eval n2
+            i0 = evalAsNumber (ENProd n1 n2)
+            i1 = evalAsNumber n1
+            i2 = evalAsNumber n2
 
 prop_NumLT = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 < i2)
           where
-            v0 = eval (EBoolean (ELT n1 n2))
-            VBoolean b0 = v0
-            VNumber i1 = eval n1
-            VNumber i2 = eval n2
+            b0 = evalAsBoolean (ELT n1 n2)
+            i1 = evalAsNumber n1
+            i2 = evalAsNumber n2
 
 prop_NumGT = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 > i2)
           where
-            v0 = eval (EBoolean (EGT n1 n2))
-            VBoolean b0 = v0
-            VNumber i1 = eval n1
-            VNumber i2 = eval n2
+            b0 = evalAsBoolean (EGT n1 n2)
+            i1 = evalAsNumber n1
+            i2 = evalAsNumber n2
 
 prop_NumLTE = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 <= i2)
           where
-            v0 = eval (EBoolean (ELTE n1 n2))
-            VBoolean b0 = v0
-            VNumber i1 = eval n1
-            VNumber i2 = eval n2
+            b0 = evalAsBoolean (ELTE n1 n2)
+            i1 = evalAsNumber n1
+            i2 = evalAsNumber n2
 
 prop_NumGTE = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 >= i2)
           where
-            v0 = eval (EBoolean (EGTE n1 n2))
-            VBoolean b0 = v0
-            VNumber i1 = eval n1
-            VNumber i2 = eval n2
+            b0 = evalAsBoolean (EGTE n1 n2)
+            i1 = evalAsNumber n1
+            i2 = evalAsNumber n2

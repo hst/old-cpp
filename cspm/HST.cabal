@@ -14,6 +14,7 @@ Library
   Other-Modules:    HST.CSPM.Environments,
                     HST.CSPM.Evaluate,
                     HST.CSPM.Expressions,
+                    HST.CSPM.Utils,
                     HST.CSPM.Values
 
 Executable tests
