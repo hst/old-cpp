@@ -29,6 +29,7 @@ import HST.CSPM.Values
 
 eval :: Expression -> Value
 
+eval EBottom             = VBottom
 eval (ENumber id)        = VNumber (evalNumber id)
 eval (ESequence s)       = VSequence (evalSequence s)
 eval (ESet a)            = VSet (evalSet a)

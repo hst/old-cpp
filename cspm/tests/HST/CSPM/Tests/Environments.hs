@@ -20,16 +20,20 @@
 --
 ------------------------------------------------------------------------
 
-module HST.CSPM
-    (
-     module HST.CSPM.Expressions,
-     module HST.CSPM.Values,
-     module HST.CSPM.Evaluate,
-     module HST.CSPM.Environments
-    )
-    where
+module HST.CSPM.Tests.Environments where
 
-import HST.CSPM.Expressions
-import HST.CSPM.Values
-import HST.CSPM.Evaluate
-import HST.CSPM.Environments
+import Test.QuickCheck
+
+import HST.CSPM
+import HST.CSPM.Tests.Generators
+
+testAll = do
+  putStr "EnvExtend1: "
+  quickCheck prop_EnvExtend1
+
+prop_EnvExtend1 = forAll (pair identifier expression) tester
+    where
+      tester (id, x) = x == x0
+          where
+            e0 = extendEnv rootEnv [Binding id x]
+            x0 = lookupExpr e0 id

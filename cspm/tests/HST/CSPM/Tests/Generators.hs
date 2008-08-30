@@ -53,7 +53,8 @@ listOf g = sized listOf'
     where
       listOf' n = sequence [g | i <- [1..n]]
 
-esequence = listOf enumber
+qsequence = listOf enumber
+esequence = liftM (ESequence . QLit) qsequence
 
 boolean :: Gen Boolean
 boolean = sized boolean'
@@ -67,3 +68,10 @@ boolean = sized boolean'
                    subbool = liftM EBoolean $ boolean' (n `div` 2)
 
 eboolean = liftM EBoolean boolean
+
+expression = oneof [enumber, esequence, eboolean]
+
+identifier = elements $ map (Identifier . (:[])) ['a'..'z']
+
+pair :: Gen a -> Gen b -> Gen (a, b)
+pair = liftM2 (curry id)

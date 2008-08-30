@@ -58,7 +58,7 @@ prop_SeqClosedRange = forAll (two enumber) tester
             VNumber i1 = eval n1
             VNumber i2 = eval n2
 
-prop_SeqConcat = forAll (two esequence) tester
+prop_SeqConcat = forAll (two qsequence) tester
     where
       tester (ns1, ns2) = v0 == v12
           where
@@ -71,7 +71,7 @@ prop_SeqConcat = forAll (two esequence) tester
             VSequence q2 = v2
             v12 = VSequence (q1 ++ q2)
 
-prop_SeqTail = forAll esequence tester
+prop_SeqTail = forAll qsequence tester
     where
       tester ns = (length ns > 0) ==> v0 == v1
           where

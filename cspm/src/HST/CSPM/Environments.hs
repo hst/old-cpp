@@ -20,16 +20,45 @@
 --
 ------------------------------------------------------------------------
 
-module HST.CSPM
-    (
-     module HST.CSPM.Expressions,
-     module HST.CSPM.Values,
-     module HST.CSPM.Evaluate,
-     module HST.CSPM.Environments
-    )
-    where
+module HST.CSPM.Environments where
+
+import Data.Map (Map)
+import qualified Data.Map as Map
 
 import HST.CSPM.Expressions
 import HST.CSPM.Values
-import HST.CSPM.Evaluate
-import HST.CSPM.Environments
+
+-- Environments
+
+data Env
+    = Env {
+        table  :: Map Identifier Expression,
+        parent :: Maybe Env
+      }
+
+rootEnv :: Env
+rootEnv = Env Map.empty Nothing
+
+lookupExpr :: Env -> Identifier -> Expression
+lookupExpr e id = 
+    -- Try to find this id in the current symbol table first.
+    case Map.lookup id (table e) of
+      -- If we find it, great!  We just return it.
+      Just x -> x
+
+      -- Otherwise, we recursively look in the parent environment.
+      Nothing -> case (parent e) of
+                   Just e1 -> lookupExpr e1 id
+
+                   -- If there is no parent, then the id is undefined.
+                   -- Return bottom.
+                   Nothing -> EBottom
+
+extendEnv :: Env -> [Binding] -> Env
+extendEnv e bs 
+    = Env {
+        table  = Map.fromAscList ascList,
+        parent = Just e
+      }
+    where
+      ascList = map (\ (Binding id x) -> (id, x)) bs

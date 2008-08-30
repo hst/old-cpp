@@ -8,9 +8,11 @@ Author:          Douglas Creager
 
 Library
   HS-Source-Dirs:  src, tests
-  Build-Depends:    base, haskell98, QuickCheck >= 1.1
+  Build-Depends:    base, haskell98, containers,
+                    QuickCheck >= 1.1
   Exposed-Modules:  HST.CSPM
-  Other-Modules:    HST.CSPM.Evaluate,
+  Other-Modules:    HST.CSPM.Environments,
+                    HST.CSPM.Evaluate,
                     HST.CSPM.Expressions,
                     HST.CSPM.Values
 

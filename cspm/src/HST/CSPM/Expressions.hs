@@ -22,18 +22,37 @@
 
 module HST.CSPM.Expressions where
 
+-- Identifiers
+
+newtype Identifier
+    = Identifier String
+    deriving (Eq, Ord)
+
+instance Show Identifier where
+    show (Identifier s) = show s
+
+data Binding
+    = Binding Identifier Expression
+    deriving (Eq, Ord)
+
+instance Show Binding where
+    show (Binding id x) = show id ++ " = " ++ show x
+
 -- Expressions
 
 data Expression
-    = ENumber Number
+    = EBottom
+    | ENumber Number
     | ESequence Sequence
     | ESet Set
     | EBoolean Boolean
     | ETuple Tuple
     | QHead Expression
     | EIfThenElse Expression Expression Expression
+    deriving (Eq, Ord)
 
 instance Show Expression where
+    show EBottom = "Bottom"
     show (ENumber n) = show n
     show (ESequence s) = show s
     show (ESet a) = show a
@@ -66,6 +85,7 @@ data Number
     | NRem Expression Expression
     | QLength Expression
     | SCardinality Expression
+    deriving (Eq, Ord)
 
 instance Show Number where
     show (NLit i)         = show i
@@ -87,6 +107,7 @@ data Sequence
     | QConcat Expression Expression
     | QTail Expression
     -- TODO: sequence comprehension
+    deriving (Eq, Ord)
 
 instance Show Sequence where
     show (QLit xs)          = "<" ++ show xs ++ ">"
@@ -110,6 +131,7 @@ data Set
     | SPowerset Expression
     | SSequenceset Expression
     -- TODO: set comprehension
+    deriving (Eq, Ord)
 
 instance Show Set where
     show (SLit xs)              = "{" ++ show xs ++ "}"
@@ -142,6 +164,7 @@ data Boolean
     | QIn Expression Expression
     | SIn Expression Expression
     | SEmpty Expression
+    deriving (Eq, Ord)
 
 instance Show Boolean where
     show BTrue             = "true"
@@ -164,4 +187,4 @@ instance Show Boolean where
 
 data Tuple
     = TLit [Expression]
-    deriving Show
+    deriving (Eq, Ord, Show)
