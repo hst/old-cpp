@@ -25,9 +25,9 @@ module HST.CSPM.Evaluate where
 import Data.List
 
 import HST.CSPM.Utils
-import HST.CSPM.Values
+import HST.CSPM.Types
 import HST.CSPM.Environments
-import HST.CSPM.BoundExpressions
+import HST.CSPM.Bind
 
 evalAsNumber :: BoundExpression -> Int
 evalAsNumber = coerceNumber . eval
@@ -112,6 +112,10 @@ eval (BSEmpty a)     = VBoolean $ null (evalAsSet a)
 
 eval (BTLit xs) = VTuple $ map eval xs
 
+-- Expressions that evaluate to a lambda
+
+eval (BLambda e ids x) = VLambda e ids x
+
 -- Expressions that can evaluate to anything
 
 eval (BQHead s) = head (evalAsSequence s)
@@ -122,3 +126,8 @@ eval (BIfThenElse b x y) = if (evalAsBoolean b) then
                                eval y
 
 eval (BVar e id) = eval $ bind e $ lookupExpr e id
+
+eval (BApply x ys) = eval $ bind e1 body
+    where
+      VLambda e0 ids body = eval x
+      e1 = extendEnv e0 $ zipWith Binding ids (map EBound ys)

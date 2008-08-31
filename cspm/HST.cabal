@@ -11,11 +11,11 @@ Library
   Build-Depends:    base, haskell98, containers,
                     QuickCheck >= 1.1
   Exposed-Modules:  HST.CSPM
-  Other-Modules:    HST.CSPM.Environments,
+  Other-Modules:    HST.CSPM.Bind,
+                    HST.CSPM.Environments,
                     HST.CSPM.Evaluate,
-                    HST.CSPM.Expressions,
-                    HST.CSPM.Utils,
-                    HST.CSPM.Values
+                    HST.CSPM.Types,
+                    HST.CSPM.Utils
 
 Executable tests
   HS-Source-Dirs:  src, tests

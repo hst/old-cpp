@@ -25,17 +25,7 @@ module HST.CSPM.Environments where
 import Data.Map (Map)
 import qualified Data.Map as Map
 
-import HST.CSPM.Expressions
-import HST.CSPM.Values
-
--- Environments
-
-data Env
-    = Env {
-        table  :: Map Identifier Expression,
-        parent :: Maybe Env
-      }
-    deriving (Eq, Ord)
+import HST.CSPM.Types
 
 rootEnv :: Env
 rootEnv = Env Map.empty Nothing

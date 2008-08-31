@@ -27,6 +27,7 @@ import qualified HST.CSPM.Tests.Numbers as Numbers
 import qualified HST.CSPM.Tests.Sequences as Sequences
 import qualified HST.CSPM.Tests.Sets as Sets
 import qualified HST.CSPM.Tests.Lets as Lets
+import qualified HST.CSPM.Tests.Lambdas as Lambdas
 
 main = do
   Booleans.testAll
@@ -34,3 +35,4 @@ main = do
   Sequences.testAll
   Sets.testAll
   Lets.testAll
+  Lambdas.testAll
