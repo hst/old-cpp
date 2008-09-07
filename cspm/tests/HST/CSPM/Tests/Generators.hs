@@ -58,6 +58,8 @@ enumber = sized number'
 
 esequence = liftM EQLit $ listOf enumber
 
+eset = liftM ESLit $ listOf enumber
+
 eboolean :: Gen Expression
 eboolean = sized boolean'
     where

@@ -1,5 +1,5 @@
 Name:            HST
-Version:         1.0-a1
+Version:         1.0-a3
 Cabal-Version:   >= 1.2
 Build-Type:      Simple
 License:         LGPL
@@ -14,8 +14,8 @@ Library
   Other-Modules:    HST.CSPM.Bind,
                     HST.CSPM.Environments,
                     HST.CSPM.Evaluate,
-                    HST.CSPM.Types,
-                    HST.CSPM.Utils
+                    HST.CSPM.Sets,
+                    HST.CSPM.Types
 
 Executable tests
   HS-Source-Dirs:  src, tests

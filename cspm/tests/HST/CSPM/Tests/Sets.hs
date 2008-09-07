@@ -33,13 +33,19 @@ testAll = do
   quickCheck prop_SetLiteral
   putStr "SetClosedRange: "
   quickCheck prop_SetClosedRange
+  putStr "SetOpenRange: "
+  quickCheck prop_SetOpenRange
+  putStr "SetUnionAssoc: "
+  quickCheck prop_SetUnionAssoc
+  putStr "SetIntersectAssoc: "
+  quickCheck prop_SetIntersectAssoc
 
 prop_SetLiteral = forAll (listOf enumber) tester
     where
       tester ns = s0 == s1
           where
             s0 = eval $ bind rootEnv (ESLit ns)
-            s1 = VSet (nub (map (eval . bind rootEnv) ns))
+            s1 = VSet $ fromList (map (eval . bind rootEnv) ns)
 
 prop_SetClosedRange = forAll (two enumber) tester
     where
@@ -50,7 +56,29 @@ prop_SetClosedRange = forAll (two enumber) tester
       -- equality.
       tester (n1, n2) = (i2 - i1 <= 1000) ==> s0 == s1
           where
-            s0 = eval $ bind rootEnv(ESClosedRange n1 n2)
-            s1 = VSet (map VNumber [i1 .. i2])
+            s0 = eval $ bind rootEnv (ESClosedRange n1 n2)
+            s1 = VSet $ fromList (map VNumber [i1 .. i2])
             i1 = evalAsNumber $ bind rootEnv n1
             i2 = evalAsNumber $ bind rootEnv n2
+
+prop_SetOpenRange = forAll enumber tester
+    where
+      tester n = s0 == s1
+          where
+            s0 = eval $ bind rootEnv (ESOpenRange n)
+            s1 = VSet $ openRange i
+            i  = evalAsNumber $ bind rootEnv n
+
+prop_SetUnionAssoc = forAll (two eset) tester
+    where
+      tester (es1, es2) = s1 == s2
+          where
+            s1 = eval $ bind rootEnv (ESUnion es1 es2)
+            s2 = eval $ bind rootEnv (ESUnion es2 es1)
+
+prop_SetIntersectAssoc = forAll (two eset) tester
+    where
+      tester (es1, es2) = s1 == s2
+          where
+            s1 = eval $ bind rootEnv (ESIntersection es1 es2)
+            s2 = eval $ bind rootEnv (ESIntersection es2 es1)
