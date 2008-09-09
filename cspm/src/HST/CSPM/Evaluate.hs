@@ -22,6 +22,7 @@
 
 module HST.CSPM.Evaluate where
 
+import HST.CSPM.Sets (Set)
 import qualified HST.CSPM.Sets as Sets
 import HST.CSPM.Types
 import HST.CSPM.Environments
@@ -33,7 +34,7 @@ evalAsNumber = coerceNumber . eval
 evalAsSequence :: BoundExpression -> [Value]
 evalAsSequence = coerceSequence . eval
 
-evalAsSet :: BoundExpression -> RangedSet
+evalAsSet :: BoundExpression -> (Set Value)
 evalAsSet = coerceSet . eval
 
 evalAsBoolean :: BoundExpression -> Bool
@@ -56,7 +57,7 @@ eval (BNProd m n)      = VNumber $ (evalAsNumber m) * (evalAsNumber n)
 eval (BNQuot m n)      = VNumber $ (evalAsNumber m) `quot` (evalAsNumber n)
 eval (BNRem m n)       = VNumber $ (evalAsNumber m) `rem` (evalAsNumber n)
 eval (BQLength s)      = VNumber $ length (evalAsSequence s)
-eval (BSCardinality a) = Sets.size (evalAsSet a)
+eval (BSCardinality a) = VNumber $ Sets.size (evalAsSet a)
 
 -- Expressions that evaluate to a sequence
 
@@ -76,15 +77,20 @@ eval (BQTail s)          = VSequence $ tail (evalAsSequence s)
 eval (BSLit xs)              = VSet $ Sets.fromList (map eval xs)
 eval (BSClosedRange m n)     = VSet $ Sets.fromList $ map VNumber
                                [evalAsNumber m .. evalAsNumber n]
-eval (BSOpenRange m)         = VSet $ Sets.openRange (evalAsNumber m)
+eval (BSOpenRange m)         = VSet $ Sets.fromList $ map VNumber
+                               [evalAsNumber m .. ]
 eval (BSUnion a b)           = VSet $ (evalAsSet a) `Sets.union` (evalAsSet b)
 eval (BSIntersection a b)    = VSet $ (evalAsSet a) `Sets.intersect` (evalAsSet b)
 eval (BSDifference a b)      = VSet $ (evalAsSet a) `Sets.difference` (evalAsSet b)
-eval (BSDistUnion aa)        = VSet $ Sets.distUnion (evalAsSet aa)
-eval (BSDistIntersection aa) = VSet $ Sets.distIntersect (evalAsSet aa)
+eval (BSDistUnion aa)        = VSet $ Sets.distUnion $
+                               Sets.map coerceSet (evalAsSet aa)
+eval (BSDistIntersection aa) = VSet $ Sets.distIntersect $
+                               Sets.map coerceSet (evalAsSet aa)
 eval (BQSet s)               = VSet $ Sets.fromList (evalAsSequence s)
-eval (BSPowerset a)          = VSet $ Sets.powerset (evalAsSet a)
---eval (BSSequenceset a)       = VSet $ map VSequence (sequenceset (evalAsSet a))
+eval (BSPowerset a)          = VSet $ Sets.map VSet $
+                               Sets.powerset (evalAsSet a)
+eval (BSSequenceset a)       = VSet $ Sets.map VSequence $
+                               Sets.sequenceset (evalAsSet a)
 
 -- Expressions that evaluate to a boolean
 

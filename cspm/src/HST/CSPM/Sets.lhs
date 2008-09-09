@@ -20,306 +20,185 @@
 
 > module HST.CSPM.Sets where
 
-> import Prelude hiding (null)
+> import Prelude hiding (filter, map, null)
+> import qualified Prelude
 
-> import Data.Set (Set)
-> import qualified Data.Set as Set
+> import qualified Data.Set as S
 
-> import HST.CSPM.Types
+
+Sets
+
+The predefined Data.Set type is great for representing finite sets,
+but it doesn't work for infinite sets.  Therefore, we create our own
+Set type.  It contains a “loader list”, which can be infinite and can
+contain duplicates.  As we access elements from this list, they're
+added to a “storage set”, which allows us to ignore any duplicate
+elements that appear in the loader list.
+
+Set operations that work on infinite sets should access the elements
+using the toList function.  Operations that only work on finite sets
+should use the toSet function.
+
+> data Set a
+>     = Set {
+>         storage :: S.Set a,
+>         loader  :: [a]
+>       }
+
+> instance (Show a, Ord a) => Show (Set a) where
+>     show set = show $ toList set
+
+> instance (Eq a, Ord a) => Eq (Set a) where
+>     set1 == set2 = toSet set1 == toSet set2
+
+> instance Ord a => Ord (Set a) where
+>     compare set1 set2 = compare (toSet set1) (toSet set2)
+
 
 The empty ranged set.
 
-> emptyRangedSet :: RangedSet
-> emptyRangedSet = RangedSet { elems = Set.empty, from = Nothing }
+> empty :: Set a
+> empty = Set { storage = S.empty, loader = [] }
 
-Given a list of Values, we can create a RangedSet by creating an elems
-set from this list.
 
-> fromList :: [Value] -> RangedSet
-> fromList xs = RangedSet {
->                 elems = Set.fromList xs,
->                 from  = Nothing
->               }
+Create a new Set from the given list of elements.
 
-Create a RangedSet that only contains the given open range of Ints.
-
-> openRange :: Int -> RangedSet
-> openRange i = RangedSet {
->                 elems = Set.empty,
->                 from  = Just i
+> fromList :: [a] -> Set a
+> fromList as = Set {
+>                 storage = S.empty,
+>                 loader  = as
 >               }
 
 
-> member :: Value -> RangedSet -> Bool
-> member v@(VNumber i) (RangedSet e (Just f)) = v `Set.member` e ||
->                                               i >= f
-> member v rs = v `Set.member` (elems rs)
+Exhausting a set
 
-> null :: RangedSet -> Bool
-> null (RangedSet _ (Just _)) = False
-> null (RangedSet e Nothing)  = Set.null e
+The exhaust function loads the entire contents of the loader list into
+the storage set.  The loader list must be finite.
 
-> size :: RangedSet -> Value
-> size (RangedSet e Nothing)  = VNumber $ Set.size e
-> size (RangedSet _ (Just _)) = VBottom
+> toSet :: Ord a => Set a -> S.Set a
+> toSet = storage . exhaust
 
-> toList :: RangedSet -> [Value]
-> toList (RangedSet e Nothing)  = Set.toList e
-> toList (RangedSet e (Just i)) = Set.toList e ++ map VNumber [i..]
+> exhaust :: Ord a => Set a -> Set a
+> exhaust (Set s l)
+>     = Set {
+>         storage = s `S.union` S.fromList l,
+>         loader  = []
+>       }
 
-Consolidating RangedSets
 
-We'd like to ensure that any Int elements that are covered by the from
-clause aren't also included in the elems clause.  This ensures that we
-have a canonical representation for RangedSets.
+Extracting a list from a set
 
-To do this, we first define the foldNumbers function, which takes a
-list of Ints and a starting from value, and filters out any elements
-at the end of the list that can be merged into the from clause.  It
-returns the (possibly modified) from value, and a Set of the remaining
-Ints.
+The toList function allows us to work with infinite sets.  The loader
+list is only retrieved as needed, much like an infinite list.  At the
+same time, we stash away each element as its read into the storage
+set, allowing us to ensure that each element is only returned once.
+Any elements that have already been loaded into the storage set *will
+not* be returned.
 
-> foldNumbers :: Int -> [Int] -> (Set Int, Int)
-> foldNumbers from = foldr folder (Set.empty, from)
+The next method is the workhorse of the toList method; it extracts one
+element from the loader list, adding it to the storage set.  If this
+element wasn't already in the storage set, it's returned; otherwise,
+we return Nothing.  We also return the new Set, which will have a
+loader list that is one element shorter, and a storage set that might
+be one element larger.  Like the head function, there must be at least
+one element in the loader list.
+
+> next :: Ord a => Set a -> (Maybe a, Set a)
+> next (Set s l)
+>     | h `S.member` s = (Nothing, (Set s  l'))
+>     | otherwise      = (Just h,  (Set s' l'))
 >     where
->       folder i (nums, f) | i >= f     = (nums, f)
->                          | i == (f-1) = (nums, i)
->                          | otherwise  = (Set.insert i nums, f)
+>       h  = head l
+>       s' = S.insert h s
+>       l' = tail l
 
-Now, we can use foldNumbers to define consolidate.  If there is no
-from clause, then we don't have to do anything; the elems clause is
-already canonical.
+> toList :: Ord a => Set a -> [a]
+> toList (Set _ []) = []
+> toList set        = case next set of
+>                       (Nothing, set') -> toList set'
+>                       (Just a, set')  -> a : toList set'
 
-> consolidate :: RangedSet -> RangedSet
-> consolidate rs@(RangedSet { from = Nothing }) = rs
 
-Otherwise, we first separate the explicit elements into numbers
-(numElems) and non-numbers (otherElems).  We then use foldNumbers to
-merge numElems into the from clause, giving as a new Set of Ints
-(ints), and a new from claus (from').  We need to apply VNumber to
-each of the Ints to turn them into proper Values.
+Basic set operations
 
-At this point, we have a new Set of VNumber elems (numElems'), the
-original Set of non-number Values (otherElems), and the new from
-clause (from'), which we can combine together into the consolidated
-RangedSet.
+> member :: Ord a => a -> Set a -> Bool
+> member a set@(Set s _) = a `S.member` s || a `elem` toList set
 
-> consolidate rs = case from rs of
->                    Nothing -> rs
->                    Just i  -> RangedSet {
->                                 elems = numElems' `Set.union` otherElems,
->                                 from  = Just from'
->                               }
->                        where
->                          (ints, from') = foldNumbers i numList
->                          numElems'     = Set.map VNumber ints
->    where
->      (numElems, otherElems) = Set.partition keepNumbers (elems rs)
->      keepNumbers (VNumber _) = True
->      keepNumbers _           = False
+> null :: Set a -> Bool
+> null (Set s l) = S.null s && Prelude.null l
+
+> size :: Ord a => Set a -> Int
+> size = S.size . toSet
+
+> union :: Ord a => Set a -> Set a -> Set a
+> union (Set s1 l1) (Set s2 l2)
+>     = Set (s1 `S.union` s2) (alternate l1 l2)
 >
->      numList = map toInt $ Set.toAscList numElems
->      toInt (VNumber i) = i
+> alternate :: [a] -> [a] -> [a]
+> alternate [] ys     = ys
+> alternate xs []     = xs
+> alternate (x:xs) ys = x : alternate ys xs
 
-
-Unions of RangedSets
-
-  x = (xE ∪ xF)
-  y = (yE ∪ yF)
-
-To union two RangedSets, we can union the elem and from clauses
-independently:
-
-  x ∪ y = (xE ∪ xF) ∪ (yE ∪ yF)
-        = (xE ∪ yE) ∪ (xF ∪ yF)                   [assoc.]
-
-For the from clauses, we have different cases depending on whether
-either of the operands are empty or not:
-
-    ∅   ∪   ∅   = ∅
-  {i..} ∪   ∅   = {i..}
-    ∅   ∪ {j..} = {j..}
-  {i..} ∪ {j..} = {min(i,j)..}
-
-> union :: RangedSet -> RangedSet -> RangedSet
-> union x y = consolidate $ RangedSet {
->               elems = xE_yE,
->               from  = xF_yF (from x) (from y)
->             }
+> mapExhaust2 :: Ord a =>
+>                (S.Set a -> S.Set a -> S.Set a) ->
+>                Set a -> Set a -> Set a
+> mapExhaust2 f set1 set2
+>     = Set (f es1 es2) []
 >     where
->       xE_yE = (elems x) `Set.union` (elems y)
->
->       xF_yF Nothing Nothing   = Nothing
->       xF_yF (Just i) Nothing  = Just i
->       xF_yF Nothing (Just j)  = Just j
->       xF_yF (Just i) (Just j) = Just (min i j)
+>       es1 = toSet set1
+>       es2 = toSet set2
+
+> intersect :: Ord a => Set a -> Set a -> Set a
+> intersect = mapExhaust2 S.intersection
+
+> difference :: Ord a => Set a -> Set a -> Set a
+> difference = mapExhaust2 S.difference
 
 
-Intersection of RangedSets
+Filtering
 
-  x = (xE ∪ xF)
-  y = (yE ∪ yF)
-
-To intersect two RangedSets, we can distribute the intersection into
-the unions:
-
-  x ∩ y = (xE ∪ xF) ∩ (yE ∪ yF)
-        = (xE ∩ (yE ∪ yF)) ∪ (xF ∩ (yE ∪ yF))               [dist.]
-        = (xE ∩ yE) ∪ (xE ∩ yF) ∪ (xF ∩ yE) ∪ (xF ∩ yF)     [dist.]
-
-The middle two clauses intersect an elem with a from.  Here, we can
-just filter for the elements that are numbers, and are greater than
-the from clause:
-
-  e ∩   ∅   = ∅
-  e ∩ {i..} = {e | e ≥ i}
-
-The last clause intersects two froms.  Here, we have different cases
-depending on whether either of the operands are empty or not:
-
-    ∅   ∪   ∅   = ∅
-  {i..} ∪   ∅   = ∅
-    ∅   ∪ {j..} = ∅
-  {i..} ∪ {j..} = {min(i,j)..}
-
-> intersect :: RangedSet -> RangedSet -> RangedSet
-> intersect x y = consolidate $ RangedSet {
->                   elems = xE_yE `Set.union` xE_yF__xF_yE,
->                   from  = xF_yF (from x) (from y)
->                 }
->     where
->       xE_yE = (elems x) `Set.intersection` (elems y)
-> 
->       xE_yF = e_f' (elems x) (from y)
->       xF_yE = e_f' (elems y) (from x)
->       xE_yF__xF_yE = xE_yF `Set.union` xF_yE
-> 
->       e_f' e Nothing  = Set.empty
->       e_f' e (Just i) = Set.filter (keepAbove i) e
->       keepAbove i (VNumber j) = j >= i
->       keepAbove i _           = False
-> 
->       xF_yF Nothing _         = Nothing
->       xF_yF _ Nothing         = Nothing
->       xF_yF (Just i) (Just j) = Just (max i j)
+> filter :: Ord a => (a -> Bool) -> Set a -> Set a
+> filter f (Set s l) = Set (S.filter f s) (Prelude.filter f l)
 
 
-Difference of RangedSets
+Mapping
 
-  x = (xE ∪ xF)
-  y = (yE ∪ yF)
-
-To take the difference of two RangedSets, we can use the fake
-“negation” operator on sets:
-
-  x ∖ y = (xE ∪ xF) ∖ (yE ∪ yF)
-        = (xE ∪ xF) ∩ ¬(yE ∪ yF)                            [defn. of ∖]
-        = (xE ∪ xF) ∩ (¬yE ∩ ¬yF)                           [DeMorgan's]
-        = (xE ∩ ¬yE ∩ ¬yF) ∪ (xF ∩ ¬yE ∩ ¬yF)               [dist.]
-        = ((xE ∖ yE) ∖ yF) ∪ ((xF ∖ yF) ∖ yE)               [defn. of ∖]
-
-In this last step, I've ordered the clauses in that way to allow us to
-do the “easy” differences first.  For (xE ∖ yE), we can use the
-built-in Set.\\ function.  We can then use a filter to remove yF:
-
-  e ∖   ∅   = e
-  e ∖ {i..} = {e | (e < i) ∨ (e isn't a number) }
-
-For (xF ∖ yF), we have:
-
-    ∅   ∖   f   = ∅
-  {i..} ∖ {j..} = {i..j-1}
-  {i..} ∖   ∅   = {i..}
-
-Unfortunately, the last equation (which creates a from clause) has to
-be treated differently than the first two (which create elems clauses)
-when removing yE.  For the first two, we can simply use Set.\\, as
-above.  For the last, however, we have:
-
-  {i..} ∖ e
-
-To calculate this, we must find the largest number in e.  Everything
-above this in the open range is still there; everything below gives us
-a regular set that we can use Set.\\ on:
-
-  {i..} ∖ e = ({i..max(e)} ∖ e) ∪ {max(e)+1..}
-
-> difference :: RangedSet -> RangedSet -> RangedSet
-> difference x y = consolidate $ RangedSet {
->                    elems = xE_yE_yF (from y) `Set.union` xF_yF_e,
->                    from  = xF_yF_f
->                  }
->     where
->       closedNumSet i j = Set.fromList $ map VNumber [i..j]
->
->       xE_yE = (elems x) Set.\\ (elems y)
->
->       xE_yE_yF Nothing  = xE_yE
->       xE_yE_yF (Just i) = Set.filter (keepBelow i) xE_yE
->       keepBelow i (VNumber j) = j < i
->       keepBelow i _           = True
->
->       (xF_yF_e, xF_yF_f) = xF_yF (from x) (from y)
->
->       xF_yF Nothing _ = (Set.empty, Nothing)
->
->       xF_yF (Just xF) Nothing = (xF_yF_e, xF_yF_f)
->           where
->             yE_nums = Set.filter keepNums (elems y)
->             keepNums (VNumber _) = True
->             keepNums _           = False
->
->             yE_ints = Set.map coerceNumber yE_nums
->             yE_max  = Set.findMax yE_ints
->
->             xF_yF_e = (closedNumSet xF yE_max) Set.\\ yE_nums
->
->             xF_yF_f = Just (yE_max + 1)
->
->       xF_yF (Just xF) (Just yF) = (xF_yF' Set.\\ (elems y), Nothing)
->           where
->             xF_yF' = closedNumSet xF (yF-1)
+> map :: (Ord a, Ord b) => (a -> b) -> Set a -> Set b
+> map f (Set s l) = Set (S.map f s) (Prelude.map f l)
 
 
 Distributed union
 
-> distUnion :: RangedSet -> RangedSet
-> distUnion rss = foldr union emptyRangedSet $ map coerceSet $ toList rss
+> distUnion :: Ord a => Set (Set a) -> Set a
+> distUnion sset = foldr union empty $ toList sset
 
 
 Distributed intersection
 
-> distIntersect :: RangedSet -> RangedSet
-> distIntersect rss | null rss  = emptyRangedSet
->                   | otherwise = foldr1 intersect $ map coerceSet $ toList rss
+> distIntersect :: Ord a => Set (Set a) -> Set a
+> distIntersect sset | null sset = empty
+>                    | otherwise = foldr1 intersect $ toList sset
 
 
 Powerset
 
-> powerset :: RangedSet -> RangedSet
-> powerset rss = fromList $
->                map (VSet . fromList) $
->                listPowerset $ toList rss
+> powerset :: Ord a => Set a -> Set (Set a)
+> powerset = fromList . (Prelude.map fromList) . listPowerset . toList
 
-> listPowerset :: [Value] -> [[Value]]
+> listPowerset :: [a] -> [[a]]
 > listPowerset []     = [[]]
-> listPowerset (x:xs) = ps ++ map (x:) ps
+> listPowerset (x:xs) = ps ++ Prelude.map (x:) ps
 >     where
 >       ps = listPowerset xs
 
 
 Sequenceset
 
-> {-
-> sequenceset :: RangedSet -> RangedSet
+> sequenceset :: Ord a => Set a -> (Set [a])
 > sequenceset rss = fromList $
->                map (VSet . fromList) $
->                listPowerset $ toList rss
-> -}
+>                listSequenceset $ toList rss
 
-> {-
-> listSequenceset :: [Value] -> [[Value]]
+> listSequenceset :: [a] -> [[a]]
 > listSequenceset as = [[]] ++
->                      concat $ map (\xs -> (map (:xs) as))
->                                   (listSequenceset as))
-> -}
+>                      (concat $ Prelude.map (\xs -> (Prelude.map (:xs) as))
+>                                  (listSequenceset as))

@@ -24,8 +24,8 @@ module HST.CSPM.Types where
 
 import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.Set (Set)
-import qualified Data.Set as Set
+
+import HST.CSPM.Sets (Set)
 
 -- Identifiers
 
@@ -61,34 +61,13 @@ data Env
       }
     deriving (Eq, Ord)
 
--- Ranged sets
---
--- A ranged set is defined in two parts, each optional.  The first
--- lists the elements of the set by extension, and is used to store a
--- finite set of instances of arbitrary type.  The second defines an
--- open range of integers (the only infinite set that can be defined
--- directly in CSPM.)
-
-data RangedSet
-    = RangedSet {
-        elems :: Set Value,
-        from  :: Maybe Int
-      }
-    deriving (Eq, Ord)
-
-instance Show RangedSet where
-    show (RangedSet e Nothing)  = show (Set.toList e)
-    show (RangedSet e (Just i))
-        | Set.null e = show i ++ ".."
-        | otherwise  = show (Set.toList e) ++ "," ++ show i ++ ".."
-
 -- Values
 
 data Value
     = VBottom
     | VNumber Int
     | VSequence [Value]
-    | VSet RangedSet
+    | VSet (Set Value)
     | VBoolean Bool
     | VTuple [Value]
     | VLambda Env [Identifier] Expression
@@ -119,7 +98,7 @@ coerceNumber (VNumber i) = i
 coerceSequence :: Value -> [Value]
 coerceSequence (VSequence s) = s
 
-coerceSet :: Value -> RangedSet
+coerceSet :: Value -> (Set Value)
 coerceSet (VSet a) = a
 
 coerceBoolean :: Value -> Bool

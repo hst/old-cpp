@@ -26,6 +26,7 @@ import Data.List
 import Test.QuickCheck
 
 import HST.CSPM
+import qualified HST.CSPM.Sets as Sets
 import HST.CSPM.Tests.Generators
 
 testAll = do
@@ -33,8 +34,10 @@ testAll = do
   quickCheck prop_SetLiteral
   putStr "SetClosedRange: "
   quickCheck prop_SetClosedRange
+  {-
   putStr "SetOpenRange: "
   quickCheck prop_SetOpenRange
+  -}
   putStr "SetUnionAssoc: "
   quickCheck prop_SetUnionAssoc
   putStr "SetIntersectAssoc: "
@@ -45,7 +48,7 @@ prop_SetLiteral = forAll (listOf enumber) tester
       tester ns = s0 == s1
           where
             s0 = eval $ bind rootEnv (ESLit ns)
-            s1 = VSet $ fromList (map (eval . bind rootEnv) ns)
+            s1 = VSet $ Sets.fromList (map (eval . bind rootEnv) ns)
 
 prop_SetClosedRange = forAll (two enumber) tester
     where
@@ -57,17 +60,21 @@ prop_SetClosedRange = forAll (two enumber) tester
       tester (n1, n2) = (i2 - i1 <= 1000) ==> s0 == s1
           where
             s0 = eval $ bind rootEnv (ESClosedRange n1 n2)
-            s1 = VSet $ fromList (map VNumber [i1 .. i2])
+            s1 = VSet $ Sets.fromList (map VNumber [i1 .. i2])
             i1 = evalAsNumber $ bind rootEnv n1
             i2 = evalAsNumber $ bind rootEnv n2
+
+{-
+Can't test for equality on infinite sets.
 
 prop_SetOpenRange = forAll enumber tester
     where
       tester n = s0 == s1
           where
             s0 = eval $ bind rootEnv (ESOpenRange n)
-            s1 = VSet $ openRange i
+            s1 = VSet $ Sets.fromList $ map VNumber [i..]
             i  = evalAsNumber $ bind rootEnv n
+-}
 
 prop_SetUnionAssoc = forAll (two eset) tester
     where
