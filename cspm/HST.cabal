@@ -7,16 +7,17 @@ License-File:    LICENSE
 Author:          Douglas Creager
 
 Library
-  HS-Source-Dirs:  src, tests
+  HS-Source-Dirs:   src, tests
   Build-Depends:    base, haskell98, containers,
                     QuickCheck >= 1.1
   Exposed-Modules:  HST.CSPM
-  Other-Modules:    HST.CSPM.Bind,
+  Other-Modules:    HST.CSP0.Processes,
+                    HST.CSPM.Bind,
                     HST.CSPM.Environments,
                     HST.CSPM.Evaluate,
                     HST.CSPM.Sets,
                     HST.CSPM.Types
 
 Executable tests
-  HS-Source-Dirs:  src, tests
+  HS-Source-Dirs:   src, tests
   Main-Is:          HST/CSPM/Tests.hs
