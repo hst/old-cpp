@@ -41,5 +41,5 @@ prop_LambdaSum = forAll enumber tester
             e02 = EApply (EVar f) [en]
             e0 = ELet [Binding f e01] e02
             e1 = ENSum en (ENLit 5)
-            v0 = eval $ bind rootEnv e0
-            v1 = eval $ bind rootEnv e1
+            v0 = run $ eval $ bind rootEnv e0
+            v1 = run $ eval $ bind rootEnv e1

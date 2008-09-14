@@ -20,7 +20,12 @@
 --
 ------------------------------------------------------------------------
 
-module HST.CSPM.Evaluate where
+module HST.CSPM.Evaluate (
+                          eval, evalAsNumber, evalAsSequence,
+                          evalAsSet, evalAsBoolean, evalAsTuple, run
+                         ) where
+
+import Control.Monad.State
 
 import HST.CSPM.Sets (Set)
 import qualified HST.CSPM.Sets as Sets
@@ -28,108 +33,243 @@ import HST.CSPM.Types
 import HST.CSPM.Environments
 import HST.CSPM.Bind
 
-evalAsNumber :: BoundExpression -> Int
-evalAsNumber = coerceNumber . eval
+data EvalState
+    = EvalState ()
 
-evalAsSequence :: BoundExpression -> [Value]
-evalAsSequence = coerceSequence . eval
+emptyState :: EvalState
+emptyState = EvalState ()
 
-evalAsSet :: BoundExpression -> (Set Value)
-evalAsSet = coerceSet . eval
+type Eval a = State EvalState a
 
-evalAsBoolean :: BoundExpression -> Bool
-evalAsBoolean = coerceBoolean . eval
+run :: Eval a -> a
+run = (flip evalState) emptyState
 
-evalAsTuple :: BoundExpression -> [Value]
-evalAsTuple = coerceTuple . eval
+evalAsNumber :: BoundExpression -> Eval Int
+evalAsNumber = (liftM coerceNumber) . eval
 
-eval :: BoundExpression -> Value
+evalAsSequence :: BoundExpression -> Eval [Value]
+evalAsSequence = (liftM coerceSequence) . eval
 
-eval BBottom = VBottom
+evalAsSet :: BoundExpression -> Eval (Set Value)
+evalAsSet = (liftM coerceSet) . eval
+
+evalAsBoolean :: BoundExpression -> Eval Bool
+evalAsBoolean = (liftM coerceBoolean) . eval
+
+evalAsTuple :: BoundExpression -> Eval [Value]
+evalAsTuple = (liftM coerceTuple) . eval
+
+eval :: BoundExpression -> Eval Value
+
+eval BBottom = return VBottom
 
 -- Expressions that evaluate to a number
 
-eval (BNLit i)         = VNumber $ i
-eval (BNNeg m)         = VNumber $ -(evalAsNumber m)
-eval (BNSum m n)       = VNumber $ (evalAsNumber m) + (evalAsNumber n)
-eval (BNDiff m n)      = VNumber $ (evalAsNumber m) - (evalAsNumber n)
-eval (BNProd m n)      = VNumber $ (evalAsNumber m) * (evalAsNumber n)
-eval (BNQuot m n)      = VNumber $ (evalAsNumber m) `quot` (evalAsNumber n)
-eval (BNRem m n)       = VNumber $ (evalAsNumber m) `rem` (evalAsNumber n)
-eval (BQLength s)      = VNumber $ length (evalAsSequence s)
-eval (BSCardinality a) = VNumber $ Sets.size (evalAsSet a)
+eval (BNLit i) = return $ VNumber i
+
+eval (BNNeg m) = do
+  m' <- evalAsNumber m
+  return $ VNumber $ negate m'
+
+eval (BNSum m n) = do
+  m' <- evalAsNumber m
+  n' <- evalAsNumber n
+  return $ VNumber $ m' + n'
+
+eval (BNDiff m n) = do
+  m' <- evalAsNumber m
+  n' <- evalAsNumber n
+  return $ VNumber $ m' - n'
+
+eval (BNProd m n) = do
+  m' <- evalAsNumber m
+  n' <- evalAsNumber n
+  return $ VNumber $ m' * n'
+
+eval (BNQuot m n) = do
+  m' <- evalAsNumber m
+  n' <- evalAsNumber n
+  return $ VNumber $ m' `quot` n'
+
+eval (BNRem m n) = do
+  m' <- evalAsNumber m
+  n' <- evalAsNumber n
+  return $ VNumber $ m' `rem` n'
+
+eval (BQLength s) = do
+  s' <- evalAsSequence s
+  return $ VNumber $ length s'
+
+eval (BSCardinality a) = do
+  a' <- evalAsSet a
+  return $ VNumber $ Sets.size a'
 
 -- Expressions that evaluate to a sequence
 
-eval (BQLit xs)          = VSequence $ map eval xs
-eval (BQClosedRange m n) = VSequence $
-                           map VNumber
-                           [evalAsNumber m .. evalAsNumber n]
-eval (BQOpenRange m)     = VSequence $
-                           map VNumber
-                           [evalAsNumber m .. ]
-eval (BQConcat s t)      = VSequence $
-                           (evalAsSequence s) ++ (evalAsSequence t)
-eval (BQTail s)          = VSequence $ tail (evalAsSequence s)
+eval (BQLit xs) = do
+  xs' <- sequence $ map eval xs
+  return $ VSequence xs'
+
+eval (BQClosedRange m n) = do
+  m' <- evalAsNumber m
+  n' <- evalAsNumber n
+  return $ VSequence $ map VNumber [m'..n']
+
+eval (BQOpenRange m) = do
+  m' <- evalAsNumber m
+  return $ VSequence $ map VNumber [m'..]
+
+eval (BQConcat s t) = do
+  s' <- evalAsSequence s
+  t' <- evalAsSequence t
+  return $ VSequence $ s' ++ t'
+
+eval (BQTail s) = do
+  s' <- evalAsSequence s
+  return $ VSequence $ tail s'
 
 -- Expressions that evaluate to a set
 
-eval (BSLit xs)              = VSet $ Sets.fromList (map eval xs)
-eval (BSClosedRange m n)     = VSet $ Sets.fromList $ map VNumber
-                               [evalAsNumber m .. evalAsNumber n]
-eval (BSOpenRange m)         = VSet $ Sets.fromList $ map VNumber
-                               [evalAsNumber m .. ]
-eval (BSUnion a b)           = VSet $ (evalAsSet a) `Sets.union` (evalAsSet b)
-eval (BSIntersection a b)    = VSet $ (evalAsSet a) `Sets.intersect` (evalAsSet b)
-eval (BSDifference a b)      = VSet $ (evalAsSet a) `Sets.difference` (evalAsSet b)
-eval (BSDistUnion aa)        = VSet $ Sets.distUnion $
-                               Sets.map coerceSet (evalAsSet aa)
-eval (BSDistIntersection aa) = VSet $ Sets.distIntersect $
-                               Sets.map coerceSet (evalAsSet aa)
-eval (BQSet s)               = VSet $ Sets.fromList (evalAsSequence s)
-eval (BSPowerset a)          = VSet $ Sets.map VSet $
-                               Sets.powerset (evalAsSet a)
-eval (BSSequenceset a)       = VSet $ Sets.map VSequence $
-                               Sets.sequenceset (evalAsSet a)
+eval (BSLit xs) = do
+  xs' <- sequence $ map eval xs
+  return $ VSet $ Sets.fromList xs'
+
+eval (BSClosedRange m n) = do
+  m' <- evalAsNumber m
+  n' <- evalAsNumber n
+  return $ VSet $ Sets.fromList $ map VNumber [m'..n']
+
+eval (BSOpenRange m) = do
+  m' <- evalAsNumber m
+  return $ VSet $ Sets.fromList $ map VNumber [m'..]
+
+eval (BSUnion a b) = do
+  a' <- evalAsSet a
+  b' <- evalAsSet b
+  return $ VSet $ a' `Sets.union` b'
+
+eval (BSIntersection a b) = do
+  a' <- evalAsSet a
+  b' <- evalAsSet b
+  return $ VSet $ a' `Sets.intersect` b'
+
+eval (BSDifference a b) = do
+  a' <- evalAsSet a
+  b' <- evalAsSet b
+  return $ VSet $ a' `Sets.difference` b'
+
+eval (BSDistUnion aa) = do
+  aa' <- evalAsSet aa
+  return $ VSet $ Sets.distUnion $ Sets.map coerceSet aa'
+
+eval (BSDistIntersection aa) = do
+  aa' <- evalAsSet aa
+  return $ VSet $ Sets.distIntersect $ Sets.map coerceSet aa'
+
+eval (BQSet s) = do
+  s' <- evalAsSequence s
+  return $ VSet $ Sets.fromList s'
+
+eval (BSPowerset a) = do
+  a' <- evalAsSet a
+  return $ VSet $ Sets.map VSet $ Sets.powerset a'
+
+eval (BSSequenceset a) = do
+  a' <- evalAsSet a
+  return $ VSet $ Sets.map VSequence $ Sets.sequenceset a'
 
 -- Expressions that evaluate to a boolean
 
-eval BBTrue          = VBoolean $ True
-eval BBFalse         = VBoolean $ False
-eval (BBAnd b1 b2)   = VBoolean $ (evalAsBoolean b1) && (evalAsBoolean b2)
-eval (BBOr b1 b2)    = VBoolean $ (evalAsBoolean b1) || (evalAsBoolean b2)
-eval (BBNot b)       = VBoolean $ not (evalAsBoolean b)
-eval (BEqual x y)    = VBoolean $ (eval x) == (eval y)
-eval (BNotEqual x y) = VBoolean $ (eval x) /= (eval y)
-eval (BLT x y)       = VBoolean $ (eval x) < (eval y)
-eval (BGT x y)       = VBoolean $ (eval x) > (eval y)
-eval (BLTE x y)      = VBoolean $ (eval x) <= (eval y)
-eval (BGTE x y)      = VBoolean $ (eval x) >= (eval y)
-eval (BQEmpty s)     = VBoolean $ null (evalAsSequence s)
-eval (BQIn x s)      = VBoolean $ (eval x) `elem` (evalAsSequence s)
-eval (BSIn x a)      = VBoolean $ (eval x) `Sets.member` (evalAsSet a)
-eval (BSEmpty a)     = VBoolean $ Sets.null (evalAsSet a)
+eval BBTrue  = return $ VBoolean True
+eval BBFalse = return $ VBoolean False
+
+eval (BBAnd b1 b2) = do
+  b1' <- evalAsBoolean b1
+  b2' <- evalAsBoolean b2
+  return $ VBoolean $ b1' && b2'
+
+eval (BBOr b1 b2) = do
+  b1' <- evalAsBoolean b1
+  b2' <- evalAsBoolean b2
+  return $ VBoolean $ b1' || b2'
+
+eval (BBNot b) = do
+  b' <- evalAsBoolean b
+  return $ VBoolean $ not b'
+
+eval (BEqual x y) = do
+  x' <- eval x
+  y' <- eval y
+  return $ VBoolean $ x' == y'
+
+eval (BNotEqual x y) = do
+  x' <- eval x
+  y' <- eval y
+  return $ VBoolean $ x' /= y'
+
+eval (BLT x y) = do
+  x' <- eval x
+  y' <- eval y
+  return $ VBoolean $ x' < y'
+
+eval (BGT x y) = do
+  x' <- eval x
+  y' <- eval y
+  return $ VBoolean $ x' > y'
+
+eval (BLTE x y) = do
+  x' <- eval x
+  y' <- eval y
+  return $ VBoolean $ x' <= y'
+
+eval (BGTE x y) = do
+  x' <- eval x
+  y' <- eval y
+  return $ VBoolean $ x' >= y'
+
+eval (BQEmpty s) = do
+  s' <- evalAsSequence s
+  return $ VBoolean $ null s'
+
+eval (BQIn x s) = do
+  x' <- eval x
+  s' <- evalAsSequence s
+  return $ VBoolean $ x' `elem` s'
+
+eval (BSIn x a) = do
+  x' <- eval x
+  a' <- evalAsSet a
+  return $ VBoolean $ x' `Sets.member` a'
+
+eval (BSEmpty a) = do
+  a' <- evalAsSet a
+  return $ VBoolean $ Sets.null a'
 
 -- Expressions that evaluate to a tuple
 
-eval (BTLit xs) = VTuple $ map eval xs
+eval (BTLit xs) = do
+  xs' <- sequence $ map eval xs
+  return $ VTuple xs'
 
 -- Expressions that evaluate to a lambda
 
-eval (BLambda e ids x) = VLambda e ids x
+eval (BLambda e ids x) = return $ VLambda e ids x
 
 -- Expressions that can evaluate to anything
 
-eval (BQHead s) = head (evalAsSequence s)
+eval (BQHead s) = do
+  s' <- evalAsSequence s
+  return $ head s'
 
-eval (BIfThenElse b x y) = if (evalAsBoolean b) then
-                               eval x
-                           else
-                               eval y
+eval (BIfThenElse b x y) = do
+  b' <- evalAsBoolean b
+  case b' of
+    True  -> eval x
+    False -> eval y
 
 eval (BVar e id) = eval $ bind e $ lookupExpr e id
 
-eval (BApply x ys) = eval $ bind e1 body
-    where
-      VLambda e0 ids body = eval x
-      e1 = extendEnv e0 $ zipWith Binding ids (map EBound ys)
+eval (BApply x ys) = do
+  VLambda e0 ids body <- eval x
+  let e1 = extendEnv e0 $ zipWith Binding ids (map EBound ys)
+  eval $ bind e1 body

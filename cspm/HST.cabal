@@ -8,7 +8,7 @@ Author:          Douglas Creager
 
 Library
   HS-Source-Dirs:   src, tests
-  Build-Depends:    base, haskell98, containers,
+  Build-Depends:    base, haskell98, containers, mtl,
                     QuickCheck >= 1.1
   Exposed-Modules:  HST.CSPM
   Other-Modules:    HST.CSP0.Processes,

@@ -20,86 +20,124 @@
 --
 ------------------------------------------------------------------------
 
-module HST.CSPM.Bind where
+module HST.CSPM.Bind (
+                      bind
+                     ) where
+
+import Control.Monad.State
 
 import HST.CSPM.Types
 import HST.CSPM.Environments
 
+data BindState
+    = BindState ()
+
+emptyState :: BindState
+emptyState = BindState ()
+
+type Binder a = State BindState a
+
 bind :: Env -> Expression -> BoundExpression
 
-bind e EBottom = BBottom
+bind e x = evalState (binder e x) emptyState
+
+binder :: Env -> Expression -> Binder BoundExpression
+
+binder1 f e x = do
+  x' <- binder e x
+  return $ f x'
+
+binder2 f e x y = do
+  x' <- binder e x
+  y' <- binder e y
+  return $ f x' y'
+
+binder3 f e x y z = do
+  x' <- binder e x
+  y' <- binder e y
+  z' <- binder e z
+  return $ f x' y' z'
+
+binderList f e xs = do
+  xs' <- sequence $ map (binder e) xs
+  return $ f xs'
+
+binder e EBottom = return BBottom
 
 -- Numbers
 
-bind e (ENLit i)         = BNLit i
-bind e (ENNeg x)         = BNNeg (bind e x)
-bind e (ENSum x y)       = BNSum (bind e x) (bind e y)
-bind e (ENDiff x y)      = BNDiff (bind e x) (bind e y)
-bind e (ENProd x y)      = BNProd (bind e x) (bind e y)
-bind e (ENQuot x y)      = BNQuot (bind e x) (bind e y)
-bind e (ENRem x y)       = BNRem (bind e x) (bind e y)
-bind e (EQLength x)      = BQLength (bind e x)
-bind e (ESCardinality x) = BSCardinality (bind e x)
+binder e (ENLit i)         = return $ BNLit i
+binder e (ENNeg x)         = binder1 BNNeg e x
+binder e (ENSum x y)       = binder2 BNSum e x y
+binder e (ENDiff x y)      = binder2 BNDiff e x y
+binder e (ENProd x y)      = binder2 BNProd e x y
+binder e (ENQuot x y)      = binder2 BNQuot e x y
+binder e (ENRem x y)       = binder2 BNRem e x y
+binder e (EQLength x)      = binder1 BQLength e x
+binder e (ESCardinality x) = binder1 BSCardinality e x
 
 -- Sequences
 
-bind e (EQLit xs)          = BQLit (map (bind e) xs)
-bind e (EQClosedRange x y) = BQClosedRange (bind e x) (bind e y)
-bind e (EQOpenRange x)     = BQOpenRange (bind e x)
-bind e (EQConcat x y)      = BQConcat (bind e x) (bind e y)
-bind e (EQTail x)          = BQTail (bind e x)
+binder e (EQLit xs)          = binderList BQLit e xs
+binder e (EQClosedRange x y) = binder2 BQClosedRange e x y
+binder e (EQOpenRange x)     = binder1 BQOpenRange e x
+binder e (EQConcat x y)      = binder2 BQConcat e x y
+binder e (EQTail x)          = binder1 BQTail e x
 
 -- Sets
 
-bind e (ESLit xs)             = BSLit (map (bind e) xs)
-bind e (ESClosedRange x y)    = BSClosedRange (bind e x) (bind e y)
-bind e (ESOpenRange x)        = BSOpenRange (bind e x)
-bind e (ESUnion x y)          = BSUnion (bind e x) (bind e y)
-bind e (ESIntersection x y)   = BSIntersection (bind e x) (bind e y)
-bind e (ESDifference x y)     = BSDifference (bind e x) (bind e y)
-bind e (ESDistUnion x)        = BSDistUnion (bind e x)
-bind e (ESDistIntersection x) = BSDistIntersection (bind e x)
-bind e (EQSet x)              = BQSet (bind e x)
-bind e (ESPowerset x)         = BSPowerset (bind e x)
-bind e (ESSequenceset x)      = BSSequenceset (bind e x)
+binder e (ESLit xs)             = binderList BSLit e xs
+binder e (ESClosedRange x y)    = binder2 BSClosedRange e x y
+binder e (ESOpenRange x)        = binder1 BSOpenRange e x
+binder e (ESUnion x y)          = binder2 BSUnion e x y
+binder e (ESIntersection x y)   = binder2 BSIntersection e x y
+binder e (ESDifference x y)     = binder2 BSDifference e x y
+binder e (ESDistUnion x)        = binder1 BSDistUnion e x
+binder e (ESDistIntersection x) = binder1 BSDistIntersection e x
+binder e (EQSet x)              = binder1 BQSet e x
+binder e (ESPowerset x)         = binder1 BSPowerset e x
+binder e (ESSequenceset x)      = binder1 BSSequenceset e x
 
 -- Booleans
 
-bind e EBTrue          = BBTrue
-bind e EBFalse         = BBFalse
-bind e (EBAnd x y)     = BBAnd (bind e x) (bind e y)
-bind e (EBOr x y)      = BBOr (bind e x) (bind e y)
-bind e (EBNot x)       = BBNot (bind e x)
-bind e (EEqual x y)    = BEqual (bind e x) (bind e y)
-bind e (ENotEqual x y) = BNotEqual (bind e x) (bind e y)
-bind e (ELT x y)       = BLT (bind e x) (bind e y)
-bind e (EGT x y)       = BGT (bind e x) (bind e y)
-bind e (ELTE x y)      = BLTE (bind e x) (bind e y)
-bind e (EGTE x y)      = BGTE (bind e x) (bind e y)
-bind e (EQEmpty x)     = BQEmpty (bind e x)
-bind e (EQIn x y)      = BQIn (bind e x) (bind e y)
-bind e (ESIn x y)      = BSIn (bind e x) (bind e y)
-bind e (ESEmpty x)     = BSEmpty (bind e x)
+binder e EBTrue          = return BBTrue
+binder e EBFalse         = return BBFalse
+binder e (EBAnd x y)     = binder2 BBAnd e x y
+binder e (EBOr x y)      = binder2 BBOr e x y
+binder e (EBNot x)       = binder1 BBNot e x
+binder e (EEqual x y)    = binder2 BEqual e x y
+binder e (ENotEqual x y) = binder2 BNotEqual e x y
+binder e (ELT x y)       = binder2 BLT e x y
+binder e (EGT x y)       = binder2 BGT e x y
+binder e (ELTE x y)      = binder2 BLTE e x y
+binder e (EGTE x y)      = binder2 BGTE e x y
+binder e (EQEmpty x)     = binder1 BQEmpty e x
+binder e (EQIn x y)      = binder2 BQIn e x y
+binder e (ESIn x y)      = binder2 BSIn e x y
+binder e (ESEmpty x)     = binder1 BSEmpty e x
 
 -- Tuples
 
-bind e (ETLit xs) = BTLit (map (bind e) xs)
+binder e (ETLit xs) = binderList BTLit e xs
 
 -- Lambdas
 
-bind e (ELambda ids x) = BLambda e ids x
+binder e (ELambda ids x) = return $ BLambda e ids x
 
 -- Anything
 
-bind e (EQHead x)          = BQHead (bind e x)
-bind e (EIfThenElse x y z) = BIfThenElse (bind e x) (bind e y) (bind e z)
+binder e (EQHead x)          = binder1 BQHead e x
+binder e (EIfThenElse x y z) = binder3 BIfThenElse e x y z
 
-bind e (EBound be) = be
+binder e (EBound be) = return $ be
 
-bind e (EVar id) = BVar e id
+binder e (EVar id) = return $ BVar e id
 
-bind e (ELet bs x) = bind e1 x
+binder e (ELet bs x) = binder e1 x
     where
       e1 = extendEnv e bs
 
-bind e (EApply x ys) = BApply (bind e x) (map (bind e) ys)
+binder e (EApply x ys) = do
+  x' <- binder e x
+  ys' <- sequence $ map (binder e) ys
+  return $ BApply x' ys'
