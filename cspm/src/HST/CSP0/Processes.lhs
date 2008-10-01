@@ -253,12 +253,16 @@ process more than once.
 > data Script
 >     = Script {
 >         processes  :: ProcessSet,
->         pending    :: ProcessSet,
->         defined    :: ProcessSet,
 >         events     :: Alphabet,
 >         statements :: [Statement]
 >       }
 >     deriving Show
+
+> instance HasProcessSet Script where
+>     getProcessSet = processes
+>     putProcessSet s ps = s { processes = ps }
+
+> type ScriptTransformer a = State Script a
 
 
 The empty CSP₀ script.
@@ -266,39 +270,24 @@ The empty CSP₀ script.
 > emptyScript :: Script
 > emptyScript = Script {
 >                 processes  = ProcessSet Set.empty,
->                 pending    = ProcessSet Set.empty,
->                 defined    = ProcessSet Set.empty,
 >                 events     = Alphabet Set.empty,
 >                 statements = []
 >               }
 
 
+Applies a Script transformer to the empty Script, returning the
+result.
+
+> createScript :: (ScriptTransformer a) -> Script
+> createScript creator = execState creator emptyScript
+
+
 Adding statements to a script
 
-The addStatement function adds a Statement to a Script.  If the
-Statement is a “process” or “event” statement, we also update the
-appropriate set.  The function operates by returning a State
-transformer.
+The addStatement function creates a Script transformer that adds a
+Statement to a Script.
 
-> addStatement :: Statement -> State Script ()
-
-> addStatement stmt@(SProcess p)
->     = do
->       s <- get
->       let ProcessSet procSet = processes s
->       put $ s {
->         processes  = ProcessSet $ Set.insert p procSet,
->         statements = statements s ++ [stmt]
->       }
-
-> addStatement stmt@(SEvent a)
->     = do
->       s <- get
->       let Alphabet alpha = events s
->       put $ s {
->         events     = Alphabet $ Set.insert a alpha,
->         statements = statements s ++ [stmt]
->       }
+> addStatement :: Statement -> ScriptTransformer ()
 
 > addStatement stmt
 >     = do
@@ -306,88 +295,84 @@ transformer.
 >       put $ s { statements = statements s ++ [stmt] }
 
 
-We provide helper functions for each kind of CSP₀ statement.
+We provide helper functions that call addStatement for each kind of
+CSP₀ statement.
 
-> process :: Process -> State Script ()
-> process p
->     = do
->       addStatement (SProcess p)
+> process :: Process -> ScriptTransformer ()
+> process p = addStatement (SProcess p)
 
-> event :: Event -> State Script ()
-> event a
->     = do
->       addStatement (SEvent a)
+> event :: Event -> ScriptTransformer ()
+> event a = addStatement (SEvent a)
 
-> alias :: Process -> Process -> State Script ()
-> alias dest p
->     = do
->       addStatement (SAlias dest p)
+> alias :: Process -> Process -> ScriptTransformer ()
+> alias dest p = addStatement (SAlias dest p)
 
-> prefix :: Process -> Event -> Process -> State Script ()
-> prefix dest a p
->     = do
->       addStatement (SPrefix dest a p)
+> prefix :: Process -> Event -> Process -> ScriptTransformer ()
+> prefix dest a p = addStatement (SPrefix dest a p)
 
-> extchoice :: Process -> Process -> Process -> State Script ()
-> extchoice dest p q
->     = do
->       addStatement (SExtChoice dest p q)
+> extchoice :: Process -> Process -> Process -> ScriptTransformer ()
+> extchoice dest p q = addStatement (SExtChoice dest p q)
 
-> intchoice :: Process -> Process -> Process -> State Script ()
-> intchoice dest p q
->     = do
->       addStatement (SIntChoice dest p q)
+> intchoice :: Process -> Process -> Process -> ScriptTransformer ()
+> intchoice dest p q = addStatement (SIntChoice dest p q)
 
-> timeout :: Process -> Process -> Process -> State Script ()
-> timeout dest p q
->     = do
->       addStatement (STimeout dest p q)
+> timeout :: Process -> Process -> Process -> ScriptTransformer ()
+> timeout dest p q = addStatement (STimeout dest p q)
 
-> seqcomp :: Process -> Process -> Process -> State Script ()
-> seqcomp dest p q
->     = do
->       addStatement (SSeqComp dest p q)
+> seqcomp :: Process -> Process -> Process -> ScriptTransformer ()
+> seqcomp dest p q = addStatement (SSeqComp dest p q)
 
-> interleave :: Process -> Process -> Process -> State Script ()
-> interleave dest p q
->     = do
->       addStatement (SInterleave dest p q)
+> interleave :: Process -> Process -> Process -> ScriptTransformer ()
+> interleave dest p q = addStatement (SInterleave dest p q)
 
-> iparallel :: Process -> Process -> Alphabet -> Process -> State Script ()
-> iparallel dest p alpha q
->     = do
->       addStatement (SIParallel dest p alpha q)
+> iparallel :: Process -> Process -> Alphabet -> Process -> ScriptTransformer ()
+> iparallel dest p alpha q = addStatement (SIParallel dest p alpha q)
 
 > aparallel :: Process -> Process -> Alphabet -> Alphabet -> Process ->
->              State Script ()
-> aparallel dest p alpha beta q
->     = do
->       addStatement (SAParallel dest p alpha beta q)
+>              ScriptTransformer ()
+> aparallel dest p alpha beta q = addStatement (SAParallel dest p alpha beta q)
 
-> hide :: Process -> Process -> Alphabet -> State Script ()
-> hide dest p alpha
->     = do
->       addStatement (SHide dest p alpha)
+> hide :: Process -> Process -> Alphabet -> ScriptTransformer ()
+> hide dest p alpha = addStatement (SHide dest p alpha)
 
-> rename :: Process -> Process -> EventMap -> State Script ()
-> rename dest p emap
->     = do
->       addStatement (SRename dest p emap)
+> rename :: Process -> Process -> EventMap -> ScriptTransformer ()
+> rename dest p emap = addStatement (SRename dest p emap)
 
-> rextchoice :: Process -> ProcessSet -> State Script ()
-> rextchoice dest ps
->     = do
->       addStatement (SRExtChoice dest ps)
+> rextchoice :: Process -> ProcessSet -> ScriptTransformer ()
+> rextchoice dest ps = addStatement (SRExtChoice dest ps)
 
+
+A Script State transformer that creates a new, unique event name.
+
+> class HasAlphabet a where
+>     getAlphabet :: a -> Alphabet
+>     putAlphabet :: a -> Alphabet -> a
+
+> newEvent :: (HasAlphabet a) => String -> State a Event
+> newEvent prefix
+>     = do
+>       s <- get
+>       let alphabet = getAlphabet s
+>           Alphabet set = alphabet
+>           newEvent = uniqueEventName (Event prefix) alphabet
+>       put $ putAlphabet s $ Alphabet $ Set.insert newEvent set
+>       return newEvent
+
+
+> class HasProcessSet a where
+>     getProcessSet :: a -> ProcessSet
+>     putProcessSet :: a -> ProcessSet -> a
 
 A Script State transformer that creates a new, unique process name.
 
-> newProcess :: String -> State Script Process
+> newProcess :: (HasProcessSet a) => String -> State a Process
 > newProcess prefix
 >     = do
 >       s <- get
->       let procSet = processes s
->       let newProcess = uniqueProcessName (Process prefix) procSet
+>       let procSet = getProcessSet s
+>           ProcessSet set = procSet
+>           newProcess = uniqueProcessName (Process prefix) procSet
+>       put $ putProcessSet s $ ProcessSet $ Set.insert newProcess set
 >       return newProcess
 
 
@@ -400,47 +385,25 @@ process to the “defined” set.  If the definer happens to refer to
 process recursively (and thereby try to define it again), then the
 definer won't be executed again.
 
-> needsDefining :: Process -> State Script Bool
+> needsDefining :: (HasProcessSet a) => Process -> State a Bool
 > needsDefining p
 >     = do
 >       s <- get
->       let ProcessSet pendingSet = pending s
->           ProcessSet definedSet = defined s
->       return $ not ((p `Set.member` pendingSet) ||
->                     (p `Set.member` definedSet))
+>       let ProcessSet set = getProcessSet s
+>       return $ p `Set.notMember` set
 
-> startDefining :: Process -> State Script ()
+> startDefining :: (HasProcessSet a) => Process -> State a ()
 > startDefining p
 >     = do
 >       s <- get
->       let ProcessSet pendingSet = pending s
->       put $ s {
->         pending = ProcessSet $ Set.insert p pendingSet
->       }
+>       let ProcessSet set = getProcessSet s
+>       put $ putProcessSet s $ ProcessSet $ Set.insert p set
 
-> finishDefining :: Process -> State Script ()
-> finishDefining p
->     = do
->       s <- get
->       let ProcessSet definedSet = defined s
->       put $ s {
->         defined = ProcessSet $ Set.insert p definedSet
->       }
-
-> defineProcess :: Process -> State Script a -> State Script ()
+> defineProcess :: (HasProcessSet a) => Process -> State a b -> State a ()
 > defineProcess dest definer
 >     = do
 >       needed <- needsDefining dest
->       case needed of
->         True  -> do
->                  startDefining dest
->                  definer
->                  finishDefining dest
->         False -> return ()
-
-
-Applies a Script transformer to the empty Script, returning the
-result.
-
-> createScript :: (State Script a) -> Script
-> createScript creator = execState creator emptyScript
+>       when needed $ do
+>                     startDefining dest
+>                     definer
+>                     return ()

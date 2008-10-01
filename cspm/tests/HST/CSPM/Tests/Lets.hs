@@ -36,5 +36,5 @@ prop_LetSingle = forAll (pair identifier expression) tester
       tester (id, x) = v0 == v1
           where
             e0 = ELet [Binding id x] (EVar id)
-            v0 = run $ eval $ bind rootEnv e0
-            v1 = run $ eval $ bind rootEnv x
+            v0 = run $ eval $ bind "" rootEnv e0
+            v1 = run $ eval $ bind "" rootEnv x

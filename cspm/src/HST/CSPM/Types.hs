@@ -22,9 +22,11 @@
 
 module HST.CSPM.Types where
 
+import Control.Monad.State
 import Data.Map (Map)
 import qualified Data.Map as Map
 
+import HST.CSP0
 import HST.CSPM.Sets (Set)
 
 -- Identifiers
@@ -56,12 +58,21 @@ instance Show Binding where
 
 data Env
     = Env {
+        name   :: String,
         table  :: Map Identifier Expression,
         parent :: Maybe Env
       }
     deriving (Eq, Ord)
 
 -- Values
+
+data ProcPair =  ProcPair Process (ScriptTransformer ())
+
+instance Eq ProcPair where
+    (ProcPair p1 _) == (ProcPair p2 _) = p1 == p2
+
+instance Ord ProcPair where
+    compare (ProcPair p1 _) (ProcPair p2 _) = compare p1 p2
 
 data Value
     = VBottom
@@ -71,6 +82,8 @@ data Value
     | VBoolean Bool
     | VTuple [Value]
     | VLambda Env [Identifier] Expression
+    | VEvent Event
+    | VProcess ProcPair
     deriving (Eq, Ord)
 
 instance Show Value where
@@ -81,6 +94,9 @@ instance Show Value where
     show (VBoolean b)      = show b
     show (VTuple t)        = "(" ++ show t ++ ")"
     show (VLambda e ids x) = "\\ " ++ show ids ++ ": " ++ show x
+    show (VEvent a)        = show a
+
+    show (VProcess (ProcPair p _)) = "[proc " ++ show p ++ "]"
 
     -- We don't want to show the [] brackets when showing a list of
     -- values, since we're going to use different brackets depending
@@ -106,6 +122,12 @@ coerceBoolean (VBoolean b) = b
 
 coerceTuple :: Value -> [Value]
 coerceTuple (VTuple t) = t
+
+coerceEvent :: Value -> Event
+coerceEvent (VEvent a) = a
+
+coerceProcess :: Value -> ProcPair
+coerceProcess (VProcess pp) = pp
 
 -- Expressions
 
@@ -176,6 +198,22 @@ data Expression
     | EIfThenElse Expression Expression Expression
     | EBound BoundExpression
 
+    -- Expressions which evaluate to an event
+    | EELit String
+
+    -- Expressions which evaluate to a process
+    | EPrefix Expression Expression
+    | EExtChoice Expression Expression
+    | EIntChoice Expression Expression
+    | ETimeout Expression Expression
+    | ESeqComp Expression Expression
+    | EInterleave Expression Expression
+    | EIParallel Expression Expression Expression
+    | EAParallel Expression Expression Expression Expression
+    | EHide Expression Expression
+    -- | ERename Expression Expression
+    | ERExtChoice Expression
+
     deriving (Eq, Ord)
 
 instance Show Expression where
@@ -238,6 +276,21 @@ instance Show Expression where
                                show x ++ " else " ++ show y
 
     show (EBound be) = show be
+
+    show (EELit a) = a
+
+    show (EPrefix a p) = show a ++ " -> " ++ show p
+    show (EExtChoice p q) = show p ++ " [] " ++ show q
+    show (EIntChoice p q) = show p ++ " |~| " ++ show q
+    show (ETimeout p q) = show p ++ " [> " ++ show q
+    show (ESeqComp p q) = show p ++ " ; " ++ show q
+    show (EInterleave p q) = show p ++ " ||| " ++ show q
+    show (EIParallel p alpha q) = show p ++ " [|" ++ show alpha ++
+                                  "|] " ++ show q
+    show (EAParallel p alpha beta q) = show p ++ " [" ++ show alpha ++
+                                       " || " ++ show beta ++ "] " ++ show q
+    show (EHide p alpha) = show p ++ " \\ " ++ show alpha
+    show (ERExtChoice ps) = "[] " ++ show ps
 
     -- We don't want to show the [] brackets when showing a list of
     -- expressions, since we're going to use different brackets
@@ -317,6 +370,22 @@ data BoundExpression
     | BQHead BoundExpression
     | BIfThenElse BoundExpression BoundExpression BoundExpression
 
+    -- Expression which can evaluate to an event
+    | BELit String
+
+    -- Expression which can evaluate to a process
+    | BPrefix Process BoundExpression BoundExpression
+    | BExtChoice Process BoundExpression BoundExpression
+    | BIntChoice Process BoundExpression BoundExpression
+    | BTimeout Process BoundExpression BoundExpression
+    | BSeqComp Process BoundExpression BoundExpression
+    | BInterleave Process BoundExpression BoundExpression
+    | BIParallel Process BoundExpression BoundExpression BoundExpression
+    | BAParallel Process BoundExpression BoundExpression BoundExpression BoundExpression
+    | BHide Process BoundExpression BoundExpression
+    -- | BRename Process BoundExpression BoundExpression
+    | BRExtChoice Process BoundExpression
+
     deriving (Eq, Ord)
 
 
@@ -376,6 +445,31 @@ instance Show BoundExpression where
     show (BQHead x) = "head(" ++ show x ++ ")"
     show (BIfThenElse b x y) = "if (" ++ show b ++ ") then " ++
                                show x ++ " else " ++ show y
+
+    show (BELit a) = a
+
+    show (BPrefix dest a p) = show dest ++ ": (" ++
+                              show a ++ " -> " ++ show p ++ ")"
+    show (BExtChoice dest p q) = show dest ++ ": (" ++
+                                 show p ++ " [] " ++ show q ++ ")"
+    show (BIntChoice dest p q) = show dest ++ ": (" ++
+                                 show p ++ " |~| " ++ show q ++ ")"
+    show (BTimeout dest p q) = show dest ++ ": (" ++
+                               show p ++ " [> " ++ show q ++ ")"
+    show (BSeqComp dest p q) = show dest ++ ": (" ++
+                               show p ++ " ; " ++ show q ++ ")"
+    show (BInterleave dest p q) = show dest ++ ": (" ++
+                                  show p ++ " ||| " ++ show q ++ ")"
+    show (BIParallel dest p alpha q) = show dest ++ ": (" ++
+                                       show p ++ " [|" ++ show alpha ++
+                                                "|] " ++ show q ++ ")"
+    show (BAParallel dest p alpha beta q) = show dest ++ ": (" ++ show p ++
+                                            " [" ++ show alpha ++ " || " ++
+                                                 show beta ++ "] " ++ show q ++ ")"
+    show (BHide dest p alpha) = show dest ++ ": (" ++
+                                show p ++ " \\ " ++ show alpha ++ ")"
+    show (BRExtChoice dest ps) = show dest ++ ": (" ++
+                                 "[] " ++ show ps ++ ")"
 
     -- We don't want to show the [] brackets when showing a list of
     -- expressions, since we're going to use different brackets

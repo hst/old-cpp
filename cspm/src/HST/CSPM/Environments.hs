@@ -28,7 +28,7 @@ import qualified Data.Map as Map
 import HST.CSPM.Types
 
 rootEnv :: Env
-rootEnv = Env Map.empty Nothing
+rootEnv = Env "" Map.empty Nothing
 
 lookupExpr :: Env -> Identifier -> Expression
 lookupExpr e id = 
@@ -45,9 +45,10 @@ lookupExpr e id =
                    -- Return bottom.
                    Nothing -> EBottom
 
-extendEnv :: Env -> [Binding] -> Env
-extendEnv e bs 
+extendEnv :: String -> Env -> [Binding] -> Env
+extendEnv name e bs 
     = Env {
+        name   = name,
         table  = Map.fromAscList ascList,
         parent = Just e
       }
