@@ -202,6 +202,8 @@ data Expression
     | EELit String
 
     -- Expressions which evaluate to a process
+    | EStop
+    | ESkip
     | EPrefix Expression Expression
     | EExtChoice Expression Expression
     | EIntChoice Expression Expression
@@ -279,6 +281,8 @@ instance Show Expression where
 
     show (EELit a) = a
 
+    show EStop = "STOP"
+    show ESkip = "SKIP"
     show (EPrefix a p) = show a ++ " -> " ++ show p
     show (EExtChoice p q) = show p ++ " [] " ++ show q
     show (EIntChoice p q) = show p ++ " |~| " ++ show q
@@ -374,6 +378,8 @@ data BoundExpression
     | BELit String
 
     -- Expression which can evaluate to a process
+    | BStop
+    | BSkip
     | BPrefix Process BoundExpression BoundExpression
     | BExtChoice Process BoundExpression BoundExpression
     | BIntChoice Process BoundExpression BoundExpression
@@ -448,6 +454,8 @@ instance Show BoundExpression where
 
     show (BELit a) = a
 
+    show BStop = "STOP"
+    show BSkip = "SKIP"
     show (BPrefix dest a p) = show dest ++ ": (" ++
                               show a ++ " -> " ++ show p ++ ")"
     show (BExtChoice dest p q) = show dest ++ ": (" ++

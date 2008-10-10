@@ -49,6 +49,14 @@ this isn't checked.
 > newtype ProcessSet = ProcessSet (Set Process)
 >     deriving (Eq, Ord)
 
+Predefined processes
+
+> stop :: Process
+> stop = Process "STOP"
+
+> skip :: Process
+> skip = Process "SKIP"
+
 We don't want to show the [] brackets when showing a list of events,
 event pairs, or processes, since we're going to use different brackets
 depending on whether the list represents a sequence, set, or tuple

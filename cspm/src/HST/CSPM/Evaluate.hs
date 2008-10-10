@@ -299,6 +299,9 @@ eval (BELit a) = return $ VEvent $ Event a
 
 -- Expressions that can evaluate to a process
 
+eval BStop = return $ VProcess $ ProcPair stop (return ())
+eval BSkip = return $ VProcess $ ProcPair skip (return ())
+
 eval (BPrefix dest a p) = do
   processEval dest $ do
     a' <- evalAsEvent a

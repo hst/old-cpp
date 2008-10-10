@@ -164,6 +164,9 @@ binder pfx e (EELit a) = return $ BELit a
 
 -- Processes
 
+binder pfx e EStop = return BStop
+binder pfx e ESkip = return BSkip
+
 binder pfx e (EPrefix a p) = do
   dest <- newProcess pfx
   binder2 pfx (BPrefix dest) e a p
