@@ -38,7 +38,8 @@ import HST.CSPM.Bind
 
 data EvalState
     = EvalState {
-        defined :: ProcessSet
+        defined      :: ProcessSet,
+        applications :: Int
       }
 
 instance HasProcessSet EvalState where
@@ -46,7 +47,7 @@ instance HasProcessSet EvalState where
     putProcessSet s ps = s { defined = ps }
 
 emptyState :: EvalState
-emptyState = EvalState $ ProcessSet DS.empty
+emptyState = EvalState (ProcessSet DS.empty) 0
 
 type Eval a = State EvalState a
 
@@ -270,7 +271,7 @@ eval (BTLit xs) = do
 
 -- Expressions that evaluate to a lambda
 
-eval (BLambda e ids x) = return $ VLambda e ids x
+eval (BLambda pfx e ids x) = return $ VLambda pfx e ids x
 
 -- Expressions that can evaluate to anything
 
@@ -289,9 +290,14 @@ eval (BVar e id) = eval $ bind (name e ++ id') e $ lookupExpr e id
       Identifier id' = id
 
 eval (BApply x ys) = do
-  VLambda e0 ids body <- eval x
-  let e1 = extendEnv (name e0) e0 $ zipWith Binding ids (map EBound ys)
-  eval $ bind (name e0) e1 body
+  VLambda pfx e0 ids body <- eval x
+  s <- get
+  let apps = applications s
+      nextApp = apps + 1
+      e1 = extendEnv (name e0) e0 $ zipWith Binding ids (map EBound ys)
+      pfx' = pfx ++ "." ++ show nextApp
+  put $ s { applications = nextApp }
+  eval $ bind pfx' e1 body
 
 -- Expressions that can evaluate to an event
 

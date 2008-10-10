@@ -81,20 +81,21 @@ data Value
     | VSet (Set Value)
     | VBoolean Bool
     | VTuple [Value]
-    | VLambda Env [Identifier] Expression
+    | VLambda String Env [Identifier] Expression
     | VEvent Event
     | VProcess ProcPair
     deriving (Eq, Ord)
 
 instance Show Value where
-    show (VBottom)         = "Bottom"
-    show (VNumber i)       = show i
-    show (VSequence s)     = "<" ++ show s ++ ">"
-    show (VSet s)          = "{" ++ show s ++ "}"
-    show (VBoolean b)      = show b
-    show (VTuple t)        = "(" ++ show t ++ ")"
-    show (VLambda e ids x) = "\\ " ++ show ids ++ ": " ++ show x
-    show (VEvent a)        = show a
+    show (VBottom)             = "Bottom"
+    show (VNumber i)           = show i
+    show (VSequence s)         = "<" ++ show s ++ ">"
+    show (VSet s)              = "{" ++ show s ++ "}"
+    show (VBoolean b)          = show b
+    show (VTuple t)            = "(" ++ show t ++ ")"
+    show (VLambda pfx e ids x) = "\\ [" ++ show pfx ++ "] " ++ show ids ++
+                                 ": " ++ show x
+    show (VEvent a)            = show a
 
     show (VProcess (ProcPair p _)) = "[proc " ++ show p ++ "]"
 
@@ -366,7 +367,7 @@ data BoundExpression
     | BTLit [BoundExpression]
 
     -- Expressions which evaluate to a lambda
-    | BLambda Env [Identifier] Expression  -- yes, that's Expr, not BoundExpr
+    | BLambda String Env [Identifier] Expression  -- yes, that's Expr, not BoundExpr
 
     -- Expressions which can evaluate to anything
     | BVar Env Identifier
@@ -444,7 +445,8 @@ instance Show BoundExpression where
 
     show (BTLit xs) = "(" ++ show xs ++ ")"
 
-    show (BLambda e ids x) = "\\ " ++ show ids ++ ": " ++ show x
+    show (BLambda pfx e ids x) = "\\ [" ++ pfx ++ "] " ++ show ids ++
+                                 ": " ++ show x
 
     show (BVar e id) = show id
     show (BApply x ys) = show x ++ "(" ++ show ys ++ ")"
