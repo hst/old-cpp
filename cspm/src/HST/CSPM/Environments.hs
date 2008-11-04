@@ -27,8 +27,17 @@ import qualified Data.Map as Map
 
 import HST.CSPM.Types
 
-rootEnv :: Env
-rootEnv = Env "" Map.empty Nothing
+rootEnv :: [Binding] -> Env
+rootEnv bs
+    = Env {
+        name   = "",
+        table  = Map.fromAscList ascList,
+        parent = Nothing
+      }
+    where
+      ascList = map (\ (Binding id x) -> (id, x)) bs
+
+emptyRootEnv = rootEnv []
 
 lookupExpr :: Env -> Identifier -> Expression
 lookupExpr e id = 

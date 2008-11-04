@@ -22,7 +22,7 @@
 
 module HST.CSPM.Tests.Lambdas where
 
-import Test.QuickCheck
+import Test.QuickCheck hiding (evaluate)
 
 import HST.CSPM
 import HST.CSPM.Tests.Generators
@@ -41,5 +41,5 @@ prop_LambdaSum = forAll enumber tester
             e02 = EApply (EVar f) [en]
             e0 = ELet [Binding f e01] e02
             e1 = ENSum en (ENLit 5)
-            v0 = run $ eval $ bind "" rootEnv e0
-            v1 = run $ eval $ bind "" rootEnv e1
+            v0 = evaluate emptyRootEnv e0
+            v1 = evaluate emptyRootEnv e1

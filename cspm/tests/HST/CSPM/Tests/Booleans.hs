@@ -22,7 +22,7 @@
 
 module HST.CSPM.Tests.Booleans where
 
-import Test.QuickCheck
+import Test.QuickCheck hiding (evaluate)
 
 import HST.CSPM
 import HST.CSPM.Tests.Generators
@@ -39,25 +39,24 @@ prop_BoolAnd = forAll (two eboolean) tester
     where
       tester (eb1, eb2) = v0 == v12
           where
-            bb1 = bind "" rootEnv eb1
-            v0 = run $ eval $ bind "" rootEnv (EBAnd eb1 eb2)
-            b1 = run $ evalAsBoolean $ bind "" rootEnv eb1
-            b2 = run $ evalAsBoolean $ bind "" rootEnv eb2
+            v0 = evaluate emptyRootEnv (EBAnd eb1 eb2)
+            b1 = evaluateWith evalAsBoolean emptyRootEnv eb1
+            b2 = evaluateWith evalAsBoolean emptyRootEnv eb2
             v12 = VBoolean (b1 && b2)
 
 prop_BoolOr = forAll (two eboolean) tester
     where
       tester (eb1, eb2) = v0 == v12
           where
-            v0 = run $ eval $ bind "" rootEnv (EBOr eb1 eb2)
-            b1 = run $ evalAsBoolean $ bind "" rootEnv eb1
-            b2 = run $ evalAsBoolean $ bind "" rootEnv eb2
+            v0 = evaluate emptyRootEnv (EBOr eb1 eb2)
+            b1 = evaluateWith evalAsBoolean emptyRootEnv eb1
+            b2 = evaluateWith evalAsBoolean emptyRootEnv eb2
             v12 = VBoolean (b1 || b2)
 
 prop_BoolNot = forAll eboolean tester
     where
       tester eb1 = v0 == v1
           where
-            v0 = run $ eval $ bind "" rootEnv (EBNot eb1)
-            b1 = run $ evalAsBoolean $ bind "" rootEnv eb1
+            v0 = evaluate emptyRootEnv (EBNot eb1)
+            b1 = evaluateWith evalAsBoolean emptyRootEnv eb1
             v1 = VBoolean (not b1)

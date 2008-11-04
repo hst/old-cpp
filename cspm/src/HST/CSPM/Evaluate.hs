@@ -21,6 +21,7 @@
 ------------------------------------------------------------------------
 
 module HST.CSPM.Evaluate (
+                          evaluate, evaluateWith,
                           eval, evalAsNumber, evalAsSequence,
                           evalAsSet, evalAsBoolean, evalAsTuple, run,
                           processEval
@@ -54,7 +55,10 @@ type Eval a = State EvalState a
 run :: Eval a -> a
 run = (flip evalState) emptyState
 
---defineOrLookup :: Process -> ScriptTransformer () -> 
+evaluateWith :: (BoundExpression -> Eval a) -> Env -> Expression -> a
+evaluateWith evaler e x = run $ evaler $ bind "" e x
+
+evaluate = evaluateWith eval
 
 evalAsNumber :: BoundExpression -> Eval Int
 evalAsNumber = (liftM coerceNumber) . eval
