@@ -25,7 +25,9 @@ module HST.CSPM
      module HST.CSPM.Types,
      module HST.CSPM.Environments,
      module HST.CSPM.Bind,
-     module HST.CSPM.Evaluate
+     module HST.CSPM.Evaluate,
+     module HST.CSPM.Lexer,
+     module HST.CSPM.Parser
     )
     where
 
@@ -33,3 +35,5 @@ import HST.CSPM.Types
 import HST.CSPM.Environments
 import HST.CSPM.Bind
 import HST.CSPM.Evaluate
+import HST.CSPM.Lexer
+import HST.CSPM.Parser

@@ -8,15 +8,21 @@ Author:          Douglas Creager
 
 Library
   HS-Source-Dirs:   src, tests
-  Build-Depends:    base, haskell98, containers, mtl,
+  Build-Depends:    array, base, haskell98, containers, mtl,
                     QuickCheck >= 1.1
   Exposed-Modules:  HST.CSP0, HST.CSPM
   Other-Modules:    HST.CSP0.Processes,
                     HST.CSPM.Bind,
                     HST.CSPM.Environments,
                     HST.CSPM.Evaluate,
+                    HST.CSPM.Lexer,
+                    HST.CSPM.Parser,
                     HST.CSPM.Sets,
                     HST.CSPM.Types
+
+Executable cspm
+  HS-Source-Dirs:   src
+  Main-Is:          HST/CSPM/Tool.lhs
 
 Executable tests
   HS-Source-Dirs:   src, tests
