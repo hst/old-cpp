@@ -160,7 +160,7 @@ binder pfx e (EApply x ys) = do
 
 -- Events
 
-binder pfx e (EELit a) = return $ BELit a
+binder pfx e (EEvent a) = return $ BEvent a
 
 -- Processes
 

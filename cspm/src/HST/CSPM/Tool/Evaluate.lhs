@@ -89,9 +89,9 @@
 > action_ args
 >     = do
 >       (opts, exprs) <- parseOptions args
->       script <- getScript opts
->       let bindings = parseFile script
->           env = rootEnv bindings
+>       scriptText <- getScript opts
+>       let script = parseFile scriptText
+>           env    = createEnv script
 >       sequence $ map (parseEvalAndPrint env) exprs
 >       return ()
 

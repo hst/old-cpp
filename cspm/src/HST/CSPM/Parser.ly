@@ -132,8 +132,8 @@
 
 > %%
 
-> PRoot :: { [Binding] }
-> PRoot  : PBindings                         { $1 }
+> PRoot :: { CSPMScript }
+> PRoot  : PDefinitions                      { CSPMScript $1 }
 
 > PNewlines :: { () }
 > PNewlines  : nl PNewlines0                 { () }
@@ -141,6 +141,14 @@
 > PNewlines0 :: { () }
 > PNewlines0  :                              { () }
 >             | PNewlines0 nl                { () }
+
+> PDefinitions :: { [Definition] }
+> PDefinitions  : PDefinition                { [$1] }
+>               | PDefinitions PNewlines
+>                 PDefinition                { $1 ++ [$3] }
+
+> PDefinition :: { Definition }
+> PDefinition  : PId "=" PExpr               { DDefinition $1 $3 }
 
 > PId :: { Identifier }
 > PId  : identifier                          { Identifier $1 }

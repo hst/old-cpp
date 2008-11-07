@@ -130,6 +130,14 @@ coerceEvent (VEvent a) = a
 coerceProcess :: Value -> ProcPair
 coerceProcess (VProcess pp) = pp
 
+-- Top-level definitions
+
+data CSPMScript
+    = CSPMScript [Definition]
+
+data Definition
+    = DDefinition Identifier Expression
+
 -- Expressions
 
 data Expression
@@ -200,7 +208,7 @@ data Expression
     | EBound BoundExpression
 
     -- Expressions which evaluate to an event
-    | EELit String
+    | EEvent Event
 
     -- Expressions which evaluate to a process
     | EStop
@@ -280,7 +288,7 @@ instance Show Expression where
 
     show (EBound be) = show be
 
-    show (EELit a) = a
+    show (EEvent a) = show a
 
     show EStop = "STOP"
     show ESkip = "SKIP"
@@ -376,7 +384,7 @@ data BoundExpression
     | BIfThenElse BoundExpression BoundExpression BoundExpression
 
     -- Expression which can evaluate to an event
-    | BELit String
+    | BEvent Event
 
     -- Expression which can evaluate to a process
     | BStop
@@ -454,7 +462,7 @@ instance Show BoundExpression where
     show (BIfThenElse b x y) = "if (" ++ show b ++ ") then " ++
                                show x ++ " else " ++ show y
 
-    show (BELit a) = a
+    show (BEvent a) = show a
 
     show BStop = "STOP"
     show BSkip = "SKIP"

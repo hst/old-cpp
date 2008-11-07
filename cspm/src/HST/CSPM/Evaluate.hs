@@ -305,7 +305,7 @@ eval (BApply x ys) = do
 
 -- Expressions that can evaluate to an event
 
-eval (BELit a) = return $ VEvent $ Event a
+eval (BEvent a) = return $ VEvent a
 
 -- Expressions that can evaluate to a process
 

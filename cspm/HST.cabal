@@ -13,6 +13,7 @@ Library
   Exposed-Modules:  HST.CSP0, HST.CSPM
   Other-Modules:    HST.CSP0.Processes,
                     HST.CSPM.Bind,
+                    HST.CSPM.Definitions,
                     HST.CSPM.Environments,
                     HST.CSPM.Evaluate,
                     HST.CSPM.Lexer,
