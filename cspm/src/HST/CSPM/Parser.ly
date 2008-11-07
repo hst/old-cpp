@@ -149,6 +149,7 @@
 
 > PDefinition :: { Definition }
 > PDefinition  : PId "=" PExpr               { DDefinition $1 $3 }
+>              | channel PId                 { DSimpleChannel $2 }
 
 > PId :: { Identifier }
 > PId  : identifier                          { Identifier $1 }

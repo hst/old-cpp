@@ -26,6 +26,9 @@
 
 > createBinding :: Definition -> Binding
 > createBinding (DDefinition id x) = Binding id x
+> createBinding (DSimpleChannel id) = Binding id (EEvent (Event id'))
+>     where
+>       Identifier id' = id
 
 > createBindings :: [Definition] -> [Binding]
 > createBindings = map createBinding

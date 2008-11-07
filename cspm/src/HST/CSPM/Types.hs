@@ -137,6 +137,7 @@ data CSPMScript
 
 data Definition
     = DDefinition Identifier Expression
+    | DSimpleChannel Identifier
 
 -- Expressions
 
