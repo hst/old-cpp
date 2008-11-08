@@ -225,6 +225,7 @@
 
 > PAny_ :: { Expression }
 > PAny_  : PId                               { EVar $1 }
+>        | "(" PExpr ")"                     { $2 }
 >        | let PBindings within PExpr        { ELet $2 $4 }
 >        | PExpr "(" PExprs0 ")"             { EApply $1 $3 }
 >        | if PExpr then PExpr else PExpr    { EIfThenElse $2 $4 $6 }

@@ -3,11 +3,12 @@
 . $TESTS/functions.sh
 
 test_expression numeric-literal 1 1
-test_expression sum  "1 + 1" 2
-test_expression diff "1 - 1" 0
-test_expression prod "1 * 2" 2
-test_expression quot "5 / 2" 2
-test_expression rem  "5 % 2" 1
+test_expression math-01 "1 + 1" 2
+test_expression math-02 "1 - 1" 0
+test_expression math-03 "1 * 2" 2
+test_expression math-04 "5 / 2" 2
+test_expression math-05 "5 % 2" 1
+test_expression math-06 "(1 + 2) * 4" 12
 
 test_expression num-equality-01 "1 == 1" True
 test_expression num-equality-02 "1 + 1 == 2" True
