@@ -7,7 +7,7 @@ License-File:    LICENSE
 Author:          Douglas Creager
 
 Library
-  HS-Source-Dirs:   src, tests
+  HS-Source-Dirs:   src
   Build-Depends:    array, base, haskell98, containers, mtl,
                     QuickCheck >= 1.1
   Exposed-Modules:  HST.CSP0, HST.CSPM
@@ -25,6 +25,6 @@ Executable cspm
   HS-Source-Dirs:   src
   Main-Is:          HST/CSPM/Tool.lhs
 
-Executable tests
-  HS-Source-Dirs:   src, tests
+Executable quickcheck-tests
+  HS-Source-Dirs:   src, qc-tests
   Main-Is:          HST/CSPM/Tests.hs
