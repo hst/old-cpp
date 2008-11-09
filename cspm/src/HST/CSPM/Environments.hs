@@ -31,11 +31,14 @@ rootEnv :: [Binding] -> Env
 rootEnv bs
     = Env {
         name   = "",
-        table  = Map.fromAscList ascList,
+        table  = Map.fromList list,
         parent = Nothing
       }
     where
-      ascList = map (\ (Binding id x) -> (id, x)) bs
+      list = map (\ (Binding id x) -> (id, x)) bs
+
+instance Show Env where
+    show env = show (table env)
 
 emptyRootEnv = rootEnv []
 
@@ -58,8 +61,8 @@ extendEnv :: String -> Env -> [Binding] -> Env
 extendEnv name e bs 
     = Env {
         name   = name,
-        table  = Map.fromAscList ascList,
+        table  = Map.fromList list,
         parent = Just e
       }
     where
-      ascList = map (\ (Binding id x) -> (id, x)) bs
+      list = map (\ (Binding id x) -> (id, x)) bs

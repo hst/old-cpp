@@ -33,3 +33,7 @@ test_expression num-gt-03 "3 > 2" True
 test_expression num-gte-01 "1 >= 2" False
 test_expression num-gte-02 "2 >= 2" True
 test_expression num-gte-03 "3 >= 2" True
+
+test_script_expression math-defs-01 "
+X = 5
+A = X + 2" "A" "7"
