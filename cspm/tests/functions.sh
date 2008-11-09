@@ -44,3 +44,26 @@ test_script_expression () {
         exit 1
     fi
 }
+
+test_compile () {
+    NAME="$1"
+    SCRIPT="$2"
+    EXPRESSION="$3"
+    EXPECTED="$4"
+
+    $DIST_BUILD/cspm/cspm compile -s "$SCRIPT" "$EXPRESSION" > $TESTS/actual
+    echo "$EXPECTED" > $TESTS/expected
+
+    echo -n "$NAME:"
+
+    if cmp $TESTS/expected $TESTS/actual > /dev/null 2>/dev/null; then
+        echo " passed."
+    else
+        echo " FAILED."
+        echo "Expected:"
+        cat $TESTS/expected
+        echo "Actual:"
+        cat $TESTS/actual
+        exit 1
+    fi
+}

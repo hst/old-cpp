@@ -195,8 +195,8 @@ the statement.
 >         = "iparallel " ++ show dest ++ " = " ++ show p ++ " [|" ++
 >           show alpha ++ "|] " ++ show q ++ ";"
 >     show (SAParallel dest p alpha beta q)
->         = "aparallel " ++ show dest ++ " = " ++ show p ++ " [ " ++
->           show alpha ++ " || " ++ show beta ++ " ] " ++ show q ++ ";"
+>         = "aparallel " ++ show dest ++ " = " ++ show p ++ " [" ++
+>           show alpha ++ "||" ++ show beta ++ "] " ++ show q ++ ";"
 >     show (SHide dest p alpha) = "hide " ++ show dest ++ " = " ++ show p ++
 >                                 " \\ " ++ show alpha ++ ";"
 >     show (SRename dest p emap) = "rename " ++ show dest ++ " = " ++ show p ++
@@ -271,6 +271,9 @@ process more than once.
 >     putProcessSet s ps = s { processes = ps }
 
 > type ScriptTransformer a = State Script a
+
+
+> outputScript s = unlines $ map show $ statements s
 
 
 The empty CSP₀ script.

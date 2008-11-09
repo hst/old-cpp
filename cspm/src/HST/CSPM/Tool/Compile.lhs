@@ -18,14 +18,15 @@
     MA 02111-1307 USA
 ------------------------------------------------------------------------
 
-> module HST.CSPM.Tool.Evaluate
+> module HST.CSPM.Tool.Compile
 >     (
->      cmdEvaluate
+>      cmdCompile
 >     )
 >     where
 
 > import System.Console.GetOpt
 
+> import HST.CSP0
 > import HST.CSPM
 > import HST.CSPM.Tool.Command
 
@@ -80,26 +81,30 @@
 >         (Just f, Nothing)  -> readFile f
 >         (Nothing, Just s)  -> return s
 
-> parseEvalAndPrint :: Env -> String -> IO ()
-> parseEvalAndPrint env expr
->     = do
->       putStrLn (expr ++ " = " ++
->                 show (evaluate env (parseExpr expr)))
+> parseAndCompile :: Env -> String -> ScriptTransformer ()
+> parseAndCompile env expr
+>     = case value of
+>         VProcess (ProcPair dest definer) -> definer
+>         _                                -> return ()
+>     where
+>       value = evaluate env (parseExpr expr)
 
 > action_ args
 >     = do
 >       (opts, exprs) <- parseOptions args
 >       scriptText <- getScript opts
->       let script = parseFile scriptText
->           env    = createEnv script
->       sequence $ map (parseEvalAndPrint env) exprs
+>       let script   = parseFile scriptText
+>           env      = createEnv script
+>           definers = sequence $ map (parseAndCompile env) exprs
+>           csp0     = createScript definers
+>       putStr $ outputScript csp0
 >       return ()
 
-> header = "Usage: cspm evaluate [OPTIONS] EXPRESSIONS"
-> description_ = "evaluate CSPM expressions"
+> header = "Usage: cspm compile [OPTIONS] PROCESSES"
+> description_ = "compile CSPM processes"
 > usage_ = usageInfo header options
 
-> cmdEvaluate
+> cmdCompile
 >     = Command {
 >         action      = action_,
 >         description = description_,

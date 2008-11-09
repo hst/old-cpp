@@ -56,7 +56,7 @@ run :: Eval a -> a
 run = (flip evalState) emptyState
 
 evaluateWith :: (BoundExpression -> Eval a) -> Env -> Expression -> a
-evaluateWith evaler e x = run $ evaler $ bind "" e x
+evaluateWith evaler e x = run $ evaler $ bind "rootExpr" e x
 
 evaluate = evaluateWith eval
 

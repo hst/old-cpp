@@ -182,6 +182,7 @@
 >        | PBoolean_                         { $1 }
 >        | PTuple_                           { $1 }
 >        | PLambda_                          { $1 }
+>        | PProc_                            { $1 }
 >        | PAny_                             { $1 }
 
 > PNumber_ :: { Expression }
@@ -223,6 +224,21 @@
 
 > PLambda_ :: { Expression }
 > PLambda_  : "\\" PIds "@" PExpr            { ELambda $2 $4 }
+
+> PProc_ :: { Expression }
+> PProc_  : stop                             { EStop }
+>         | skip                             { ESkip }
+>         | PExpr "->" PExpr                 { EPrefix $1 $3 }
+>         | PExpr "[]" PExpr                 { EExtChoice $1 $3 }
+>         | PExpr "|~|" PExpr                { EIntChoice $1 $3 }
+>         | PExpr "[>" PExpr                 { ETimeout $1 $3 }
+>         | PExpr ";" PExpr                  { ESeqComp $1 $3 }
+>         | PExpr "|||" PExpr                { EInterleave $1 $3 }
+>         | PExpr "[|" PExpr "|]" PExpr      { EIParallel $1 $3 $5 }
+>         | PExpr "[" PExpr "||"
+>           PExpr "]" PExpr                  { EAParallel $1 $3 $5 $7 }
+>         | PExpr "\\" PExpr                 { EHide $1 $3 }
+>         | "[]" PExpr                       { ERExtChoice $2 }
 
 > PAny_ :: { Expression }
 > PAny_  : PId                               { EVar $1 }

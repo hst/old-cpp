@@ -13,3 +13,14 @@ $TESTS/expressions/test-sequences.sh
 $TESTS/expressions/test-sets.sh
 $TESTS/expressions/test-booleans.sh
 $TESTS/expressions/test-lambdas.sh
+
+$TESTS/processes/test-prefix.sh
+$TESTS/processes/test-extchoice.sh
+$TESTS/processes/test-intchoice.sh
+$TESTS/processes/test-timeout.sh
+$TESTS/processes/test-seqcomp.sh
+$TESTS/processes/test-interleave.sh
+$TESTS/processes/test-iparallel.sh
+$TESTS/processes/test-aparallel.sh
+$TESTS/processes/test-hide.sh
+$TESTS/processes/test-rextchoice.sh

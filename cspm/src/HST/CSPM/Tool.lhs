@@ -32,12 +32,14 @@ module HST.CSPM.Tool
 > import System.Environment
 
 > import HST.CSPM.Tool.Command
+> import HST.CSPM.Tool.Compile
 > import HST.CSPM.Tool.Evaluate
 
 > type Commands = Map String Command
 
 > commands :: Commands
 > commands = Map.fromList [
+>             ("compile", cmdCompile),
 >             ("evaluate", cmdEvaluate)
 >            ]
 

@@ -66,7 +66,7 @@ data Env
 
 -- Values
 
-data ProcPair =  ProcPair Process (ScriptTransformer ())
+data ProcPair = ProcPair Process (ScriptTransformer ())
 
 instance Eq ProcPair where
     (ProcPair p1 _) == (ProcPair p2 _) = p1 == p2
@@ -134,10 +134,12 @@ coerceProcess (VProcess pp) = pp
 
 data CSPMScript
     = CSPMScript [Definition]
+    deriving Show
 
 data Definition
     = DDefinition Identifier Expression
     | DSimpleChannel Identifier
+    deriving Show
 
 -- Expressions
 
