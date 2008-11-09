@@ -133,14 +133,15 @@
 > %%
 
 > PRoot :: { CSPMScript }
-> PRoot  : PDefinitions                      { CSPMScript $1 }
+> PRoot  : PNewlines0 PDefinitions
+>          PNewlines0                        { CSPMScript $2 }
 
 > PNewlines :: { () }
 > PNewlines  : nl PNewlines0                 { () }
 
 > PNewlines0 :: { () }
 > PNewlines0  :                              { () }
->             | PNewlines0 nl                { () }
+>             | PNewlines                    { () }
 
 > PDefinitions :: { [Definition] }
 > PDefinitions  : PDefinition                { [$1] }
