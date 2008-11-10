@@ -266,6 +266,10 @@ process more than once.
 >       }
 >     deriving Show
 
+> instance HasAlphabet Script where
+>     getAlphabet = events
+>     putAlphabet s a = s { events = a }
+
 > instance HasProcessSet Script where
 >     getProcessSet = processes
 >     putProcessSet s ps = s { processes = ps }
@@ -370,11 +374,11 @@ A Script State transformer that creates a new, unique event name.
 >       return newEvent
 
 
+A Script State transformer that creates a new, unique process name.
+
 > class HasProcessSet a where
 >     getProcessSet :: a -> ProcessSet
 >     putProcessSet :: a -> ProcessSet -> a
-
-A Script State transformer that creates a new, unique process name.
 
 > newProcess :: (HasProcessSet a) => String -> State a Process
 > newProcess prefix
@@ -385,6 +389,19 @@ A Script State transformer that creates a new, unique process name.
 >           newProcess = uniqueProcessName (Process prefix) procSet
 >       put $ putProcessSet s $ ProcessSet $ Set.insert newProcess set
 >       return newProcess
+
+
+A Script State transformer that ensures that a specified event has
+been declared.
+
+> defineEvent :: Event -> ScriptTransformer ()
+> defineEvent e
+>     = do
+>       s <- get
+>       let Alphabet set = events s
+>       when (e `Set.notMember` set) $ do
+>         put $ putAlphabet s $ Alphabet $ Set.insert e set
+>         event e
 
 
 The defineProcess function allows you to ensure that you only define a

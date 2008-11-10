@@ -317,6 +317,7 @@ eval (BPrefix dest a p) = do
     a' <- evalAsEvent a
     ProcPair pDest pDefine <- evalAsProcess p
     return $ defineProcess dest $ do
+                            defineEvent a'
                             process dest
                             pDefine
                             prefix dest a' pDest
