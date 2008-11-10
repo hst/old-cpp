@@ -99,64 +99,68 @@
 >     | TBadChar
 >     deriving (Eq, Ord, Show)
 
-> lexer :: String -> [Token]
+The base lexer.  We have to do some postprocessing to the token
+stream, however, so this is not the “lexer” function that's exported
+from the module.
 
-> lexer [] = []
+> baseLexer :: String -> [Token]
 
-> lexer ('\n':cs) = TNewline : lexer cs
+> baseLexer [] = []
 
-> lexer ('|':'~':'|':cs) = TCap : lexer cs
-> lexer ('|':'|':'|':cs) = TThreePipe : lexer cs
+> baseLexer ('\n':cs) = TNewline : baseLexer cs
 
-> lexer ('[':'[':cs) = TLMap : lexer cs
-> lexer (']':']':cs) = TRMap : lexer cs
-> lexer ('{':'|':cs) = TLPBrace : lexer cs
-> lexer ('|':'}':cs) = TRPBrace : lexer cs
-> lexer ('[':'|':cs) = TLPar : lexer cs
-> lexer ('|':']':cs) = TRPar : lexer cs
-> lexer ('=':'=':cs) = TEq : lexer cs
-> lexer ('!':'=':cs) = TNE : lexer cs
-> lexer ('<':'=':cs) = TLE : lexer cs
-> lexer ('>':'=':cs) = TGE : lexer cs
-> lexer ('[':'>':cs) = TRTriangle : lexer cs
-> lexer ('[':']':cs) = TBox : lexer cs
-> lexer ('|':'|':cs) = TTwoPipe : lexer cs
-> lexer ('<':'-':cs) = TLArrow : lexer cs
-> lexer ('-':'>':cs) = TRArrow : lexer cs
-> lexer ('/':'\\':cs) = TTriangle : lexer cs
-> lexer ('.':'.':cs) = TTwoDot : lexer cs
+> baseLexer ('|':'~':'|':cs) = TCap : baseLexer cs
+> baseLexer ('|':'|':'|':cs) = TThreePipe : baseLexer cs
 
-> lexer ('(':cs) = TLParen : lexer cs
-> lexer (')':cs) = TRParen : lexer cs
-> lexer ('{':cs) = TLBrace : lexer cs
-> lexer ('}':cs) = TRBrace : lexer cs
-> lexer ('[':cs) = TLBracket : lexer cs
-> lexer (']':cs) = TRBracket : lexer cs
-> lexer ('<':cs) = TLAngle : lexer cs
-> lexer ('>':cs) = TRAngle : lexer cs
-> lexer ('\\':cs) = TBackslash : lexer cs
-> lexer ('|':cs) = TPipe : lexer cs
-> lexer (':':cs) = TColon : lexer cs
-> lexer ('&':cs) = TAmpersand : lexer cs
-> lexer (';':cs) = TSemi : lexer cs
-> lexer ('.':cs) = TDot : lexer cs
-> lexer ('?':cs) = TQMark : lexer cs
-> lexer ('!':cs) = TBang : lexer cs
-> lexer ('@':cs) = TAt : lexer cs
-> lexer (',':cs) = TComma : lexer cs
-> lexer ('=':cs) = TEquals : lexer cs
-> lexer ('+':cs) = TPlus : lexer cs
-> lexer ('-':cs) = TMinus : lexer cs
-> lexer ('*':cs) = TAsterisk : lexer cs
-> lexer ('/':cs) = TSlash : lexer cs
-> lexer ('%':cs) = TPercent : lexer cs
-> lexer ('#':cs) = THash : lexer cs
-> lexer ('^':cs) = TCaret : lexer cs
+> baseLexer ('[':'[':cs) = TLMap : baseLexer cs
+> baseLexer (']':']':cs) = TRMap : baseLexer cs
+> baseLexer ('{':'|':cs) = TLPBrace : baseLexer cs
+> baseLexer ('|':'}':cs) = TRPBrace : baseLexer cs
+> baseLexer ('[':'|':cs) = TLPar : baseLexer cs
+> baseLexer ('|':']':cs) = TRPar : baseLexer cs
+> baseLexer ('=':'=':cs) = TEq : baseLexer cs
+> baseLexer ('!':'=':cs) = TNE : baseLexer cs
+> baseLexer ('<':'=':cs) = TLE : baseLexer cs
+> baseLexer ('>':'=':cs) = TGE : baseLexer cs
+> baseLexer ('[':'>':cs) = TRTriangle : baseLexer cs
+> baseLexer ('[':']':cs) = TBox : baseLexer cs
+> baseLexer ('|':'|':cs) = TTwoPipe : baseLexer cs
+> baseLexer ('<':'-':cs) = TLArrow : baseLexer cs
+> baseLexer ('-':'>':cs) = TRArrow : baseLexer cs
+> baseLexer ('/':'\\':cs) = TTriangle : baseLexer cs
+> baseLexer ('.':'.':cs) = TTwoDot : baseLexer cs
 
-> --lexer ('[':'=':cs) = TRefinedBy "T" : lexer cs
+> baseLexer ('(':cs) = TLParen : baseLexer cs
+> baseLexer (')':cs) = TRParen : baseLexer cs
+> baseLexer ('{':cs) = TLBrace : baseLexer cs
+> baseLexer ('}':cs) = TRBrace : baseLexer cs
+> baseLexer ('[':cs) = TLBracket : baseLexer cs
+> baseLexer (']':cs) = TRBracket : baseLexer cs
+> baseLexer ('<':cs) = TLAngle : baseLexer cs
+> baseLexer ('>':cs) = TRAngle : baseLexer cs
+> baseLexer ('\\':cs) = TBackslash : baseLexer cs
+> baseLexer ('|':cs) = TPipe : baseLexer cs
+> baseLexer (':':cs) = TColon : baseLexer cs
+> baseLexer ('&':cs) = TAmpersand : baseLexer cs
+> baseLexer (';':cs) = TSemi : baseLexer cs
+> baseLexer ('.':cs) = TDot : baseLexer cs
+> baseLexer ('?':cs) = TQMark : baseLexer cs
+> baseLexer ('!':cs) = TBang : baseLexer cs
+> baseLexer ('@':cs) = TAt : baseLexer cs
+> baseLexer (',':cs) = TComma : baseLexer cs
+> baseLexer ('=':cs) = TEquals : baseLexer cs
+> baseLexer ('+':cs) = TPlus : baseLexer cs
+> baseLexer ('-':cs) = TMinus : baseLexer cs
+> baseLexer ('*':cs) = TAsterisk : baseLexer cs
+> baseLexer ('/':cs) = TSlash : baseLexer cs
+> baseLexer ('%':cs) = TPercent : baseLexer cs
+> baseLexer ('#':cs) = THash : baseLexer cs
+> baseLexer ('^':cs) = TCaret : baseLexer cs
 
-> lexer cs@(c:cs')
->     | isSpace c = lexer cs'
+> --baseLexer ('[':'=':cs) = TRefinedBy "T" : baseLexer cs
+
+> baseLexer cs@(c:cs')
+>     | isSpace c = baseLexer cs'
 >     | isAlpha c = lexIDOrKeyword cs
 >     | isDigit c = lexDigit cs
 >     | otherwise = [TBadChar]
@@ -196,11 +200,181 @@
 > keyword id            = TIdentifier id
 
 > lexIDOrKeyword :: String -> [Token]
-> lexIDOrKeyword cs = keyword id : lexer rest
+> lexIDOrKeyword cs = keyword id : baseLexer rest
 >     where
 >       (id, rest) = lexID cs
 
 > lexDigit :: String -> [Token]
-> lexDigit cs = TNumber (read digits) : lexer rest
+> lexDigit cs = TNumber (read digits) : baseLexer rest
 >     where
 >       (digits, rest) = span isDigit cs
+
+
+Reduce any sequence of consecutive TNewline tokens into a single
+token.
+
+The flag is whether we've just read a newline.
+
+> reduceNewlines :: [Token] -> [Token]
+> reduceNewlines ts = fst $ foldr reducer ([], False) ts
+>     where
+>       reducer TNewline (ts, False) = (TNewline:ts, True)
+>       reducer TNewline (ts, True)  = (ts,          True)
+>       reducer t        (ts, _)     = (t:ts,        False)
+
+
+Remove any newlines that appear before a binary or unary operator (a
+“soaker”).
+
+The flag is whether we've just read a token that shouldn't be preceded
+by a newline.
+
+> soaksNewlinesBefore :: Token -> Bool
+> soaksNewlinesBefore TLParen        = False
+> soaksNewlinesBefore TRParen        = True
+> soaksNewlinesBefore TLBrace        = False
+> soaksNewlinesBefore TRBrace        = True
+> soaksNewlinesBefore TLBracket      = True
+> soaksNewlinesBefore TRBracket      = True
+> soaksNewlinesBefore TLAngle        = False
+> soaksNewlinesBefore TRAngle        = True
+> soaksNewlinesBefore TBackslash     = True
+> soaksNewlinesBefore TPipe          = True
+> soaksNewlinesBefore TColon         = True
+> soaksNewlinesBefore TAmpersand     = True
+> soaksNewlinesBefore TSemi          = True
+> soaksNewlinesBefore TDot           = True
+> soaksNewlinesBefore TQMark         = True
+> soaksNewlinesBefore TBang          = True
+> soaksNewlinesBefore TAt            = True
+> soaksNewlinesBefore TComma         = True
+> soaksNewlinesBefore TEquals        = True
+> soaksNewlinesBefore TPlus          = True
+> soaksNewlinesBefore TMinus         = False
+> soaksNewlinesBefore TAsterisk      = True
+> soaksNewlinesBefore TSlash         = True
+> soaksNewlinesBefore TPercent       = True
+> soaksNewlinesBefore THash          = True
+> soaksNewlinesBefore TCaret         = True
+> soaksNewlinesBefore TLMap          = True
+> soaksNewlinesBefore TRMap          = True
+> soaksNewlinesBefore TLPBrace       = False
+> soaksNewlinesBefore TRPBrace       = True
+> soaksNewlinesBefore TLPar          = True
+> soaksNewlinesBefore TRPar          = True
+> soaksNewlinesBefore TEq            = True
+> soaksNewlinesBefore TNE            = True
+> soaksNewlinesBefore TLE            = True
+> soaksNewlinesBefore TGE            = True
+> soaksNewlinesBefore TRTriangle     = True
+> soaksNewlinesBefore TBox           = True
+> soaksNewlinesBefore TTwoPipe       = True
+> soaksNewlinesBefore TLArrow        = True
+> soaksNewlinesBefore TRArrow        = True
+> soaksNewlinesBefore TTriangle      = True
+> soaksNewlinesBefore TTwoDot        = True
+> soaksNewlinesBefore TCap           = True
+> soaksNewlinesBefore TThreePipe     = True
+> soaksNewlinesBefore (TRefinedBy _) = True
+> soaksNewlinesBefore TAnd           = True
+> soaksNewlinesBefore TElse          = True
+> soaksNewlinesBefore TIf            = True
+> soaksNewlinesBefore TLet           = True
+> soaksNewlinesBefore TNot           = True
+> soaksNewlinesBefore TOr            = True
+> soaksNewlinesBefore TThen          = True
+> soaksNewlinesBefore TWithin        = True
+> soaksNewlinesBefore _              = False
+
+> removeNewlinesBeforeSoaker :: [Token] -> [Token]
+> removeNewlinesBeforeSoaker ts = fst $ foldr reducer ([], False) ts
+>     where
+>       reducer TNewline (ts, False) = (TNewline:ts, False)
+>       reducer TNewline (ts, True)  = (ts,          False)
+>       reducer t        (ts, _)     = (t:ts,        soaksNewlinesBefore t)
+
+
+Remove any newlines that appear after a binary or unary operator (a
+“soaker”).
+
+The flag is whether we've just read a newline.
+
+  rx (t:TNewline:ts) | soaksNewlinesAfter t = t : rx ts
+                     | otherwise            = t : TNewline : rx ts
+  rx (t:ts)                                 = t : rx ts
+  rx []                                     = []
+
+> soaksNewlinesAfter :: Token -> Bool
+> soaksNewlinesAfter TLParen        = True
+> soaksNewlinesAfter TRParen        = False
+> soaksNewlinesAfter TLBrace        = True
+> soaksNewlinesAfter TRBrace        = False
+> soaksNewlinesAfter TLBracket      = True
+> soaksNewlinesAfter TRBracket      = True
+> soaksNewlinesAfter TLAngle        = True
+> soaksNewlinesAfter TRAngle        = False
+> soaksNewlinesAfter TBackslash     = True
+> soaksNewlinesAfter TPipe          = True
+> soaksNewlinesAfter TColon         = True
+> soaksNewlinesAfter TAmpersand     = True
+> soaksNewlinesAfter TSemi          = True
+> soaksNewlinesAfter TDot           = True
+> soaksNewlinesAfter TQMark         = True
+> soaksNewlinesAfter TBang          = True
+> soaksNewlinesAfter TAt            = True
+> soaksNewlinesAfter TComma         = True
+> soaksNewlinesAfter TEquals        = True
+> soaksNewlinesAfter TPlus          = True
+> soaksNewlinesAfter TMinus         = True
+> soaksNewlinesAfter TAsterisk      = True
+> soaksNewlinesAfter TSlash         = True
+> soaksNewlinesAfter TPercent       = True
+> soaksNewlinesAfter THash          = True
+> soaksNewlinesAfter TCaret         = True
+> soaksNewlinesAfter TLMap          = True
+> soaksNewlinesAfter TRMap          = False
+> soaksNewlinesAfter TLPBrace       = True
+> soaksNewlinesAfter TRPBrace       = False
+> soaksNewlinesAfter TLPar          = True
+> soaksNewlinesAfter TRPar          = True
+> soaksNewlinesAfter TEq            = True
+> soaksNewlinesAfter TNE            = True
+> soaksNewlinesAfter TLE            = True
+> soaksNewlinesAfter TGE            = True
+> soaksNewlinesAfter TRTriangle     = True
+> soaksNewlinesAfter TBox           = True
+> soaksNewlinesAfter TTwoPipe       = True
+> soaksNewlinesAfter TLArrow        = True
+> soaksNewlinesAfter TRArrow        = True
+> soaksNewlinesAfter TTriangle      = True
+> soaksNewlinesAfter TTwoDot        = True
+> soaksNewlinesAfter TCap           = True
+> soaksNewlinesAfter TThreePipe     = True
+> soaksNewlinesAfter (TRefinedBy _) = True
+> soaksNewlinesAfter TAnd           = True
+> soaksNewlinesAfter TElse          = True
+> soaksNewlinesAfter TIf            = True
+> soaksNewlinesAfter TLet           = True
+> soaksNewlinesAfter TNot           = True
+> soaksNewlinesAfter TOr            = True
+> soaksNewlinesAfter TThen          = True
+> soaksNewlinesAfter TWithin        = True
+> soaksNewlinesAfter _              = False
+
+> removeNewlinesAfterSoaker :: [Token] -> [Token]
+> removeNewlinesAfterSoaker ts = fst $ foldr reducer ([], False) ts
+>     where
+>       reducer TNewline (ts, _)     = (ts, True)
+>       reducer t        (ts, True)
+>           | soaksNewlinesAfter t   = (t:ts, False)
+>           | otherwise              = (t:TNewline:ts, False)
+>       reducer t        (ts, False) = (t:ts, False)
+
+
+String together all of the functions that make up the lexer.
+
+> lexer
+>     = removeNewlinesAfterSoaker .
+>       removeNewlinesBeforeSoaker .
+>       reduceNewlines .
+>       baseLexer

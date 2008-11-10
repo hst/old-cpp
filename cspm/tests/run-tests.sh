@@ -24,3 +24,5 @@ $TESTS/processes/test-iparallel.sh
 $TESTS/processes/test-aparallel.sh
 $TESTS/processes/test-hide.sh
 $TESTS/processes/test-rextchoice.sh
+
+$TESTS/processes/test-newlines.sh
