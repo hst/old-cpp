@@ -1,4 +1,5 @@
 set(TESTS
+  00-identifiers
   00-prefix
   00-extchoice1
   00-extchoice2

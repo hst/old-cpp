@@ -318,7 +318,8 @@ namespace hst_parser
 
                 int lookahead = peek_char(stream);
 
-                if (isalpha(lookahead) || isdigit(lookahead) || ch == '_')
+                if (isalpha(lookahead) || isdigit(lookahead) ||
+                    lookahead == '_' || lookahead == '.')
                 {
                     read_char(stream, loc);
                     *id += lookahead;
@@ -328,7 +329,7 @@ namespace hst_parser
             }
 
             ch = peek_char(stream);
-            while (isalpha(ch) || isdigit(ch) || ch == '_')
+            while (isalpha(ch) || isdigit(ch) || ch == '_' || ch == '.')
             {
                 read_char(stream, loc);
                 *id += ch;
