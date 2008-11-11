@@ -75,23 +75,39 @@
 >     | TRefinedBy String
 >     | TAnd
 >     | TAssert
+>     | TCard
 >     | TChannel
 >     | TChaos
 >     | TDatatype
+>     | TDiff
+>     | TDInter
+>     | TDUnion
+>     | TElem
 >     | TElse
+>     | TEmpty
 >     | TExternal
 >     | TFalse
+>     | THead
 >     | TIf
+>     | TInter
+>     | TLength
 >     | TLet
+>     | TMember
 >     | TNot
+>     | TNull
 >     | TOr
+>     | TPowerset
 >     | TPragma
 >     | TPrint
+>     | TSequenceset
+>     | TSet
 >     | TSkip
 >     | TStop
+>     | TTail
 >     | TThen
 >     | TTransparent
 >     | TTrue
+>     | TUnion
 >     | TWithin
 >     | TIdentifier String
 >     | TNumber Int
@@ -179,23 +195,39 @@ from the module.
 > keyword :: String -> Token
 > keyword "and"         = TAnd
 > keyword "assert"      = TAssert
+> keyword "card"        = TCard
 > keyword "channel"     = TChannel
 > keyword "chaos"       = TChaos
 > keyword "datatype"    = TDatatype
+> keyword "diff"        = TDiff
+> keyword "Inter"       = TDInter
+> keyword "Union"       = TDUnion
+> keyword "elem"        = TElem
 > keyword "else"        = TElse
+> keyword "empty"       = TEmpty
 > keyword "external"    = TExternal
 > keyword "false"       = TFalse
+> keyword "head"        = THead
 > keyword "if"          = TIf
+> keyword "inter"       = TInter
+> keyword "length"      = TLength
 > keyword "let"         = TLet
+> keyword "member"      = TMember
 > keyword "not"         = TNot
+> keyword "null"        = TNull
 > keyword "or"          = TOr
+> keyword "Set"         = TPowerset
 > keyword "pragma"      = TPragma
 > keyword "print"       = TPrint
+> keyword "Seq"         = TSequenceset
+> keyword "set"         = TSet
 > keyword "SKIP"        = TSkip
 > keyword "STOP"        = TStop
+> keyword "tail"        = TTail
 > keyword "then"        = TThen
 > keyword "transparent" = TTransparent
 > keyword "true"        = TTrue
+> keyword "union"       = TUnion
 > keyword "within"      = TWithin
 > keyword id            = TIdentifier id
 

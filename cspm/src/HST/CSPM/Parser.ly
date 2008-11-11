@@ -83,23 +83,39 @@
 >   "[="         { TRefinedBy $$ }
 >   and          { TAnd }
 >   assert       { TAssert }
+>   card         { TCard }
 >   channel      { TChannel }
 >   chaos        { TChaos }
 >   datatype     { TDatatype }
+>   diff         { TDiff }
+>   dinter       { TDInter }
+>   dunion       { TDUnion }
+>   elem         { TElem }
 >   else         { TElse }
+>   empty        { TEmpty }
 >   external     { TExternal }
 >   false        { TFalse }
+>   head         { THead }
 >   if           { TIf }
+>   inter        { TInter }
+>   length       { TLength }
 >   let          { TLet }
+>   member       { TMember }
 >   not          { TNot }
+>   null         { TNull }
 >   or           { TOr }
+>   powerset     { TPowerset }
 >   pragma       { TPragma }
 >   print        { TPrint }
+>   sequenceset  { TSequenceset }
+>   set          { TSet }
 >   skip         { TSkip }
 >   stop         { TStop }
+>   tail         { TTail }
 >   then         { TThen }
 >   transparent  { TTransparent }
 >   true         { TTrue }
+>   union        { TUnion }
 >   within       { TWithin }
 >   identifier   { TIdentifier $$ }
 >   number       { TNumber $$ }
@@ -194,17 +210,28 @@
 >           | PExpr "/" PExpr                { ENQuot $1 $3 }
 >           | PExpr "%" PExpr                { ENRem $1 $3 }
 >           | "#" PExpr                      { EQLength $2 }
+>           | length "(" PExpr ")"           { EQLength $3 }
+>           | card "(" PExpr ")"             { ESCardinality $3 }
 
 > PSequence_ :: { Expression }
 > PSequence_  : "<" PQExprs0 ">"             { EQLit $2 }
 >             | "<" PExpr ".." PExpr ">"     { EQClosedRange $2 $4 }
 >             | "<" PExpr ".." ">"           { EQOpenRange $2 }
 >             | PExpr "^" PExpr              { EQConcat $1 $3 }
+>             | tail "(" PExpr ")"           { EQTail $3 }
 
 > PSet_ :: { Expression }
 > PSet_  : "{" PExprs0 "}"                   { ESLit $2 }
 >        | "{" PExpr ".." PExpr "}"          { ESClosedRange $2 $4 }
 >        | "{" PExpr ".." "}"                { ESOpenRange $2 }
+>        | union "(" PExpr "," PExpr ")"     { ESUnion $3 $5 }
+>        | inter "(" PExpr "," PExpr ")"     { ESIntersection $3 $5 }
+>        | diff "(" PExpr "," PExpr ")"      { ESDifference $3 $5 }
+>        | dunion "(" PExpr ")"              { ESDistUnion $3 }
+>        | dinter "(" PExpr ")"              { ESDistIntersection $3 }
+>        | set "(" PExpr ")"                 { EQSet $3 }
+>        | powerset "(" PExpr ")"            { ESPowerset $3 }
+>        | sequenceset "(" PExpr ")"         { ESSequenceset $3 }
 
 > PBoolean_ :: { Expression }
 > PBoolean_  : true                          { EBTrue }
@@ -218,6 +245,11 @@
 >            | PExpr ">" PExpr               { EGT $1 $3 }
 >            | PExpr "<=" PExpr              { ELTE $1 $3 }
 >            | PExpr ">=" PExpr              { EGTE $1 $3 }
+>            | null "(" PExpr ")"            { EQEmpty $3 }
+>            | elem "(" PExpr "," PExpr ")"  { EQIn $3 $5 }
+>            | empty "(" PExpr ")"           { ESEmpty $3 }
+>            | member "(" PExpr ","
+>              PExpr ")"                     { ESIn $3 $5 }
 
 > PTuple_ :: { Expression }
 > PTuple_  : "(" PExpr "," PExprs0 ")"       { ETLit ($2:$4) }
@@ -245,6 +277,7 @@
 >        | "(" PExpr ")"                     { $2 }
 >        | let PBindings within PExpr        { ELet $2 $4 }
 >        | PExpr "(" PExprs0 ")"             { EApply $1 $3 }
+>        | head "(" PExpr ")"                { EQHead $3 }
 >        | if PExpr then PExpr else PExpr    { EIfThenElse $2 $4 $6 }
 
 > PBindings :: { [Binding] }
