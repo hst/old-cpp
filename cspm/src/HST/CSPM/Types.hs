@@ -130,6 +130,23 @@ coerceEvent (VEvent a) = a
 coerceProcess :: Value -> ProcPair
 coerceProcess (VProcess pp) = pp
 
+-- Patterns
+
+data Pattern
+    = PNLit Int
+    | PWildcard
+    | PIdentifier Identifier
+    | PTuple [Pattern]
+    | PQLit [Pattern]
+    | PQConcat Pattern Pattern
+    | PSEmpty
+    | PSSingleton Pattern
+    -- | channel
+    -- | dotted
+    | PConjunction Pattern Pattern
+
+type PatternMatch = Maybe [Binding]
+
 -- Top-level definitions
 
 data CSPMScript
@@ -209,6 +226,7 @@ data Expression
     | EQHead Expression
     | EIfThenElse Expression Expression Expression
     | EBound BoundExpression
+    | EValue Value
 
     -- Expressions which evaluate to an event
     | EEvent Event
@@ -290,6 +308,7 @@ instance Show Expression where
                                show x ++ " else " ++ show y
 
     show (EBound be) = show be
+    show (EValue v) = "<<value: " ++ show v ++ ">>"
 
     show (EEvent a) = show a
 
@@ -385,6 +404,7 @@ data BoundExpression
     | BApply BoundExpression [BoundExpression]
     | BQHead BoundExpression
     | BIfThenElse BoundExpression BoundExpression BoundExpression
+    | BValue Value
 
     -- Expression which can evaluate to an event
     | BEvent Event
@@ -464,6 +484,8 @@ instance Show BoundExpression where
     show (BQHead x) = "head(" ++ show x ++ ")"
     show (BIfThenElse b x y) = "if (" ++ show b ++ ") then " ++
                                show x ++ " else " ++ show y
+
+    show (BValue v) = "<<value: " ++ show v ++ ">>"
 
     show (BEvent a) = show a
 

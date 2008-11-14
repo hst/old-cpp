@@ -303,6 +303,8 @@ eval (BApply x ys) = do
   put $ s { applications = nextApp }
   eval $ bind pfx' e1 body
 
+eval (BValue v) = return v
+
 -- Expressions that can evaluate to an event
 
 eval (BEvent a) = return $ VEvent a

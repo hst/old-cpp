@@ -146,6 +146,8 @@ binder pfx e (EIfThenElse x y z) = binder3 pfx BIfThenElse e x y z
 
 binder pfx e (EBound be) = return $ be
 
+binder pfx e (EValue v) = return $ BValue v
+
 binder pfx e (EVar id) = return $ BVar e id
 
 binder pfx e (ELet bs x) = binder pfx e1 x

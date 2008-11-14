@@ -24,6 +24,7 @@ module HST.CSPM
     (
      module HST.CSPM.Types,
      module HST.CSPM.Environments,
+     module HST.CSPM.Patterns,
      module HST.CSPM.Bind,
      module HST.CSPM.Evaluate,
      module HST.CSPM.Definitions,
@@ -34,6 +35,7 @@ module HST.CSPM
 
 import HST.CSPM.Types
 import HST.CSPM.Environments
+import HST.CSPM.Patterns
 import HST.CSPM.Bind
 import HST.CSPM.Evaluate
 import HST.CSPM.Definitions
