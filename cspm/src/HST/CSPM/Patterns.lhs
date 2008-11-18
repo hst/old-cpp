@@ -20,12 +20,12 @@
 
 > module HST.CSPM.Patterns
 >     (
->      valueMatches
+>      matchClause, valueMatches
 >     )
 >     where
 
 > import Data.List (unfoldr)
-> import Data.Maybe (catMaybes)
+> import Data.Maybe (catMaybes, listToMaybe, mapMaybe)
 > import Monad (liftM)
 
 > import qualified HST.CSPM.Sets as Sets
@@ -168,3 +168,16 @@ what the pattern expects to receive.  This results in a failed match.
 > valueMatches (PQConcat _ _)  _ = Nothing
 > valueMatches PSEmpty         _ = Nothing
 > valueMatches (PSSingleton _) _ = Nothing
+
+
+Given a list of LambdaClauses, find the first pattern that matches the
+value.  Return the list of bindings for this match, along with the
+corresponding expression.  If no pattern matches, return Nothing.
+
+> matchClause :: [LambdaClause] -> Value -> Maybe ([Binding], Expression)
+
+> matchClause clauses v = listToMaybe $ mapMaybe matcher clauses
+>     where
+>       matcher (Clause p x) = case valueMatches p v of
+>                                Just bs -> Just (bs, x)
+>                                Nothing -> Nothing

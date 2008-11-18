@@ -36,6 +36,7 @@ import qualified HST.CSPM.Sets as Sets
 import HST.CSPM.Types
 import HST.CSPM.Environments
 import HST.CSPM.Bind
+import HST.CSPM.Patterns
 
 data EvalState
     = EvalState {
@@ -275,7 +276,9 @@ eval (BTLit xs) = do
 
 -- Expressions that evaluate to a lambda
 
-eval (BLambda pfx e ids x) = return $ VLambda pfx e ids x
+eval (BLambda pfx e ids x) = return $ VLambda pfx e [Clause pattern x]
+    where
+      pattern = PTuple $ map PIdentifier ids
 
 -- Expressions that can evaluate to anything
 
@@ -294,14 +297,19 @@ eval (BVar e id) = eval $ bind (name e ++ id') e $ lookupExpr e id
       Identifier id' = id
 
 eval (BApply x ys) = do
-  VLambda pfx e0 ids body <- eval x
-  s <- get
-  let apps = applications s
-      nextApp = apps + 1
-      e1 = extendEnv (name e0) e0 $ zipWith Binding ids (map EBound ys)
-      pfx' = pfx ++ "." ++ show nextApp
-  put $ s { applications = nextApp }
-  eval $ bind pfx' e1 body
+  VLambda pfx e0 clauses <- eval x
+  v <- eval (BTLit ys)
+  case matchClause clauses v of
+    Nothing         -> return VBottom
+    Just (bs, body) ->
+        do
+          s <- get
+          let apps = applications s
+              nextApp = apps + 1
+              e1 = extendEnv (name e0) e0 bs
+              pfx' = pfx ++ "." ++ show nextApp
+          put $ s { applications = nextApp }
+          eval $ bind pfx' e1 body
 
 eval (BValue v) = return v
 

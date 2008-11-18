@@ -74,6 +74,18 @@ instance Eq ProcPair where
 instance Ord ProcPair where
     compare (ProcPair p1 _) (ProcPair p2 _) = compare p1 p2
 
+data LambdaClause = Clause Pattern Expression
+                    deriving (Eq, Ord)
+
+instance Show LambdaClause where
+    show (Clause p x) = show p ++ " @ " ++ show x
+
+    showList []       = showString "{}"
+    showList (x:xs)   = showChar '{' . shows x . showl xs
+                        where showl []     = showChar '}'
+                              showl (x:xs) = showString "; " . shows x .
+                                             showl xs
+
 data Value
     = VBottom
     | VNumber Int
@@ -81,21 +93,20 @@ data Value
     | VSet (Set Value)
     | VBoolean Bool
     | VTuple [Value]
-    | VLambda String Env [Identifier] Expression
+    | VLambda String Env [LambdaClause]
     | VEvent Event
     | VProcess ProcPair
     deriving (Eq, Ord)
 
 instance Show Value where
-    show (VBottom)             = "Bottom"
-    show (VNumber i)           = show i
-    show (VSequence s)         = "<" ++ show s ++ ">"
-    show (VSet s)              = "{" ++ show s ++ "}"
-    show (VBoolean b)          = show b
-    show (VTuple t)            = "(" ++ show t ++ ")"
-    show (VLambda pfx e ids x) = "\\ [" ++ show pfx ++ "] " ++ show ids ++
-                                 ": " ++ show x
-    show (VEvent a)            = show a
+    show (VBottom)          = "Bottom"
+    show (VNumber i)        = show i
+    show (VSequence s)      = "<" ++ show s ++ ">"
+    show (VSet s)           = "{" ++ show s ++ "}"
+    show (VBoolean b)       = show b
+    show (VTuple t)         = "(" ++ show t ++ ")"
+    show (VLambda pfx e cs) = "\\ [" ++ show pfx ++ "] " ++ show cs
+    show (VEvent a)         = show a
 
     show (VProcess (ProcPair p _)) = "[proc " ++ show p ++ "]"
 
@@ -144,6 +155,7 @@ data Pattern
     -- | channel
     -- | dotted
     | PConjunction Pattern Pattern
+    deriving (Eq, Ord)
 
 instance Show Pattern where
     show (PNLit i)            = show i
