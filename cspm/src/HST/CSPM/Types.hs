@@ -145,6 +145,27 @@ data Pattern
     -- | dotted
     | PConjunction Pattern Pattern
 
+instance Show Pattern where
+    show (PNLit i)            = show i
+    show (PWildcard)          = "_"
+    show (PIdentifier id)     = show id
+    show (PTuple pt)          = "(" ++ show pt ++ ")"
+    show (PQLit pq)           = "<" ++ show pq ++ ">"
+    show (PQConcat p1 p2)     = show p1 ++ "^" ++ show p2
+    show (PSEmpty)            = "{}"
+    show (PSSingleton p)      = "{" ++ show p ++ "}"
+    show (PConjunction p1 p2) = show p1 ++ "@" ++ show p2
+
+    -- We don't want to show the [] brackets when showing a list of
+    -- patterns, since we're going to use different brackets depending
+    -- on whether the list represents a sequence, set, or tuple.
+
+    showList []     = showString ""
+    showList (x:xs) = shows x . showl xs
+                      where
+                        showl []     = id
+                        showl (x:xs) = showChar ',' . shows x . showl xs
+
 type PatternMatch = Maybe [Binding]
 
 -- Top-level definitions
