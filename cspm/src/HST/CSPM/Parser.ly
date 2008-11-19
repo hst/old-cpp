@@ -61,6 +61,7 @@
 >   "%"          { TPercent }
 >   "#"          { THash }
 >   "^"          { TCaret }
+>   "_"          { TWildcard }
 >   "[["         { TLMap }
 >   "]]"         { TRMap }
 >   "{|"         { TLPBrace }
@@ -165,8 +166,33 @@
 >                 PDefinition                { $1 ++ [$3] }
 
 > PDefinition :: { Definition }
-> PDefinition  : PId "=" PExpr               { DDefinition $1 $3 }
+> PDefinition  : PPattern "=" PExpr          { DPatternDefn $1 $3 }
 >              | channel PId                 { DSimpleChannel $2 }
+
+> PDefnLeft :: { () }
+> PDefnLeft  : PPattern                      { () }
+>            | PId "(" ")"                   { () }
+>            | PId "(" PPatterns0 ")"        { () }
+
+> PPatterns :: { [Pattern] }
+> PPatterns  : PPattern                      { [$1] }
+>            | PPatterns "," PPattern        { $1 ++ [$3] }
+
+> PPatterns0 :: { [Pattern] }
+> PPatterns0  :                              { [] }
+>             | PPatterns                    { $1 }
+
+> PPattern :: { Pattern }
+> PPattern  : number                         { PNLit $1 }
+>           | "_"                            { PWildcard }
+>           | PId                            { PIdentifier $1 }
+>           | "(" PPattern ","
+>             PPatterns0 ")"                 { PTuple ($2:$4) }
+>           | "<" PPatterns0 ">"             { PQLit $2 }
+>           | PPattern "^" PPattern          { PQConcat $1 $3 }
+>           | "{" "}"                        { PSEmpty }
+>           | "{" PPattern "}"               { PSSingleton $2 }
+>           | PPattern "@" PPattern          { PConjunction $1 $3 }
 
 > PId :: { Identifier }
 > PId  : identifier                          { Identifier $1 }

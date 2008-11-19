@@ -313,6 +313,16 @@ eval (BApply x ys) = do
 
 eval (BValue v) = return v
 
+eval (BExtractMatch id p x) = do
+  v <- eval x
+  case valueMatches p v of
+    Nothing -> return VBottom
+    Just bs -> return boundValue
+      where
+        binding = head $ filter finder bs
+        finder (Binding id' _) = id == id'
+        Binding _ (EValue boundValue) = binding
+
 -- Expressions that can evaluate to an event
 
 eval (BEvent a) = return $ VEvent a

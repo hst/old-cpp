@@ -20,18 +20,30 @@
 
 > module HST.CSPM.Definitions where
 
+> import Data.Maybe
+
 > import HST.CSP0
 > import HST.CSPM.Types
 > import HST.CSPM.Environments
+> import HST.CSPM.Patterns
 
-> createBinding :: Definition -> Binding
-> createBinding (DDefinition id x) = Binding id x
-> createBinding (DSimpleChannel id) = Binding id (EEvent (Event id'))
+> createBinding :: Definition -> [Binding]
+
+> createBinding (DPatternDefn p x)
+>     = map binder (patternIds p)
+>     where
+>       binder id = Binding id $ EExtractMatch id p x
+
+
+fromMaybe [] $ valueMatches p (eval e x)
+
+> createBinding (DSimpleChannel id)
+>     = [Binding id (EEvent (Event id'))]
 >     where
 >       Identifier id' = id
 
 > createBindings :: [Definition] -> [Binding]
-> createBindings = map createBinding
+> createBindings = concatMap createBinding
 
 > createEnv :: CSPMScript -> Env
 > createEnv (CSPMScript defs) = rootEnv $ createBindings defs

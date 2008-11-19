@@ -160,6 +160,10 @@ binder pfx e (EApply x ys) = do
   ys' <- sequence $ map (binder pfx e) ys
   return $ BApply x' ys'
 
+binder pfx e (EExtractMatch id p x) = do
+  x' <- binder pfx e x
+  return $ BExtractMatch id p x'
+
 -- Events
 
 binder pfx e (EEvent a) = return $ BEvent a

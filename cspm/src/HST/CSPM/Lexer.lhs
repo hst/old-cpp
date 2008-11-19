@@ -53,6 +53,7 @@
 >     | TPercent
 >     | THash
 >     | TCaret
+>     | TWildcard
 >     | TLMap
 >     | TRMap
 >     | TLPBrace
@@ -172,6 +173,7 @@ from the module.
 > baseLexer ('%':cs) = TPercent : baseLexer cs
 > baseLexer ('#':cs) = THash : baseLexer cs
 > baseLexer ('^':cs) = TCaret : baseLexer cs
+> baseLexer ('_':cs) = TWildcard : baseLexer cs
 
 > --baseLexer ('[':'=':cs) = TRefinedBy "T" : baseLexer cs
 

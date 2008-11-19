@@ -13,6 +13,7 @@ $TESTS/expressions/test-sequences.sh
 $TESTS/expressions/test-sets.sh
 $TESTS/expressions/test-booleans.sh
 $TESTS/expressions/test-lambdas.sh
+$TESTS/expressions/test-patterns.sh
 
 $TESTS/processes/test-prefix.sh
 $TESTS/processes/test-extchoice.sh

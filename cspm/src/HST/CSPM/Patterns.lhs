@@ -20,7 +20,7 @@
 
 > module HST.CSPM.Patterns
 >     (
->      matchClause, valueMatches
+>      matchClause, patternIds, valueMatches
 >     )
 >     where
 
@@ -44,6 +44,18 @@ but (hopefully) more efficient.
 >       splitter ([], []) = Nothing
 >       splitter (pre, []) = Just ((pre, []), ([], []))
 >       splitter (pre, post@(p:ps)) = Just ((pre, post), (pre ++ [p], ps))
+
+
+> patternIds :: Pattern -> [Identifier]
+> patternIds (PNLit _)            = []
+> patternIds PWildcard            = []
+> patternIds (PIdentifier id)     = [id]
+> patternIds (PTuple ps)          = concatMap patternIds ps
+> patternIds (PQLit qs)           = concatMap patternIds qs
+> patternIds (PQConcat p1 p2)     = patternIds p1 ++ patternIds p2
+> patternIds PSEmpty              = []
+> patternIds (PSSingleton p)      = patternIds p
+> patternIds (PConjunction p1 p2) = patternIds p1 ++ patternIds p2
 
 
 > valueMatches :: Pattern -> Value -> PatternMatch

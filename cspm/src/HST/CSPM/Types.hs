@@ -187,7 +187,7 @@ data CSPMScript
     deriving Show
 
 data Definition
-    = DDefinition Identifier Expression
+    = DPatternDefn Pattern Expression
     | DSimpleChannel Identifier
     deriving Show
 
@@ -260,6 +260,7 @@ data Expression
     | EIfThenElse Expression Expression Expression
     | EBound BoundExpression
     | EValue Value
+    | EExtractMatch Identifier Pattern Expression
 
     -- Expressions which evaluate to an event
     | EEvent Event
@@ -342,6 +343,9 @@ instance Show Expression where
 
     show (EBound be) = show be
     show (EValue v) = "<<value: " ++ show v ++ ">>"
+
+    show (EExtractMatch id p x) = "<<extract " ++ show id ++ " from " ++
+                                  show p ++ " = " ++ show x ++ ">>"
 
     show (EEvent a) = show a
 
@@ -438,6 +442,7 @@ data BoundExpression
     | BQHead BoundExpression
     | BIfThenElse BoundExpression BoundExpression BoundExpression
     | BValue Value
+    | BExtractMatch Identifier Pattern BoundExpression
 
     -- Expression which can evaluate to an event
     | BEvent Event
@@ -519,6 +524,9 @@ instance Show BoundExpression where
                                show x ++ " else " ++ show y
 
     show (BValue v) = "<<value: " ++ show v ++ ">>"
+
+    show (BExtractMatch id p x) = "<<extract " ++ show id ++ " from " ++
+                                  show p ++ " = " ++ show x ++ ">>"
 
     show (BEvent a) = show a
 
