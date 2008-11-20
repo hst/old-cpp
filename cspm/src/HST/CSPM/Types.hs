@@ -188,6 +188,8 @@ data CSPMScript
 
 data Definition
     = DPatternDefn Pattern Expression
+    | DLambdaClause Identifier LambdaClause
+    | DLambda Identifier [LambdaClause]
     | DSimpleChannel Identifier
     deriving Show
 

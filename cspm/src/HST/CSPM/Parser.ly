@@ -167,6 +167,9 @@
 
 > PDefinition :: { Definition }
 > PDefinition  : PPattern "=" PExpr          { DPatternDefn $1 $3 }
+>              | PId "(" PPatterns0 ")"
+>                "=" PExpr                   { DLambdaClause $1 $
+>                                              Clause (PTuple $3) $6 }
 >              | channel PId                 { DSimpleChannel $2 }
 
 > PPatterns :: { [Pattern] }
