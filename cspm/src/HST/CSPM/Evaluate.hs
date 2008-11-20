@@ -276,9 +276,7 @@ eval (BTLit xs) = do
 
 -- Expressions that evaluate to a lambda
 
-eval (BLambda pfx e ids x) = return $ VLambda pfx e [Clause pattern x]
-    where
-      pattern = PTuple $ map PIdentifier ids
+eval (BLambda pfx e cs) = return $ VLambda pfx e cs
 
 -- Expressions that can evaluate to anything
 

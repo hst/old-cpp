@@ -137,7 +137,7 @@ binder pfx e (ETLit xs) = binderList pfx BTLit e xs
 
 -- Lambdas
 
-binder pfx e (ELambda ids x) = return $ BLambda pfx e ids x
+binder pfx e (ELambda cs) = return $ BLambda pfx e cs
 
 -- Anything
 

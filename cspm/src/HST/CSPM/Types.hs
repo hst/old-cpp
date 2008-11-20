@@ -250,7 +250,7 @@ data Expression
     | ETLit [Expression]
 
     -- Expressions which evaluate to a lambda
-    | ELambda [Identifier] Expression
+    | ELambda [LambdaClause]
 
     -- Expressions which can evaluate to anything
     | EVar Identifier
@@ -331,7 +331,7 @@ instance Show Expression where
 
     show (ETLit xs) = "(" ++ show xs ++ ")"
 
-    show (ELambda ids x) = "\\ " ++ show ids ++ ": " ++ show x
+    show (ELambda cs) = "\\ " ++ show cs
 
     show (EVar id) = show id
     show (ELet bs x) = "let " ++ show bs ++ " within " ++ show x
@@ -434,7 +434,7 @@ data BoundExpression
     | BTLit [BoundExpression]
 
     -- Expressions which evaluate to a lambda
-    | BLambda String Env [Identifier] Expression  -- yes, that's Expr, not BoundExpr
+    | BLambda String Env [LambdaClause]  -- yep, that contains Expr, not BoundExpr
 
     -- Expressions which can evaluate to anything
     | BVar Env Identifier
@@ -514,8 +514,7 @@ instance Show BoundExpression where
 
     show (BTLit xs) = "(" ++ show xs ++ ")"
 
-    show (BLambda pfx e ids x) = "\\ [" ++ pfx ++ "] " ++ show ids ++
-                                 ": " ++ show x
+    show (BLambda pfx e cs) = "\\ [" ++ pfx ++ "] " ++ show cs
 
     show (BVar e id) = show id
     show (BApply x ys) = show x ++ "(" ++ show ys ++ ")"

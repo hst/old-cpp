@@ -37,7 +37,9 @@ prop_LambdaSum = forAll enumber tester
           where
             f = Identifier "f"
             x = Identifier "x"
-            e01 = ELambda [x] (ENSum (EVar x) (ENLit 5))
+            e01 = ELambda [Clause
+                           (PTuple [PIdentifier x])
+                           (ENSum (EVar x) (ENLit 5))]
             e02 = EApply (EVar f) [en]
             e0 = ELet [Binding f e01] e02
             e1 = ENSum en (ENLit 5)

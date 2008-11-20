@@ -169,11 +169,6 @@
 > PDefinition  : PPattern "=" PExpr          { DPatternDefn $1 $3 }
 >              | channel PId                 { DSimpleChannel $2 }
 
-> PDefnLeft :: { () }
-> PDefnLeft  : PPattern                      { () }
->            | PId "(" ")"                   { () }
->            | PId "(" PPatterns0 ")"        { () }
-
 > PPatterns :: { [Pattern] }
 > PPatterns  : PPattern                      { [$1] }
 >            | PPatterns "," PPattern        { $1 ++ [$3] }
@@ -281,7 +276,8 @@
 > PTuple_  : "(" PExpr "," PExprs0 ")"       { ETLit ($2:$4) }
 
 > PLambda_ :: { Expression }
-> PLambda_  : "\\" PIds "@" PExpr            { ELambda $2 $4 }
+> PLambda_  : "\\" PIds "@" PExpr
+>             { ELambda [Clause (PTuple $ map PIdentifier $2) $4] }
 
 > PProc_ :: { Expression }
 > PProc_  : stop                             { EStop }
