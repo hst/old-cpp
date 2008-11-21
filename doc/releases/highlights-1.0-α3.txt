@@ -1,0 +1,15 @@
+Release 1.0-α3:
+
+  • CSPM compiler
+
+      Many language features are implemented.  The following aren't:
+        • sequence comprehensions
+        • set comprehensions
+        • dotted channels
+        • special definitions
+        • comments
+        • type definitions
+        • include files
+
+      Also, many process operators are not yet supported, since the
+      underlying CSP₀ library also doesn't support them.

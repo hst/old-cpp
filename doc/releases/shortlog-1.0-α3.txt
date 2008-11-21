@@ -1,0 +1,37 @@
+Douglas Creager (35):
+      Initial Haskell CSPM implementation
+      Cabal build infrastructure
+      Adding more test cases for sets
+      Adding more test cases for booleans
+      CSPM environments
+      Flattening the Expression type
+      Let bindings
+      Evaluation rules for lambdas
+      New implementation of sets
+      Infinite sets
+      Initial support for CSP₀ scripts
+      Binding and evaluation now take place in a monad
+      Evaluate process expressions
+      Adding predefined SKIP and STOP processes
+      Distinct process names for each application of a function
+      Helper methods for evaluating CSPM expressions
+      Basic CSPM parser and command-line utility
+      Top-level script no longer implemented as an implicit “let” statement
+      Simple “channel” statement
+      Adding additional (non-QuickCheck) testing harness
+      Parentheses in expressions
+      Allow trailing newlines at end of CSPM script
+      Definitions no longer need to be in alphabetical order
+      Adding process expressions to CSPM parser
+      CSP₀ identifiers can now contain periods
+      Prefix CSPM expressions should create “event” CSP₀ statements
+      Allow newlines before and after binary operators
+      Implementing built-in functions as keywords
+      Initial pattern matching support
+      Adding Show instance for patterns
+      Lambdas now implemented using patterns
+      Patterns on left-hand sides of top-level definitions
+      Lambda expressions now implemented using patterns, too
+      Functions defined in multiple branches
+      “let”s now allow pattern definitions and multiple-branch functions
+
