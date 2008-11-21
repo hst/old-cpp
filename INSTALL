@@ -1,12 +1,15 @@
+CSP₀ library
+============
+
 I'll write more detailed notes later.  For now, to compile this
 package, you need:
 
- * cmake
- * bison
- * asciidoc
- * xmlto
- * Boost
- * libjudy
+  • cmake
+  • bison
+  • asciidoc
+  • xmlto
+  • Boost
+  • libjudy
 
 The first four are only needed at build-time.  The last two are
 required at runtime as well.
@@ -37,3 +40,39 @@ Then execute the following:
 
 (You'll obviously only need the “sudo” if you're installing into a
 system-wide directory.)
+
+
+CSPM library
+============
+
+To compile the CSPM, you'll need a Haskell compiler and several
+libraries.  So far we've only tested this on GHC 6.8.  If you can get
+it to compile using other compilers or GHC versions, we'd love to hear
+it!
+
+You'll also need the happy parser generator, and the following
+Hackage/Cabal packages:
+
+  • array
+  • base
+  • containers
+  • mtl
+  • QuickCheck
+
+These should all be preinstalled for any reasonably recent Haskell
+compiler.
+
+The cspm directory contains a Cabal package description, so you can
+use the usual Cabal recipe for compiling and installing the CSPM
+portion of the library:
+
+  runghc Setup.lhs configure
+  runghc Setup.lhs build
+  runghc Setup.lhs test
+  sudo runghc Setup.lhs install
+
+(substituting “runghc” with “runhaskell” or “runhugs” or something
+else if appropriate.)
+
+As with the CSP₀ library, you'll only need the “sudo” if you're
+installing into a system-wide directory.

@@ -1,0 +1,6 @@
+process P;
+process P.1;
+process P_1.2;
+process $P;
+process $P.1;
+process $P_1.2;

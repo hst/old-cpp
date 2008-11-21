@@ -34,9 +34,10 @@ Identifiers
 ~~~~~~~~~~~
 
 Identifiers must begin with a letter, underscore, or dollar sign.  The
-remaining characters must be letters, numbers, or underscores.  Those
-that begin with a dollar sign must contain at least one more character
-— ‘++$++’ on its own is not a valid identifier.
+remaining characters must be letters, numbers, periods, or
+underscores.  Those that begin with a dollar sign must contain at
+least one more character — ‘++$++’ on its own is not a valid
+identifier.
 
 The intention is that higher-level languages shouldn't allow
 identifiers beginning with +$+; instead, these identifiers are
