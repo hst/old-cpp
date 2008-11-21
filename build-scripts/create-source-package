@@ -1,12 +1,11 @@
 #!/bin/bash
 
-PACKAGE="hst"
-VERSION="0.1-α1"
+TAG="$1"
 
 USAGE="create-source-package"
 SUBDIRECTORY_OK=1
-. git-sh-setup
+. "$(git --exec-path)/git-sh-setup"
 
 cd_to_toplevel
-git archive --format=tar --prefix=${PACKAGE}-${VERSION}/ HEAD | \
-    gzip > ${PACKAGE}-${VERSION}.tar.gz
+git archive --format=tar --prefix=${TAG}/ ${TAG} | \
+    gzip > ${TAG}.tar.gz
