@@ -35,6 +35,6 @@ prop_LetSingle = forAll (pair identifier expression) tester
     where
       tester (id, x) = v0 == v1
           where
-            e0 = ELet [Binding id x] (EVar id)
+            e0 = ELet [DPatternDefn (PIdentifier id) x] (EVar id)
             v0 = evaluate emptyRootEnv e0
             v1 = evaluate emptyRootEnv x

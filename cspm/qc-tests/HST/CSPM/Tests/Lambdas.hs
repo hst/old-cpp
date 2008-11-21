@@ -41,7 +41,7 @@ prop_LambdaSum = forAll enumber tester
                            (PTuple [PIdentifier x])
                            (ENSum (EVar x) (ENLit 5))]
             e02 = EApply (EVar f) [en]
-            e0 = ELet [Binding f e01] e02
+            e0 = ELet [DPatternDefn (PIdentifier f) e01] e02
             e1 = ENSum en (ENLit 5)
             v0 = evaluate emptyRootEnv e0
             v1 = evaluate emptyRootEnv e1

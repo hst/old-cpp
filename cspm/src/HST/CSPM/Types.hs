@@ -191,7 +191,7 @@ data Definition
     | DLambdaClause Identifier LambdaClause
     | DLambda Identifier [LambdaClause]
     | DSimpleChannel Identifier
-    deriving Show
+    deriving (Eq, Ord, Show)
 
 -- Expressions
 
@@ -256,7 +256,7 @@ data Expression
 
     -- Expressions which can evaluate to anything
     | EVar Identifier
-    | ELet [Binding] Expression
+    | ELet [Definition] Expression
     | EApply Expression [Expression]
     | EQHead Expression
     | EIfThenElse Expression Expression Expression
@@ -336,7 +336,7 @@ instance Show Expression where
     show (ELambda cs) = "\\ " ++ show cs
 
     show (EVar id) = show id
-    show (ELet bs x) = "let " ++ show bs ++ " within " ++ show x
+    show (ELet ds x) = "let " ++ show ds ++ " within " ++ show x
     show (EApply x ys) = show x ++ "(" ++ show ys ++ ")"
 
     show (EQHead x) = "head(" ++ show x ++ ")"

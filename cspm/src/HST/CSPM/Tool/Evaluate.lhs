@@ -91,7 +91,7 @@
 >       (opts, exprs) <- parseOptions args
 >       scriptText <- getScript opts
 >       let script = parseFile scriptText
->           env    = createEnv script
+>           env    = createRootEnv script
 >       sequence $ map (parseEvalAndPrint env) exprs
 >       return ()
 

@@ -30,6 +30,7 @@ import qualified Data.Set as DS
 import HST.CSP0 hiding (processes)
 import HST.CSPM.Types
 import HST.CSPM.Environments
+import HST.CSPM.Definitions
 
 data BindState
     = BindState {
@@ -150,9 +151,9 @@ binder pfx e (EValue v) = return $ BValue v
 
 binder pfx e (EVar id) = return $ BVar e id
 
-binder pfx e (ELet bs x) = binder pfx e1 x
+binder pfx e (ELet ds x) = binder pfx e1 x
     where
-      e1   = extendEnv pfx1 e bs
+      e1   = createNestedEnv pfx1 e ds
       pfx1 = pfx ++ "."
 
 binder pfx e (EApply x ys) = do

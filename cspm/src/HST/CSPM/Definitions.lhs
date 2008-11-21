@@ -74,9 +74,18 @@ use the merge and extract helper functions to create the new DLambdas.
 >       extract [] = []
 
 
-To create an Environment for a list of Definitions, we first merge
+To create a root Environment for a list of Definitions, we first merge
 together all of the DLambdaClauses into DLambdas, and then use
 createBindings to create the contents of the new Environment.
 
-> createEnv :: CSPMScript -> Env
-> createEnv (CSPMScript defs) = rootEnv $ createBindings $ mergeLambdas defs
+> createRootEnv :: CSPMScript -> Env
+> createRootEnv (CSPMScript defs) = rootEnv $ createBindings $ mergeLambdas defs
+
+
+To create a nested Environment for a list of Definitions, we follow
+the same process as above; we just use extendEnv instead of rootEnv to
+create the Environment.
+
+> createNestedEnv :: String -> Env -> [Definition] -> Env
+> createNestedEnv name e defs
+>     = extendEnv name e $ createBindings $ mergeLambdas defs

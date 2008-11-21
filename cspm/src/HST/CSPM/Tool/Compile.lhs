@@ -94,7 +94,7 @@
 >       (opts, exprs) <- parseOptions args
 >       scriptText <- getScript opts
 >       let script   = parseFile scriptText
->           env      = createEnv script
+>           env      = createRootEnv script
 >           definers = sequence $ map (parseAndCompile env) exprs
 >           csp0     = createScript definers
 >       putStr $ outputScript csp0

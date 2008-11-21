@@ -300,17 +300,21 @@
 > PAny_ :: { Expression }
 > PAny_  : PId                               { EVar $1 }
 >        | "(" PExpr ")"                     { $2 }
->        | let PBindings within PExpr        { ELet $2 $4 }
+>        | let PSimpleDefns within PExpr     { ELet $2 $4 }
 >        | PExpr "(" PExprs0 ")"             { EApply $1 $3 }
 >        | head "(" PExpr ")"                { EQHead $3 }
 >        | if PExpr then PExpr else PExpr    { EIfThenElse $2 $4 $6 }
 
-> PBindings :: { [Binding] }
-> PBindings  : PBinding                      { [$1] }
->            | PBindings PNewlines PBinding  { $1 ++ [$3] }
+> PSimpleDefns :: { [Definition] }
+> PSimpleDefns  : PSimpleDefn                { [$1] }
+>               | PSimpleDefns PNewlines
+>                 PSimpleDefn                { $1 ++ [$3] }
 
-> PBinding :: { Binding }
-> PBinding  : PId "=" PExpr                  { Binding $1 $3 }
+> PSimpleDefn :: { Definition }
+> PSimpleDefn  : PPattern "=" PExpr          { DPatternDefn $1 $3 }
+>              | PId "(" PPatterns0 ")"
+>                "=" PExpr                   { DLambdaClause $1 $
+>                                              Clause (PTuple $3) $6 }
 
 > {
 
