@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ln -s /Libraries/Frameworks/HST.framework/csp0 /usr/bin
