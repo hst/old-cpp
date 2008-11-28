@@ -14,19 +14,25 @@ USR_DIR=${VERSION_DIR}/usr
 
 # Remove any existing bundle.
 
-if [ -x ${FRAMEWORK_DIR} ]; then
+if [ -e ${FRAMEWORK_DIR} ]; then
     echo Removing old framework bundle...
     rm -rf ${FRAMEWORK_DIR}
 fi
 
-if [ -x HST.mpkg ]; then
+if [ -e HST.mpkg ]; then
     echo Removing old installation package...
     rm -rf HST.mpkg
+fi
+
+if [ -e HST.dmg ]; then
+    echo Removing old disk image...
+    rm -f HST.dmg
 fi
 
 
 # Set up the versioned framework bundle.
 
+echo ""
 echo Creating HST framework in ${FRAMEWORK_DIR}...
 
 mkdir -p ${VERSION_DIR}
@@ -143,6 +149,28 @@ install_name_tool -change ${OLD_LIBHST_ID} ${LIBHST_ID} ${USR_DIR}/bin/csp0
 # And finally, build the installation package.
 
 echo ""
-echo "Building installation package..."
+echo Building installation package...
 
 /Developer/usr/bin/packagemaker --doc HST.pmdoc -o HST.mpkg
+
+
+# Create the disk image.
+
+CONTENTS_SIZE=$(du -s HST.mpkg | cut -f 1)
+DMG_SIZE=$(dc -e ${CONTENTS_SIZE} -e "125 * 100 / p")
+
+echo ""
+echo Creating ${CONTENTS_SIZE}/${DMG_SIZE} disk image...
+
+hdiutil create \
+    -sectors ${DMG_SIZE} \
+    -fs HFS+ \
+    -volname HST \
+    HST
+
+echo ""
+echo Copying installation package into disk image...
+
+hdiutil mount HST.dmg
+ditto -rsrcFork HST.mpkg /Volumes/HST/HST.mpkg
+hdiutil detach /Volumes/HST
