@@ -1,0 +1,4 @@
+#!/bin/bash
+
+ln -s -f /Library/Frameworks/HST.framework/csp0 /usr/bin
+ln -s -f /Library/Frameworks/HST.framework/cspm /usr/bin
