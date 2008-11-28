@@ -65,7 +65,7 @@ make install
 ln -s Versions/Current/usr/lib/libhst.dylib ${FRAMEWORK_DIR}/
 ln -s Versions/Current/usr/bin/csp0 ${FRAMEWORK_DIR}/
 
-cd ..
+cd ${PACKAGING_DIR}
 
 
 # Copy Judy library into the bundle.
@@ -82,6 +82,32 @@ echo Copying ${OLD_JUDY_PATH} into bundle...
 cp ${OLD_JUDY_PATH} ${USR_DIR}/lib/
 
 JUDY_NAME=$(basename ${OLD_JUDY_PATH})
+
+
+# Build the Haskell library.
+
+HASKELL_DIR=${ROOT_DIR}/cspm
+
+echo ""
+echo Configuring Haskell code...
+
+cd ${HASKELL_DIR}
+ghc --make Setup.lhs
+
+./Setup configure
+
+echo ""
+echo Building Haskell code...
+
+./Setup build
+
+echo ""
+echo Installing Haskell code into bundle...
+
+cp dist/build/cspm/cspm ${USR_DIR}/bin/
+ln -s Versions/Current/usr/bin/cspm ${FRAMEWORK_DIR}/
+
+cd ${PACKAGING_DIR}
 
 
 # We'll eventually place the framework into /Libraries/Frameworks.
