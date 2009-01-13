@@ -8,6 +8,10 @@ export DIST_BUILD
 export TESTS=$DIST_BUILD/tests
 
 $TESTS/quickcheck-tests.sh
+
+$TESTS/mechanics/test-comments.sh
+$TESTS/mechanics/test-newlines.sh
+
 $TESTS/expressions/test-numbers.sh
 $TESTS/expressions/test-sequences.sh
 $TESTS/expressions/test-sets.sh
@@ -26,5 +30,3 @@ $TESTS/processes/test-iparallel.sh
 $TESTS/processes/test-aparallel.sh
 $TESTS/processes/test-hide.sh
 $TESTS/processes/test-rextchoice.sh
-
-$TESTS/processes/test-newlines.sh

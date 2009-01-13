@@ -126,6 +126,8 @@ from the module.
 
 > baseLexer ('\n':cs) = TNewline : baseLexer cs
 
+> baseLexer ('-':'-':cs) = soakLineComment cs
+
 > baseLexer ('|':'~':'|':cs) = TCap : baseLexer cs
 > baseLexer ('|':'|':'|':cs) = TThreePipe : baseLexer cs
 
@@ -242,6 +244,16 @@ from the module.
 > lexDigit cs = TNumber (read digits) : baseLexer rest
 >     where
 >       (digits, rest) = span isDigit cs
+
+
+Read the remainder of a single-line comment.  The opening “--” should
+already have been read.  The newline that ends the comment will be
+returned as a token.
+
+> soakLineComment :: String -> [Token]
+> soakLineComment [] = []
+> soakLineComment ('\n':cs) = TNewline : baseLexer cs
+> soakLineComment (_:cs) = soakLineComment cs
 
 
 Reduce any sequence of consecutive TNewline tokens into a single
