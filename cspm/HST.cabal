@@ -1,6 +1,6 @@
 Name:            HST
-Version:         1.0-a3
-Cabal-Version:   >= 1.2
+Version:         1.0-a4
+Cabal-Version:   >= 1.6
 Build-Type:      Simple
 License:         LGPL
 License-File:    LICENSE
@@ -8,7 +8,7 @@ Author:          Douglas Creager
 
 Library
   HS-Source-Dirs:   src
-  Build-Depends:    array, base, haskell98, containers, mtl,
+  Build-Depends:    array, base >= 3 && < 4, haskell98, containers, mtl,
                     QuickCheck >= 1.1
   Exposed-Modules:  HST.CSP0, HST.CSPM
   Other-Modules:    HST.CSP0.Processes,
