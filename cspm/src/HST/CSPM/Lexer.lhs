@@ -127,6 +127,7 @@ from the module.
 > baseLexer ('\n':cs) = TNewline : baseLexer cs
 
 > baseLexer ('-':'-':cs) = soakLineComment cs
+> baseLexer ('{':'-':cs) = soakBlockComment cs
 
 > baseLexer ('|':'~':'|':cs) = TCap : baseLexer cs
 > baseLexer ('|':'|':'|':cs) = TThreePipe : baseLexer cs
@@ -248,12 +249,29 @@ from the module.
 
 Read the remainder of a single-line comment.  The opening “--” should
 already have been read.  The newline that ends the comment will be
-returned as a token.
+returned as a token.  We can match EOF before we read the closing
+newline; this just means that this comment closes out the file.
 
 > soakLineComment :: String -> [Token]
 > soakLineComment [] = []
 > soakLineComment ('\n':cs) = TNewline : baseLexer cs
 > soakLineComment (_:cs) = soakLineComment cs
+
+
+Read the remainder of a block comment.  The opening “{-” should
+already have been read.  Any newlines that appear in the comment do
+*not* get returned as tokens.  We also have to handle nested block
+comments, so if we see another “{-” before seeing the closing “-}”, we
+increment a depth counter and keep going.
+
+> soakBlockComment :: String -> [Token]
+> soakBlockComment cs = soaker 0 cs
+>     where
+>       soaker _ [] = [TBadChar]
+>       soaker 0 ('-':'}':cs) = baseLexer cs
+>       soaker x ('-':'}':cs) = soaker (x-1) cs
+>       soaker x ('{':'-':cs) = soaker (x+1) cs
+>       soaker x (_:cs)       = soaker x cs
 
 
 Reduce any sequence of consecutive TNewline tokens into a single
