@@ -68,4 +68,4 @@ foreach(_man ${MAN_SOURCES})
 
 endforeach(_man)
 
-add_custom_target(doc ALL DEPENDS ${DOC_DEPENDS})
+add_custom_target(doc DEPENDS ${DOC_DEPENDS})

@@ -2,17 +2,18 @@ CSP₀ library
 ============
 
 I'll write more detailed notes later.  For now, to compile this
-package, you need:
+package, you need several tools:
 
+
+To build the source code:
   • cmake
   • bison
-  • asciidoc
-  • xmlto
   • Boost
   • libjudy
 
-The first four are only needed at build-time.  The last two are
-required at runtime as well.
+To generate the documentation:
+  • asciidoc
+  • xmlto
 
 It's highly recommended that you perform an out-of-source build.
 Decide on values for the following:
