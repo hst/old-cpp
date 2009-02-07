@@ -24,15 +24,13 @@
 #ifndef HST_NORMALIZED_LTS_HH
 #define HST_NORMALIZED_LTS_HH
 
-#include <tr1/memory>
+#include <boost/shared_ptr.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_map_l.h>
 
 #include <hst/types.hh>
 #include <hst/lts.hh>
-
-using namespace std;
 
 namespace hst
 {
@@ -100,8 +98,8 @@ namespace hst
 
         typedef judy_map_l<stateset_cp, state_t,
                            intset_t_hasher,
-                           intset_t_hasher>       set_state_map_t;
-        typedef shared_ptr<set_state_map_t>       set_state_map_p;
+                           intset_t_hasher>         set_state_map_t;
+        typedef boost::shared_ptr<set_state_map_t>  set_state_map_p;
 
         set_state_map_t  states;
 
@@ -111,8 +109,8 @@ namespace hst
          */
 
         typedef judy_map_l<state_t, stateset_cp,
-                           state_t_hasher>        state_set_map_t;
-        typedef shared_ptr<state_set_map_t>       state_set_map_p;
+                           state_t_hasher>          state_set_map_t;
+        typedef boost::shared_ptr<state_set_map_t>  state_set_map_p;
 
         state_set_map_t  sets;
 
@@ -122,8 +120,8 @@ namespace hst
          */
 
         typedef judy_map_l<state_t, state_t,
-                           state_t_hasher>    initial_map_t;
-        typedef shared_ptr<initial_map_t>     initial_map_p;
+                           state_t_hasher>        initial_map_t;
+        typedef boost::shared_ptr<initial_map_t>  initial_map_p;
 
         initial_map_t  initial_map;
 
@@ -136,8 +134,8 @@ namespace hst
 
     public:
         friend
-        ostream &operator <<
-        (ostream &stream, const normalized_lts_t &normalized);
+        std::ostream &operator <<
+        (std::ostream &stream, const normalized_lts_t &normalized);
 
         normalized_lts_t(lts_t *__source, event_t __tau,
                          semantic_model_t __semantic_model):
@@ -293,8 +291,8 @@ namespace hst
         void normalize();
     };
 
-    ostream &operator <<
-    (ostream &stream, const normalized_lts_t &normalized);
+    std::ostream &operator << (std::ostream &stream,
+			       const normalized_lts_t &normalized);
 }
 
 #endif // HST_NORMALIZED_LTS_H

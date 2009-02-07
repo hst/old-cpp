@@ -21,12 +21,13 @@
  *----------------------------------------------------------------------
  */
 
-#ifndef HST_CSP_INTERLEAVE_CC
-#define HST_CSP_INTERLEAVE_CC
+#ifndef HST_REFINE_CC
+#define HST_REFINE_CC
 
 #include <assert.h>
 #include <deque>
 #include <iostream>
+#include <boost/shared_ptr.hpp>
 #include <boost/iterator/filter_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
@@ -533,4 +534,4 @@ namespace hst
     }
 }
 
-#endif // HST_CSP_INTERLEAVE_CC
+#endif // HST_REFINE_CC

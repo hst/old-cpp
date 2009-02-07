@@ -28,8 +28,6 @@
 #include <hst/lts.hh>
 #include <hst/normalized-lts.hh>
 
-using namespace std;
-
 namespace hst
 {
     struct trace_counterexample_t

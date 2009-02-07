@@ -29,8 +29,6 @@
 
 #include "location.hh"
 
-using namespace std;
-
 namespace hst_parser
 {
     struct token
@@ -90,16 +88,16 @@ namespace hst_parser
 
     union semantic_type
     {
-        unsigned long  ul_val;
-        const string   *str_val;
-        bool           dummy;
+        unsigned long      ul_val;
+        const std::string  *str_val;
+        bool               dummy;
     };
 
     struct lexer
     {
-        istream  &stream;
+        std::istream  &stream;
 
-        lexer(istream &_stream): stream(_stream) {}
+        lexer(std::istream &_stream): stream(_stream) {}
 
         token_type operator () (semantic_type *lval, location *loc);
     };

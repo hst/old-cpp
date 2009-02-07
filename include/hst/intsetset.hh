@@ -26,7 +26,8 @@
 
 #include <assert.h>
 #include <iostream>
-#include <tr1/memory>
+
+#include <boost/shared_ptr.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_l.h>
@@ -36,9 +37,6 @@
 #ifndef HST_INTSETSET_DEBUG
 #define HST_INTSETSET_DEBUG 0
 #endif
-
-using namespace std;
-using namespace std::tr1;
 
 namespace hst
 {
@@ -268,8 +266,8 @@ namespace hst
 
     };
 
-    typedef shared_ptr<intsetset_t>        intsetset_p;
-    typedef shared_ptr<const intsetset_t>  intsetset_cp;
+    typedef boost::shared_ptr<intsetset_t>        intsetset_p;
+    typedef boost::shared_ptr<const intsetset_t>  intsetset_cp;
 
     struct intsetset_t_hasher
     {
@@ -293,8 +291,10 @@ namespace hst
     };
 
     // Input and output operators for streams
-    istream &operator >> (istream &stream, intsetset_t &intsetset);
-    ostream &operator << (ostream &stream, const intsetset_t &intsetset);
+    std::istream &operator >> (std::istream &stream,
+			       intsetset_t &intsetset);
+    std::ostream &operator << (std::ostream &stream,
+			       const intsetset_t &intsetset);
 }
 
 #endif // HST_INTSETSET_HH

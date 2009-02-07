@@ -26,7 +26,8 @@
 
 #include <deque>
 #include <functional>
-#include <tr1/memory>
+
+#include <boost/shared_ptr.hpp>
 
 #include <hst/intset.hh>
 #include <hst/intsetset.hh>
@@ -38,8 +39,6 @@
 
 #define HST_ERROR_STATE  ((hst::state_t) (-1))
 #define HST_ERROR_EVENT  ((hst::event_t) (-1))
-
-using namespace std;
 
 namespace hst
 {
@@ -88,7 +87,7 @@ namespace hst
      */
 
     struct skip_taus:
-        public unary_function<event_t, bool>
+        public std::unary_function<event_t, bool>
     {
     protected:
         event_t  tau;
@@ -109,24 +108,24 @@ namespace hst
         }
     };
 
-    typedef deque<event_t>             trace_t;
-    typedef shared_ptr<trace_t>        trace_p;
-    typedef shared_ptr<const trace_t>  trace_cp;
+    typedef std::deque<event_t>               trace_t;
+    typedef boost::shared_ptr<trace_t>        trace_p;
+    typedef boost::shared_ptr<const trace_t>  trace_cp;
 
-    typedef pair<state_t, state_t>           state_state_t;
-    typedef shared_ptr<state_state_t>        state_state_p;
-    typedef shared_ptr<const state_state_t>  state_state_cp;
+    typedef std::pair<state_t, state_t>             state_state_t;
+    typedef boost::shared_ptr<state_state_t>        state_state_p;
+    typedef boost::shared_ptr<const state_state_t>  state_state_cp;
 
-    typedef pair<event_t, state_t>           event_state_t;
-    typedef shared_ptr<event_state_t>        event_state_p;
-    typedef shared_ptr<const event_state_t>  event_state_cp;
+    typedef std::pair<event_t, state_t>             event_state_t;
+    typedef boost::shared_ptr<event_state_t>        event_state_p;
+    typedef boost::shared_ptr<const event_state_t>  event_state_cp;
 
     struct string_hasher
     {
-        unsigned long operator () (const string &str) const
+        unsigned long operator () (const std::string &str) const
         {
             unsigned long  hash = 0L;
-            for (string::const_iterator it = str.begin();
+            for (std::string::const_iterator it = str.begin();
                  it != str.end(); ++it)
             {
                 hash += *it;

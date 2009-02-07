@@ -28,6 +28,8 @@
 
 #include <hst/zobrist.hh>
 
+using namespace std;
+
 namespace hst
 {
     void zobrist_t::fill_keys(const unsigned long start,

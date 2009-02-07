@@ -27,7 +27,8 @@
 #include <assert.h>
 #include <functional>
 #include <iostream>
-#include <tr1/memory>
+
+#include <boost/shared_ptr.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
@@ -43,8 +44,8 @@ namespace hst
     {
     protected:
         typedef judy_map_l<state_t, state_t,
-                           state_t_hasher>    head_map_t;
-        typedef shared_ptr<head_map_t>        head_map_p;
+                           state_t_hasher>     head_map_t;
+        typedef boost::shared_ptr<head_map_t>  head_map_p;
 
         /**
          * Records the “head” of the equivalence class that [state]
@@ -149,7 +150,7 @@ namespace hst
          */
 
         struct range_evaluator:
-            public unary_function
+            public std::unary_function
             <head_map_t::const_iterator::const_reference, state_t>
         {
             result_type operator () (argument_type it) const
@@ -187,7 +188,8 @@ namespace hst
         }
     };
 
-    ostream &operator << (ostream &stream, const equivalences_t &equiv);
+    std::ostream &operator << (std::ostream &stream,
+			       const equivalences_t &equiv);
 }
 
 #endif // HST_EQUIVALENCE_H

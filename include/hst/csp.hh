@@ -27,7 +27,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <tr1/memory>
+
+#include <boost/shared_ptr.hpp>
 
 #include <hst/types.hh>
 #include <hst/eventmap.hh>
@@ -37,8 +38,6 @@
 #ifndef HST_CSP_DEBUG
 #define HST_CSP_DEBUG 0
 #endif
-
-using namespace std;
 
 namespace hst
 {
@@ -67,15 +66,15 @@ namespace hst
         event_t  _tau;
         event_t  _tick;
 
-        typedef judy_map_l<string, state_t,
-                           string_hasher>     state_name_map_t;
-        typedef shared_ptr<state_name_map_t>  state_name_map_p;
+        typedef judy_map_l<std::string, state_t,
+                           string_hasher>            state_name_map_t;
+        typedef boost::shared_ptr<state_name_map_t>  state_name_map_p;
 
         state_name_map_t  _state_symbol_table;
 
-        typedef judy_map_l<string, event_t,
-                           string_hasher>     event_name_map_t;
-        typedef shared_ptr<event_name_map_t>  event_name_map_p;
+        typedef judy_map_l<std::string, event_t,
+                           string_hasher>            event_name_map_t;
+        typedef boost::shared_ptr<event_name_map_t>  event_name_map_p;
 
         event_name_map_t  _event_symbol_table;
 
@@ -233,12 +232,12 @@ namespace hst
 
         state_t add_temp_process()
         {
-            ostringstream  name;
+	    std::ostringstream  name;
             name << "%" << _next_temp_index++;
             return add_process(name.str());
         }
 
-        state_t add_process(const string &name)
+        state_t add_process(const std::string &name)
         {
 #if HST_CSP_DEBUG
             cerr << "Adding process " << name;
@@ -254,7 +253,7 @@ namespace hst
             return state;
         }
 
-        void alias_process(const string &name, state_t process)
+        void alias_process(const std::string &name, state_t process)
         {
 #if HST_CSP_DEBUG
             cerr << "Aliasing process " << name
@@ -264,7 +263,7 @@ namespace hst
             _state_symbol_table.insert(make_pair(name, process));
         }
 
-        event_t add_event(const string &name)
+        event_t add_event(const std::string &name)
         {
 #if HST_CSP_DEBUG
             cerr << "Adding event " << name;
@@ -280,7 +279,7 @@ namespace hst
             return event;
         }
 
-        state_t get_process(const string &name) const
+        state_t get_process(const std::string &name) const
         {
 #if HST_CSP_DEBUG
             cerr << "Retrieving process " << name;
@@ -303,7 +302,7 @@ namespace hst
             }
         }
 
-        event_t get_event(const string &name) const
+        event_t get_event(const std::string &name) const
         {
 #if HST_CSP_DEBUG
             cerr << "Retrieving event " << name;
@@ -326,7 +325,7 @@ namespace hst
             }
         }
 
-        state_t lookup_memoized_process(const string &name) const
+        state_t lookup_memoized_process(const std::string &name) const
         {
             state_name_map_t::const_iterator  it =
                 _memoized_processes.find(name);
@@ -339,7 +338,7 @@ namespace hst
             }
         }
 
-        void save_memoized_process(const string &name, state_t state)
+        void save_memoized_process(const std::string &name, state_t state)
         {
             _memoized_processes.insert(make_pair(name, state));
         }
@@ -400,12 +399,13 @@ namespace hst
         void replicated_extchoice(state_t dest, stateset_t &Ps);
     };
 
-    typedef shared_ptr<csp_t>        csp_p;
-    typedef shared_ptr<const csp_t>  csp_cp;
+    typedef boost::shared_ptr<csp_t>        csp_p;
+    typedef boost::shared_ptr<const csp_t>  csp_cp;
 
-    void read_csp0(istream &stream, csp_t &csp);
+    void read_csp0(std::istream &stream, csp_t &csp);
 
-    ostream &operator << (ostream &stream, const csp_t &csp);
+    std::ostream &operator << (std::ostream &stream,
+			       const csp_t &csp);
 }
 
 #endif // HST_CSP_HH

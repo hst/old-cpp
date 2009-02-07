@@ -26,7 +26,8 @@
 
 #include <assert.h>
 #include <iostream>
-#include <tr1/memory>
+
+#include <boost/shared_ptr.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_cell.h>
@@ -36,9 +37,6 @@
 #ifndef HST_INTSET_DEBUG
 #define HST_INTSET_DEBUG 0
 #endif
-
-using namespace std;
-using namespace std::tr1;
 
 namespace hst
 {
@@ -51,7 +49,7 @@ namespace hst
     // cdr of the pair is some element of set1 that is not in set2.
 
     template <class I1, class I2>
-    pair<bool, unsigned long>
+    std::pair<bool, unsigned long>
     is_superset_with_proof(const I1 &begin1, const I1 &end1,
                            const I2 &begin2, const I2 &end2)
     {
@@ -69,7 +67,7 @@ namespace hst
                 // *it2 in set1.  This means that *it2 cannot be in
                 // set1, violating the superset constraint.
 
-                return make_pair(false, *it2);
+                return std::make_pair(false, *it2);
             } else if (*it1 < *it2) {
                 // We've advanced it2 further than it1 without seeing
                 // *it1 in set2.  This means the *it1 cannot be in
@@ -97,9 +95,9 @@ namespace hst
 
         if (it2 == end2)
         {
-            return make_pair(true, 0);
+            return std::make_pair(true, 0);
         } else {
-            return make_pair(false, *it2);
+            return std::make_pair(false, *it2);
         }
     }
 
@@ -392,8 +390,8 @@ namespace hst
 
     };
 
-    typedef shared_ptr<intset_t>        intset_p;
-    typedef shared_ptr<const intset_t>  intset_cp;
+    typedef boost::shared_ptr<intset_t>        intset_p;
+    typedef boost::shared_ptr<const intset_t>  intset_cp;
 
     struct intset_t_hasher
     {
@@ -417,8 +415,10 @@ namespace hst
     };
 
     // Input and output operators for streams
-    istream &operator >> (istream &stream, intset_t &intset);
-    ostream &operator << (ostream &stream, const intset_t &intset);
+    std::istream &operator >> (std::istream &stream,
+			       intset_t &intset);
+    std::ostream &operator << (std::ostream &stream,
+			       const intset_t &intset);
 }
 
 #endif // HST_INTSET_HH
