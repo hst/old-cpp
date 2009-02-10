@@ -12,8 +12,7 @@ To build the source code:
   • libjudy
 
 To generate the documentation:
-  • asciidoc
-  • xmlto
+  • pandoc
 
 It's highly recommended that you perform an out-of-source build.
 Decide on values for the following:
@@ -36,6 +35,7 @@ Then execute the following:
     -D CMAKE_INSTALL_PREFIX:string=${PREFIX} \
     ${SRC_DIR}
   make
+  make doc
   make test
   sudo make install
 

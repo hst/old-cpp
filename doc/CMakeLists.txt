@@ -7,16 +7,29 @@ set(MAN_SOURCES
   csp0.1
 )
 
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/hst.css
+  ${CMAKE_CURRENT_BINARY_DIR}/hst.css
+  COPYONLY
+)
+
+install(
+  FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/hst.css
+  DESTINATION
+    share/doc/hst
+)
+
 set(DOC_DEPENDS)
 
 foreach(_doc ${DOC_SOURCES})
-  set(_txt  "${CMAKE_CURRENT_SOURCE_DIR}/${_doc}.txt")
+  set(_md   "${CMAKE_CURRENT_SOURCE_DIR}/${_doc}.md")
   set(_html "${CMAKE_CURRENT_BINARY_DIR}/${_doc}.html")
 
   add_custom_command(
     OUTPUT ${_html}
-    COMMAND asciidoc -b xhtml11 -o ${_html} ${_txt}
-    MAIN_DEPENDENCY ${_txt}
+    COMMAND pandoc -c hst.css -s -o ${_html} ${_md}
+    MAIN_DEPENDENCY ${_md}
     COMMENT "Generating ${_html}"
   )
 
@@ -31,29 +44,25 @@ foreach(_doc ${DOC_SOURCES})
 endforeach(_doc)
 
 foreach(_man ${MAN_SOURCES})
-  set(_txt       "${CMAKE_CURRENT_SOURCE_DIR}/${_man}.txt")
-  set(_xml       "${CMAKE_CURRENT_BINARY_DIR}/${_man}.xml")
+  set(_md        "${CMAKE_CURRENT_SOURCE_DIR}/${_man}.md")
+  set(_html      "${CMAKE_CURRENT_BINARY_DIR}/${_man}.html")
   set(_manoutput "${CMAKE_CURRENT_BINARY_DIR}/${_man}")
 
   add_custom_command(
-    OUTPUT ${_xml}
-    COMMAND asciidoc -b docbook -d manpage -o ${_xml} ${_txt}
-    MAIN_DEPENDENCY ${_txt}
-    COMMENT "Generating ${_xml}"
+    OUTPUT ${_html}
+    COMMAND pandoc -c hst.css -s -o ${_html} ${_md}
+    MAIN_DEPENDENCY ${_md}
+    COMMENT "Generating ${_html}"
   )
 
   add_custom_command(
     OUTPUT ${_manoutput}
-    COMMAND
-      xmlto
-      -o ${CMAKE_CURRENT_BINARY_DIR}
-      -m ${CMAKE_CURRENT_SOURCE_DIR}/callouts.xsl
-      man ${_xml}
-    MAIN_DEPENDENCY ${_xml}
+    COMMAND pandoc -s -t man -o ${_manoutput} ${_md}
+    MAIN_DEPENDENCY ${_md}
     COMMENT "Generating ${_manoutput}"
   )
 
-  list(APPEND DOC_DEPENDS ${_manoutput})
+  list(APPEND DOC_DEPENDS ${_html} ${_manoutput})
 
   string(LENGTH ${_man} _len)
   math(EXPR _len ${_len}-1)
@@ -64,6 +73,13 @@ foreach(_man ${MAN_SOURCES})
       ${_manoutput}
     DESTINATION
       share/man/man${_section}
+  )
+
+  install(
+    FILES
+      ${_html}
+    DESTINATION
+      share/doc/hst
   )
 
 endforeach(_man)
