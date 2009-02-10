@@ -267,9 +267,9 @@ namespace hst
     typedef boost::shared_ptr<const eventmap_t>  eventmap_cp;
 
     std::istream &operator >> (std::istream &stream,
-			       eventmap_t &map);
+                   eventmap_t &map);
     std::ostream &operator << (std::ostream &stream,
-			       const eventmap_t &map);
+                   const eventmap_t &map);
 }
 
 #endif // HST_EVENTMAP_H

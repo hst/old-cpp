@@ -292,7 +292,7 @@ namespace hst
     };
 
     std::ostream &operator << (std::ostream &stream,
-			       const normalized_lts_t &normalized);
+                   const normalized_lts_t &normalized);
 }
 
 #endif // HST_NORMALIZED_LTS_H

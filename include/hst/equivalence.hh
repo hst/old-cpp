@@ -189,7 +189,7 @@ namespace hst
     };
 
     std::ostream &operator << (std::ostream &stream,
-			       const equivalences_t &equiv);
+                   const equivalences_t &equiv);
 }
 
 #endif // HST_EQUIVALENCE_H

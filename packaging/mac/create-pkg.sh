@@ -80,7 +80,7 @@ cd ${PACKAGING_DIR}
 # second contains a space.
 
 OLD_JUDY_PATH=$(otool -L ${FRAMEWORK_DIR}/libhst.dylib |
-    grep -E -o "[^	]+Judy[^ ]+")
+    grep -E -o "[^  ]+Judy[^ ]+")
 
 echo ""
 echo Copying ${OLD_JUDY_PATH} into bundle...

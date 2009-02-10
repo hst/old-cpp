@@ -416,9 +416,9 @@ namespace hst
 
     // Input and output operators for streams
     std::istream &operator >> (std::istream &stream,
-			       intset_t &intset);
+                   intset_t &intset);
     std::ostream &operator << (std::ostream &stream,
-			       const intset_t &intset);
+                   const intset_t &intset);
 }
 
 #endif // HST_INTSET_HH

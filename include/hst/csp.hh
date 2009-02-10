@@ -232,7 +232,7 @@ namespace hst
 
         state_t add_temp_process()
         {
-	    std::ostringstream  name;
+        std::ostringstream  name;
             name << "%" << _next_temp_index++;
             return add_process(name.str());
         }
@@ -405,7 +405,7 @@ namespace hst
     void read_csp0(std::istream &stream, csp_t &csp);
 
     std::ostream &operator << (std::ostream &stream,
-			       const csp_t &csp);
+                   const csp_t &csp);
 }
 
 #endif // HST_CSP_HH
