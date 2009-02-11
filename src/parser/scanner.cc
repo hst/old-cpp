@@ -381,6 +381,9 @@ namespace hst_parser
             } else if (*id == "rextchoice") {
                 delete id;
                 return token::REXTCHOICE;
+            } else if (*id == "rintchoice") {
+                delete id;
+                return token::RINTCHOICE;
             } else if (*id == "seqcomp") {
                 delete id;
                 return token::SEQCOMP;

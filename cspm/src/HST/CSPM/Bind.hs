@@ -213,3 +213,7 @@ binder pfx e (EHide p alpha) = do
 binder pfx e (ERExtChoice ps) = do
   dest <- newProcess pfx
   binder1 pfx (BRExtChoice dest) e ps
+
+binder pfx e (ERIntChoice ps) = do
+  dest <- newProcess pfx
+  binder1 pfx (BRIntChoice dest) e ps

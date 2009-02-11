@@ -435,6 +435,15 @@ eval (BRExtChoice dest ps) = do
                                sequence $ pDefiners
                                rextchoice dest pDests
 
+eval (BRIntChoice dest ps) = do
+  processEval dest $ do
+    ps' <- evalAsSet ps
+    let (pDests, pDefiners) = coerceProcessSet ps'
+    return $ defineProcess dest $ do
+                               process dest
+                               sequence $ pDefiners
+                               rintchoice dest pDests
+
 coerceAlphabet = Alphabet . Sets.toSet . (Sets.map coerceEvent)
 
 coerceProcessSet ps =

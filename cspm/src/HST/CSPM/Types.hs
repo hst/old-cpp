@@ -281,6 +281,7 @@ data Expression
     | EHide Expression Expression
     -- | ERename Expression Expression
     | ERExtChoice Expression
+    | ERIntChoice Expression
 
     deriving (Eq, Ord)
 
@@ -365,6 +366,7 @@ instance Show Expression where
                                        " || " ++ show beta ++ "] " ++ show q
     show (EHide p alpha) = show p ++ " \\ " ++ show alpha
     show (ERExtChoice ps) = "[] " ++ show ps
+    show (ERIntChoice ps) = "|~| " ++ show ps
 
     -- We don't want to show the [] brackets when showing a list of
     -- expressions, since we're going to use different brackets
@@ -463,6 +465,7 @@ data BoundExpression
     | BHide Process BoundExpression BoundExpression
     -- | BRename Process BoundExpression BoundExpression
     | BRExtChoice Process BoundExpression
+    | BRIntChoice Process BoundExpression
 
     deriving (Eq, Ord)
 
@@ -555,6 +558,8 @@ instance Show BoundExpression where
                                 show p ++ " \\ " ++ show alpha ++ ")"
     show (BRExtChoice dest ps) = show dest ++ ": (" ++
                                  "[] " ++ show ps ++ ")"
+    show (BRIntChoice dest ps) = show dest ++ ": (" ++
+                                 "|~| " ++ show ps ++ ")"
 
     -- We don't want to show the [] brackets when showing a list of
     -- expressions, since we're going to use different brackets

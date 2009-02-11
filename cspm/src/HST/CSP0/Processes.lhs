@@ -169,6 +169,10 @@ statement's operands easily.
 >         dest :: Process,
 >         ps   :: ProcessSet
 >       }
+>     | SRIntChoice {
+>         dest :: Process,
+>         ps   :: ProcessSet
+>       }
 
 
 The Statement type's Show instance outputs the correct CSP₀ syntax for
@@ -203,6 +207,8 @@ the statement.
 >                                  " " ++ show emap ++ ";"
 >     show (SRExtChoice dest ps) = "rextchoice " ++ show dest ++ " = [] " ++
 >                                  show ps ++ ";"
+>     show (SRIntChoice dest ps) = "rintchoice " ++ show dest ++ " = |~| " ++
+>                                  show ps ++ ";"
 
 
 Return the process name created by a statement.  Note that the
@@ -221,6 +227,7 @@ Return the process name created by a statement.  Note that the
 > definedProcess (SHide { dest = dest }) = Just dest
 > definedProcess (SRename { dest = dest }) = Just dest
 > definedProcess (SRExtChoice { dest = dest }) = Just dest
+> definedProcess (SRIntChoice { dest = dest }) = Just dest
 > definedProcess _ = Nothing
 
 
@@ -355,6 +362,9 @@ CSP₀ statement.
 
 > rextchoice :: Process -> ProcessSet -> ScriptTransformer ()
 > rextchoice dest ps = addStatement (SRExtChoice dest ps)
+
+> rintchoice :: Process -> ProcessSet -> ScriptTransformer ()
+> rintchoice dest ps = addStatement (SRIntChoice dest ps)
 
 
 A Script State transformer that creates a new, unique event name.

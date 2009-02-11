@@ -115,11 +115,10 @@ not.
 
     timeout ‹P› = ‹Q› [> ‹R›;
 
-Creates an timeout process.  _‹P›_ behaves like _‹Q›_ initially, but
-at any point in the future (nondeterministically), it can start to
-refuse _‹Q›_ and behave like _‹R›_ instead.  _‹P›_ must not be
-finalized.  _‹Q›_ must be finalized.  _‹R›_ can either be finalized or
-not.
+Creates a timeout process.  _‹P›_ behaves like _‹Q›_ initially, but at
+any point in the future (nondeterministically), it can start to refuse
+_‹Q›_ and behave like _‹R›_ instead.  _‹P›_ must not be finalized.
+_‹Q›_ must be finalized.  _‹R›_ can either be finalized or not.
 
     seqcomp ‹P› = ‹Q› ; ‹R›;
 
@@ -173,6 +172,13 @@ Creates a replicated external choice process.  _‹P›_ presents the
 environment with the choice of acting like any of the processes in
 _‹φ›_.  _‹P›_ must not be finalized.  Each process in _‹φ›_ must be
 finalized.
+
+    rintchoice ‹P› = |~| { ‹φ› };
+
+Creates a replicated internal choice process.  _‹P›_ will
+nondeterministically choose to act like any of the processes in _‹φ›_.
+_‹P›_ must not be finalized.  Each process in _‹φ›_ can either be
+finalized or not.  The set _‹φ›_ must not be empty.
 
 
 # References

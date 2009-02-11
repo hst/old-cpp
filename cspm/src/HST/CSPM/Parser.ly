@@ -296,6 +296,7 @@
 >           PExpr "]" PExpr                  { EAParallel $1 $3 $5 $7 }
 >         | PExpr "\\" PExpr                 { EHide $1 $3 }
 >         | "[]" PExpr                       { ERExtChoice $2 }
+>         | "|~|" PExpr                      { ERIntChoice $2 }
 
 > PAny_ :: { Expression }
 > PAny_  : PId                               { EVar $1 }

@@ -1,0 +1,8 @@
+# Basic operator test
+# P = |~| {}
+
+# This should cause an error, since you perform replicated internal
+# choice on an empty process set.
+
+process P;
+rintchoice P = |~| {};

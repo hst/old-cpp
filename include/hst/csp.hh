@@ -397,6 +397,10 @@ namespace hst
         /// [□Ps]
         state_t add_replicated_extchoice(stateset_t &Ps);
         void replicated_extchoice(state_t dest, stateset_t &Ps);
+
+        /// [⊓Ps]
+        state_t add_replicated_intchoice(stateset_t &Ps);
+        void replicated_intchoice(state_t dest, stateset_t &Ps);
     };
 
     typedef boost::shared_ptr<csp_t>        csp_p;

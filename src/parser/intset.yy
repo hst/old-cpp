@@ -110,6 +110,7 @@ using namespace hst_parser;
 %token RENAME     411 "rename"
 %token SEQCOMP    412 "seqcomp"
 %token REXTCHOICE 413 "rextchoice"
+%token RINTCHOICE 414 "rintchoice"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"
