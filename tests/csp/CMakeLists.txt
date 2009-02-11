@@ -84,7 +84,7 @@ target_link_libraries(test-csp0 hst)
 foreach(_test ${TESTS})
   add_test(
     csp:compile:${_test}
-    bash -c "./test-csp0 < ${_test}.csp0 | cmp - ${_test}.output"
+    bash -c "./test-csp0 < ${_test}.csp0 2>&1 | cmp - ${_test}.output"
   )
 endforeach(_test)
 
@@ -93,12 +93,12 @@ target_link_libraries(test-prenormalize hst)
 foreach(_test ${TESTS})
   add_test(
     csp:prenormalize-t:${_test}
-    bash -c "./test-prenormalize T < ${_test}.csp0 | 
+    bash -c "./test-prenormalize T < ${_test}.csp0 2>&1 |
        cmp - ${_test}.t-prenormal-output"
   )
   add_test(
     csp:prenormalize-f:${_test}
-    bash -c "./test-prenormalize F < ${_test}.csp0 | 
+    bash -c "./test-prenormalize F < ${_test}.csp0 2>&1 |
        cmp - ${_test}.f-prenormal-output"
   )
 endforeach(_test)
@@ -108,12 +108,12 @@ target_link_libraries(test-normalize hst)
 foreach(_test ${TESTS})
   add_test(
     csp:normalize-t:${_test}
-    bash -c "./test-normalize T < ${_test}.csp0 | 
+    bash -c "./test-normalize T < ${_test}.csp0 2>&1 |
        cmp - ${_test}.t-normal-output"
   )
   add_test(
     csp:normalize-f:${_test}
-    bash -c "./test-normalize F < ${_test}.csp0 | 
+    bash -c "./test-normalize F < ${_test}.csp0 2>&1 |
        cmp - ${_test}.f-normal-output"
   )
 endforeach(_test)
