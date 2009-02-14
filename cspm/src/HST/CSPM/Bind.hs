@@ -102,6 +102,8 @@ binder pfx e (EQTail x)          = binder1 pfx BQTail e x
 
 -- Sets
 
+binder pfx e ESBool                 = return BSBool
+binder pfx e ESInt                  = return BSInt
 binder pfx e (ESLit xs)             = binderList pfx BSLit e xs
 binder pfx e (ESClosedRange x y)    = binder2 pfx BSClosedRange e x y
 binder pfx e (ESOpenRange x)        = binder1 pfx BSOpenRange e x

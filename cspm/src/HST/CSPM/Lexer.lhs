@@ -76,6 +76,7 @@
 >     | TRefinedBy String
 >     | TAnd
 >     | TAssert
+>     | TBool
 >     | TCard
 >     | TChannel
 >     | TChaos
@@ -90,6 +91,7 @@
 >     | TFalse
 >     | THead
 >     | TIf
+>     | TInt
 >     | TInter
 >     | TLength
 >     | TLet
@@ -200,6 +202,7 @@ from the module.
 > keyword :: String -> Token
 > keyword "and"         = TAnd
 > keyword "assert"      = TAssert
+> keyword "Bool"        = TBool
 > keyword "card"        = TCard
 > keyword "channel"     = TChannel
 > keyword "chaos"       = TChaos
@@ -214,6 +217,7 @@ from the module.
 > keyword "false"       = TFalse
 > keyword "head"        = THead
 > keyword "if"          = TIf
+> keyword "Int"         = TInt
 > keyword "inter"       = TInter
 > keyword "length"      = TLength
 > keyword "let"         = TLet

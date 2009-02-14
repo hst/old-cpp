@@ -56,6 +56,10 @@ type Eval a = State EvalState a
 run :: Eval a -> a
 run = (flip evalState) emptyState
 
+interleaveList x y = concat $ zipWith pairToList x y
+    where
+      pairToList x y = [x,y]
+
 evaluateWith :: (BoundExpression -> Eval a) -> Env -> Expression -> a
 evaluateWith evaler e x = run $ evaler $ bind "rootExpr" e x
 
@@ -152,6 +156,14 @@ eval (BQTail s) = do
   return $ VSequence $ tail s'
 
 -- Expressions that evaluate to a set
+
+eval BSBool = return $ VSet $ Sets.fromList [VBoolean True, VBoolean False]
+
+eval BSInt = return $ VSet $ Sets.fromList $ map VNumber ints
+    where
+      ints = 0 : interleaveList pos neg
+      pos  = [1..]
+      neg  = [-1,-2..]
 
 eval (BSLit xs) = do
   xs' <- sequence $ map eval xs

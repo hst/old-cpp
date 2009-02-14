@@ -84,6 +84,7 @@
 >   "[="         { TRefinedBy $$ }
 >   and          { TAnd }
 >   assert       { TAssert }
+>   bool         { TBool }
 >   card         { TCard }
 >   channel      { TChannel }
 >   chaos        { TChaos }
@@ -98,6 +99,7 @@
 >   false        { TFalse }
 >   head         { THead }
 >   if           { TIf }
+>   int          { TInt }
 >   inter        { TInter }
 >   length       { TLength }
 >   let          { TLet }
@@ -245,7 +247,9 @@
 >             | tail "(" PExpr ")"           { EQTail $3 }
 
 > PSet_ :: { Expression }
-> PSet_  : "{" PExprs0 "}"                   { ESLit $2 }
+> PSet_  : bool                              { ESBool }
+>        | int                               { ESInt }
+>        | "{" PExprs0 "}"                   { ESLit $2 }
 >        | "{" PExpr ".." PExpr "}"          { ESClosedRange $2 $4 }
 >        | "{" PExpr ".." "}"                { ESOpenRange $2 }
 >        | union "(" PExpr "," PExpr ")"     { ESUnion $3 $5 }

@@ -10,6 +10,11 @@ test_expression math-04 "5 / 2" 2
 test_expression math-05 "5 % 2" 1
 test_expression math-06 "(1 + 2) * 4" 12
 
+test_expression int-type-01 "member(0,Int)" True
+test_expression int-type-02 "member(100,Int)" True
+test_expression int-type-03 "member(-100,Int)" True
+test_expression int-type-04 "member(100+1000,Int)" True
+
 test_expression num-equality-01 "1 == 1" True
 test_expression num-equality-02 "1 + 1 == 2" True
 test_expression num-equality-03 "1 + 2 == 2" False

@@ -218,6 +218,8 @@ data Expression
     -- TODO: sequence comprehension
 
     -- Expressions which evaluate to a set
+    | ESBool
+    | ESInt
     | ESLit [Expression]
     | ESClosedRange Expression Expression
     | ESOpenRange Expression
@@ -304,6 +306,8 @@ instance Show Expression where
     show (EQConcat s t)      = "concat(" ++ show s ++ ", " ++ show t ++ ")"
     show (EQTail s)          = "tail(" ++ show s ++ ")"
 
+    show ESBool                  = "Bool"
+    show ESInt                   = "Int"
     show (ESLit xs)              = "{" ++ show xs ++ "}"
     show (ESClosedRange m n)     = "{" ++ show m ++ ".." ++ show n ++ "}"
     show (ESOpenRange m)         = "{" ++ show m ++ "..}"
@@ -404,6 +408,8 @@ data BoundExpression
     -- TODO: sequence comprehension
 
     -- Expressions which evaluate to a set
+    | BSBool
+    | BSInt
     | BSLit [BoundExpression]
     | BSClosedRange BoundExpression BoundExpression
     | BSOpenRange BoundExpression
@@ -489,6 +495,8 @@ instance Show BoundExpression where
     show (BQConcat s t)      = "concat(" ++ show s ++ ", " ++ show t ++ ")"
     show (BQTail s)          = "tail(" ++ show s ++ ")"
 
+    show BSBool                  = "Bool"
+    show BSInt                   = "Int"
     show (BSLit xs)              = "{" ++ show xs ++ "}"
     show (BSClosedRange m n)     = "{" ++ show m ++ ".." ++ show n ++ "}"
     show (BSOpenRange m)         = "{" ++ show m ++ "..}"
