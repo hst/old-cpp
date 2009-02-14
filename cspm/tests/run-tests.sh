@@ -19,6 +19,7 @@ $TESTS/expressions/test-booleans.sh
 $TESTS/expressions/test-lambdas.sh
 $TESTS/expressions/test-lets.sh
 $TESTS/expressions/test-patterns.sh
+$TESTS/expressions/test-types.sh
 
 $TESTS/processes/test-prefix.sh
 $TESTS/processes/test-extchoice.sh

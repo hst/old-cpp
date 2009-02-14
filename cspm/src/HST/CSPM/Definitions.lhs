@@ -50,6 +50,9 @@ currently the only definitions that can create multiple bindings.
 >     where
 >       Identifier id' = id
 
+> createBinding (DNametype id x)
+>     = [Binding id x]
+
 
 Create a list of Bindings for a list of Definitions.
 

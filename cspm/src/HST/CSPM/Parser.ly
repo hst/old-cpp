@@ -104,6 +104,7 @@
 >   length       { TLength }
 >   let          { TLet }
 >   member       { TMember }
+>   nametype     { TNametype }
 >   not          { TNot }
 >   null         { TNull }
 >   or           { TOr }
@@ -173,6 +174,7 @@
 >                "=" PExpr                   { DLambdaClause $1 $
 >                                              Clause (PTuple $3) $6 }
 >              | channel PId                 { DSimpleChannel $2 }
+>              | nametype PId "=" PType      { DNametype $2 $4 }
 
 > PPatterns :: { [Pattern] }
 > PPatterns  : PPattern                      { [$1] }
@@ -309,6 +311,27 @@
 >        | PExpr "(" PExprs0 ")"             { EApply $1 $3 }
 >        | head "(" PExpr ")"                { EQHead $3 }
 >        | if PExpr then PExpr else PExpr    { EIfThenElse $2 $4 $6 }
+
+> PType :: { Expression }
+> PType  : bool                              { ESBool }
+>        | int                               { ESInt }
+>        | "{" PExprs0 "}"                   { ESLit $2 }
+>        | "{" PExpr ".." PExpr "}"          { ESClosedRange $2 $4 }
+>        | "{" PExpr ".." "}"                { ESOpenRange $2 }
+>        | union "(" PType "," PType ")"     { ESUnion $3 $5 }
+>        | inter "(" PType "," PType ")"     { ESIntersection $3 $5 }
+>        | diff "(" PType "," PType ")"      { ESDifference $3 $5 }
+>        | dunion "(" PType ")"              { ESDistUnion $3 }
+>        | dinter "(" PType ")"              { ESDistIntersection $3 }
+>        | set "(" PType ")"                 { EQSet $3 }
+>        | powerset "(" PType ")"            { ESPowerset $3 }
+>        | sequenceset "(" PType ")"         { ESSequenceset $3 }
+>        | PId                               { EVar $1 }
+>        | PId "(" PTypes ")"                { EApply (EVar $1) $3 }
+
+> PTypes :: { [Expression] }
+> PTypes  : PType                            { [$1] }
+>         | PTypes "," PType                 { $1 ++ [$3] }
 
 > PSimpleDefns :: { [Definition] }
 > PSimpleDefns  : PSimpleDefn                { [$1] }

@@ -96,6 +96,7 @@
 >     | TLength
 >     | TLet
 >     | TMember
+>     | TNametype
 >     | TNot
 >     | TNull
 >     | TOr
@@ -222,6 +223,7 @@ from the module.
 > keyword "length"      = TLength
 > keyword "let"         = TLet
 > keyword "member"      = TMember
+> keyword "nametype"    = TNametype
 > keyword "not"         = TNot
 > keyword "null"        = TNull
 > keyword "or"          = TOr

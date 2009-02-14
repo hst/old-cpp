@@ -191,6 +191,7 @@ data Definition
     | DLambdaClause Identifier LambdaClause
     | DLambda Identifier [LambdaClause]
     | DSimpleChannel Identifier
+    | DNametype Identifier Expression
     deriving (Eq, Ord, Show)
 
 -- Expressions
