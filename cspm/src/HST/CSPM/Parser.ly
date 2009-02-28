@@ -164,17 +164,17 @@
 >             | PNewlines                    { () }
 
 > PDefinitions :: { [Definition] }
-> PDefinitions  : PDefinition                { [$1] }
+> PDefinitions  : PDefinition                { $1 }
 >               | PDefinitions PNewlines
->                 PDefinition                { $1 ++ [$3] }
+>                 PDefinition                { $1 ++ $3 }
 
-> PDefinition :: { Definition }
-> PDefinition  : PPattern "=" PExpr          { DPatternDefn $1 $3 }
+> PDefinition :: { [Definition] }
+> PDefinition  : PPattern "=" PExpr          { [DPatternDefn $1 $3] }
 >              | PId "(" PPatterns0 ")"
->                "=" PExpr                   { DLambdaClause $1 $
->                                              Clause (PTuple $3) $6 }
->              | channel PId                 { DSimpleChannel $2 }
->              | nametype PId "=" PType      { DNametype $2 $4 }
+>                "=" PExpr                   { [DLambdaClause $1 $
+>                                              Clause (PTuple $3) $6] }
+>              | channel PIds                { map DSimpleChannel $2 }
+>              | nametype PId "=" PType      { [DNametype $2 $4] }
 
 > PPatterns :: { [Pattern] }
 > PPatterns  : PPattern                      { [$1] }
