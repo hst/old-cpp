@@ -232,6 +232,7 @@ data Expression
     | EQSet Expression
     | ESPowerset Expression
     | ESSequenceset Expression
+    | ESProductType [Expression]
     -- TODO: set comprehension
 
     -- Expressions which evaluate to a boolean
@@ -320,6 +321,7 @@ instance Show Expression where
     show (EQSet q0)              = "set(" ++ show q0 ++ ")"
     show (ESPowerset s1)         = "Set(" ++ show s1 ++ ")"
     show (ESSequenceset s1)      = "Seq(" ++ show s1 ++ ")"
+    show (ESProductType xs)      = "(:" ++ show xs ++ ":)"
 
     show EBTrue            = "true"
     show EBFalse           = "false"
@@ -422,6 +424,7 @@ data BoundExpression
     | BQSet BoundExpression
     | BSPowerset BoundExpression
     | BSSequenceset BoundExpression
+    | BSProductType [BoundExpression]
     -- TODO: set comprehension
 
     -- Expressions which evaluate to a boolean
@@ -509,6 +512,7 @@ instance Show BoundExpression where
     show (BQSet q0)              = "set(" ++ show q0 ++ ")"
     show (BSPowerset s1)         = "Set(" ++ show s1 ++ ")"
     show (BSSequenceset s1)      = "Seq(" ++ show s1 ++ ")"
+    show (BSProductType xs)      = "(:" ++ show xs ++ ":)"
 
     show BBTrue            = "true"
     show BBFalse           = "false"

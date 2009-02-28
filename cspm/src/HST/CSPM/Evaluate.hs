@@ -213,6 +213,10 @@ eval (BSSequenceset a) = do
   a' <- evalAsSet a
   return $ VSet $ Sets.map VSequence $ Sets.sequenceset a'
 
+eval (BSProductType xs) = do
+  xs' <- sequence $ map evalAsSet xs
+  return $ VSet $ Sets.fromList $ map VTuple $ Sets.productSet xs'
+
 -- Expressions that evaluate to a boolean
 
 eval BBTrue  = return $ VBoolean True

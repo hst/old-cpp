@@ -63,3 +63,10 @@ test_script_expression nametype-function-03 \
 U = T()
 nametype A = U" \
 "A == {0..5}" True
+
+# Tuple expressions build a product set — i.e., a set of tuples,
+# rather than a tuple of sets.
+
+test_script_expression nametype-tuple-01 \
+"nametype A = ({0,1}, {2,3})" \
+"A == {(0,2),(0,3),(1,2),(1,3)}" True
