@@ -322,7 +322,8 @@
 >        | "{" PExprs0 "}"                   { ESLit $2 }
 >        | "{" PExpr ".." PExpr "}"          { ESClosedRange $2 $4 }
 >        | "{" PExpr ".." "}"                { ESOpenRange $2 }
->        | "(" PType "," PTypes ")"          { ESProductType ($2:$4) }
+>        | "(" PType "," PTypes ")"          { ESTupleProduct ($2:$4) }
+>        | PType "." PType                   { ESDotProduct $1 $3 }
 >        | union "(" PType "," PType ")"     { ESUnion $3 $5 }
 >        | inter "(" PType "," PType ")"     { ESIntersection $3 $5 }
 >        | diff "(" PType "," PType ")"      { ESDifference $3 $5 }

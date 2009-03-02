@@ -115,7 +115,8 @@ binder pfx e (ESDistIntersection x) = binder1 pfx BSDistIntersection e x
 binder pfx e (EQSet x)              = binder1 pfx BQSet e x
 binder pfx e (ESPowerset x)         = binder1 pfx BSPowerset e x
 binder pfx e (ESSequenceset x)      = binder1 pfx BSSequenceset e x
-binder pfx e (ESProductType xs)     = binderList pfx BSProductType e xs
+binder pfx e (ESTupleProduct xs)    = binderList pfx BSTupleProduct e xs
+binder pfx e (ESDotProduct x y)     = binder2 pfx BSDotProduct e x y
 
 -- Booleans
 
