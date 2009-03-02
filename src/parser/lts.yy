@@ -25,7 +25,7 @@ using namespace hst_parser;
  */
 %debug
 
-/* start symbol is named "intset" */
+/* start symbol is named "lts" */
 %start lts
 
 /* write out a header file containing the token defines */
@@ -46,6 +46,9 @@ using namespace hst_parser;
 {
     // initialize the initial location object
     @$.begin.filename = @$.end.filename = &_filename;
+
+    // Bison 2.3 numbers columns from 0
+    @$.begin.column = @$.end.column = 1;
 };
 
 /*

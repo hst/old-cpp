@@ -63,6 +63,8 @@ set(TESTS
   10-extchoice-intchoice
   10-intchoice-extchoice
   80-roscoe-02
+  bugs-20-column-number-1
+  bugs-20-column-number-2
 )
 
 # Copy the test data from the source directory to the build directory.
