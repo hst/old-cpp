@@ -16,6 +16,7 @@ $TESTS/expressions/test-numbers.sh
 $TESTS/expressions/test-sequences.sh
 $TESTS/expressions/test-sets.sh
 $TESTS/expressions/test-booleans.sh
+$TESTS/expressions/test-dots.sh
 $TESTS/expressions/test-lambdas.sh
 $TESTS/expressions/test-lets.sh
 $TESTS/expressions/test-patterns.sh

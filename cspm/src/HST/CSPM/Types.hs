@@ -23,6 +23,7 @@
 module HST.CSPM.Types where
 
 import Control.Monad.State
+import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
 
@@ -93,6 +94,7 @@ data Value
     | VSet (Set Value)
     | VBoolean Bool
     | VTuple [Value]
+    | VDot [Value]
     | VLambda String Env [LambdaClause]
     | VEvent Event
     | VProcess ProcPair
@@ -105,6 +107,7 @@ instance Show Value where
     show (VSet s)           = "{" ++ show s ++ "}"
     show (VBoolean b)       = show b
     show (VTuple t)         = "(" ++ show t ++ ")"
+    show (VDot d)           = intercalate "." (map show d)
     show (VLambda pfx e cs) = "\\ [" ++ show pfx ++ "] " ++ show cs
     show (VEvent a)         = show a
 
@@ -135,11 +138,23 @@ coerceBoolean (VBoolean b) = b
 coerceTuple :: Value -> [Value]
 coerceTuple (VTuple t) = t
 
+coerceDot :: Value -> [Value]
+coerceDot (VDot d) = d
+
 coerceEvent :: Value -> Event
 coerceEvent (VEvent a) = a
 
 coerceProcess :: Value -> ProcPair
 coerceProcess (VProcess pp) = pp
+
+-- A smart constructor for VDots; ensures that dot values are
+-- “flattened”.
+
+vDot :: Value -> Value -> Value
+vDot (VDot d1) (VDot d2) = VDot (d1 ++ d2)
+vDot (VDot d1) y         = VDot (d1 ++ [y])
+vDot x         (VDot d2) = VDot (x : d2)
+vDot x         y         = VDot [x,y]
 
 -- Patterns
 
@@ -255,6 +270,9 @@ data Expression
     -- Expressions which evaluate to a tuple
     | ETLit [Expression]
 
+    -- Expressions which evaluate to a dot
+    | EDot Expression Expression
+
     -- Expressions which evaluate to a lambda
     | ELambda [LambdaClause]
 
@@ -340,6 +358,8 @@ instance Show Expression where
     show (ESEmpty s0)      = "empty(" ++ show s0 ++ ")"
 
     show (ETLit xs) = "(" ++ show xs ++ ")"
+
+    show (EDot x y) = show x ++ "." ++ show y
 
     show (ELambda cs) = "\\ " ++ show cs
 
@@ -447,6 +467,9 @@ data BoundExpression
     -- Expressions which evaluate to a tuple
     | BTLit [BoundExpression]
 
+    -- Expressions which evaluate to a dot
+    | BDot BoundExpression BoundExpression
+
     -- Expressions which evaluate to a lambda
     | BLambda String Env [LambdaClause]  -- yep, that contains Expr, not BoundExpr
 
@@ -531,6 +554,8 @@ instance Show BoundExpression where
     show (BSEmpty s0)      = "empty(" ++ show s0 ++ ")"
 
     show (BTLit xs) = "(" ++ show xs ++ ")"
+
+    show (BDot x y) = show x ++ "." ++ show y
 
     show (BLambda pfx e cs) = "\\ [" ++ pfx ++ "] " ++ show cs
 

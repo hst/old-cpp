@@ -290,6 +290,14 @@ eval (BTLit xs) = do
   xs' <- sequence $ map eval xs
   return $ VTuple xs'
 
+-- Expressions that evaluate to a dot
+
+eval (BDot x y) = do
+  x' <- eval x
+  y' <- eval y
+  -- use the smart constructor to flatten nested dots
+  return $ vDot x' y'
+
 -- Expressions that evaluate to a lambda
 
 eval (BLambda pfx e cs) = return $ VLambda pfx e cs

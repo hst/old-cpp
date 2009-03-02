@@ -139,6 +139,10 @@ binder pfx e (ESEmpty x)     = binder1 pfx BSEmpty e x
 
 binder pfx e (ETLit xs) = binderList pfx BTLit e xs
 
+-- Dots
+
+binder pfx e (EDot x y) = binder2 pfx BDot e x y
+
 -- Lambdas
 
 binder pfx e (ELambda cs) = return $ BLambda pfx e cs

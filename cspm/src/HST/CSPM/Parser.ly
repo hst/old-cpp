@@ -225,6 +225,7 @@
 >        | PSet_                             { $1 }
 >        | PBoolean_                         { $1 }
 >        | PTuple_                           { $1 }
+>        | PDot_                             { $1 }
 >        | PLambda_                          { $1 }
 >        | PProc_                            { $1 }
 >        | PAny_                             { $1 }
@@ -283,6 +284,9 @@
 
 > PTuple_ :: { Expression }
 > PTuple_  : "(" PExpr "," PExprs0 ")"       { ETLit ($2:$4) }
+
+> PDot_ :: { Expression }
+> PDot_  : PExpr "." PExpr                   { EDot $1 $3 }
 
 > PLambda_ :: { Expression }
 > PLambda_  : "\\" PIds "@" PExpr
