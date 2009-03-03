@@ -163,6 +163,7 @@ data Pattern
     | PWildcard
     | PIdentifier Identifier
     | PTuple [Pattern]
+    | PDot Pattern Pattern
     | PQLit [Pattern]
     | PQConcat Pattern Pattern
     | PSEmpty
@@ -177,6 +178,7 @@ instance Show Pattern where
     show (PWildcard)          = "_"
     show (PIdentifier id)     = show id
     show (PTuple pt)          = "(" ++ show pt ++ ")"
+    show (PDot p1 p2)         = show p1 ++ "." ++ show p2
     show (PQLit pq)           = "<" ++ show pq ++ ">"
     show (PQConcat p1 p2)     = show p1 ++ "^" ++ show p2
     show (PSEmpty)            = "{}"

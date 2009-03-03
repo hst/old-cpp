@@ -190,6 +190,7 @@
 >           | PId                            { PIdentifier $1 }
 >           | "(" PPattern ","
 >             PPatterns0 ")"                 { PTuple ($2:$4) }
+>           | PPattern "." PPattern          { PDot $1 $3 }
 >           | "<" PPatterns0 ">"             { PQLit $2 }
 >           | PPattern "^" PPattern          { PQConcat $1 $3 }
 >           | "{" "}"                        { PSEmpty }
