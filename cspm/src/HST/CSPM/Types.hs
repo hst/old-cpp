@@ -29,6 +29,7 @@ import qualified Data.Map as Map
 
 import HST.CSP0
 import HST.CSPM.Sets (Set)
+import qualified HST.CSPM.Sets as Sets
 
 -- Identifiers
 
@@ -96,6 +97,7 @@ data Value
     | VTuple [Value]
     | VDot [Value]
     | VLambda String Env [LambdaClause]
+    | VConstructor Identifier
     | VEvent Event
     | VProcess ProcPair
     deriving (Eq, Ord)
@@ -109,6 +111,7 @@ instance Show Value where
     show (VTuple t)         = "(" ++ show t ++ ")"
     show (VDot d)           = intercalate "." (map show d)
     show (VLambda pfx e cs) = "\\ [" ++ show pfx ++ "] " ++ show cs
+    show (VConstructor id)  = "[:" ++ show id ++ ":]"
     show (VEvent a)         = show a
 
     show (VProcess (ProcPair p _)) = "[proc " ++ show p ++ "]"
@@ -209,7 +212,21 @@ data Definition
     | DLambda Identifier [LambdaClause]
     | DSimpleChannel Identifier
     | DNametype Identifier Expression
+    | DDatatype Identifier [DConstructor]
     deriving (Eq, Ord, Show)
+
+data DConstructor
+    = DConstructor Identifier
+      deriving (Eq, Ord, Show)
+
+constructorValues :: DConstructor -> Expression
+constructorValues (DConstructor id) = ESLit [EConstructor id]
+
+constructorsValues :: [DConstructor] -> Expression
+constructorsValues cs = ESDistUnion $ ESLit $ map constructorValues cs
+
+constructorBinding :: DConstructor -> Binding
+constructorBinding (DConstructor id) = Binding id $ EConstructor id
 
 -- Expressions
 
@@ -288,6 +305,9 @@ data Expression
     | EBound BoundExpression
     | EValue Value
     | EExtractMatch Identifier Pattern Expression
+
+    -- Expressions which evaluate to a constructor
+    | EConstructor Identifier
 
     -- Expressions which evaluate to an event
     | EEvent Event
@@ -380,6 +400,8 @@ instance Show Expression where
 
     show (EExtractMatch id p x) = "<<extract " ++ show id ++ " from " ++
                                   show p ++ " = " ++ show x ++ ">>"
+
+    show (EConstructor id) = "[:" ++ show id ++ ":]"
 
     show (EEvent a) = show a
 
@@ -486,6 +508,9 @@ data BoundExpression
     | BValue Value
     | BExtractMatch Identifier Pattern BoundExpression
 
+    -- Expression which can evaluate to a constructor
+    | BConstructor Identifier
+
     -- Expression which can evaluate to an event
     | BEvent Event
 
@@ -575,6 +600,8 @@ instance Show BoundExpression where
 
     show (BExtractMatch id p x) = "<<extract " ++ show id ++ " from " ++
                                   show p ++ " = " ++ show x ++ ">>"
+
+    show (BConstructor id) = "[:" ++ show id ++ ":]"
 
     show (BEvent a) = show a
 

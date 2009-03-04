@@ -2,6 +2,8 @@
 
 . $TESTS/functions.sh
 
+# Nametypes
+
 test_script_expression nametype-01 \
 "nametype A = {0..5}" \
 "A == {0..5}" True
@@ -70,3 +72,21 @@ nametype A = U" \
 test_script_expression nametype-tuple-01 \
 "nametype A = ({0,1}, {2,3})" \
 "A == {(0,2),(0,3),(1,2),(1,3)}" True
+
+# Datatypes
+
+test_script_expression datatype-01 \
+"datatype SimpleColour = Red | Green | Blue" \
+"SimpleColour == {Red,Green,Blue}" True
+
+test_script_expression datatype-02 \
+"datatype SimpleColour = Red | Green | Blue" \
+"Red" "[:Red:]"
+
+test_script_expression datatype-03 \
+"datatype SimpleColour = Red | Green | Blue" \
+"Green" "[:Green:]"
+
+test_script_expression datatype-04 \
+"datatype SimpleColour = Red | Green | Blue" \
+"Blue" "[:Blue:]"

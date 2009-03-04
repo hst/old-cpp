@@ -351,6 +351,10 @@ eval (BExtractMatch id p x) = do
         finder (Binding id' _) = id == id'
         Binding _ (EValue boundValue) = binding
 
+-- Expressions that can evaluate to a constructor
+
+eval (BConstructor id) = return $ VConstructor id
+
 -- Expressions that can evaluate to an event
 
 eval (BEvent a) = return $ VEvent a

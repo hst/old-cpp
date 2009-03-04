@@ -175,6 +175,16 @@
 >                                              Clause (PTuple $3) $6] }
 >              | channel PIds                { map DSimpleChannel $2 }
 >              | nametype PId "=" PType      { [DNametype $2 $4] }
+>              | datatype PId "="
+>                PConstructors               { [DDatatype $2 $4] }
+
+> PConstructors :: { [DConstructor] }
+> PConstructors  : PConstructor              { [$1] }
+>                | PConstructors "|"
+>                  PConstructor              { $1 ++ [$3] }
+
+> PConstructor :: { DConstructor }
+> PConstructor  : PId                        { DConstructor $1 }
 
 > PPatterns :: { [Pattern] }
 > PPatterns  : PPattern                      { [$1] }

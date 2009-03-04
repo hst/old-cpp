@@ -173,6 +173,10 @@ binder pfx e (EExtractMatch id p x) = do
   x' <- binder pfx e x
   return $ BExtractMatch id p x'
 
+-- Constructors
+
+binder pfx e (EConstructor id) = return $ BConstructor id
+
 -- Events
 
 binder pfx e (EEvent a) = return $ BEvent a

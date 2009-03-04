@@ -24,6 +24,7 @@
 > import Data.Maybe
 
 > import HST.CSP0
+> import qualified HST.CSPM.Sets as Sets
 > import HST.CSPM.Types
 > import HST.CSPM.Environments
 > import HST.CSPM.Patterns
@@ -52,6 +53,9 @@ currently the only definitions that can create multiple bindings.
 
 > createBinding (DNametype id x)
 >     = [Binding id x]
+
+> createBinding (DDatatype id cs)
+>     = (Binding id $ constructorsValues cs) : map constructorBinding cs
 
 
 Create a list of Bindings for a list of Definitions.
