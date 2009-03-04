@@ -75,18 +75,74 @@ test_script_expression nametype-tuple-01 \
 
 # Datatypes
 
-test_script_expression datatype-01 \
+test_script_expression datatype-SimpleColour-01 \
 "datatype SimpleColour = Red | Green | Blue" \
 "SimpleColour == {Red,Green,Blue}" True
 
-test_script_expression datatype-02 \
+test_script_expression datatype-SimpleColour-02 \
 "datatype SimpleColour = Red | Green | Blue" \
 "Red" "[:Red:]"
 
-test_script_expression datatype-03 \
+test_script_expression datatype-SimpleColour-03 \
 "datatype SimpleColour = Red | Green | Blue" \
 "Green" "[:Green:]"
 
-test_script_expression datatype-04 \
+test_script_expression datatype-SimpleColour-04 \
 "datatype SimpleColour = Red | Green | Blue" \
 "Blue" "[:Blue:]"
+
+test_script_expression datatype-complex-T-01 \
+"datatype T = A.{0..3} | B.Set({0,1}) | C" \
+"T == {A.0,A.1,A.2,A.3,B.{},B.{0},B.{1},B.{0,1},C}" True
+
+test_script_expression datatype-complex-T-02 \
+"datatype T = A.{0..3} | B.Set({0,1}) | C" \
+"A" "[:A:]"
+
+test_script_expression datatype-complex-T-03 \
+"datatype T = A.{0..3} | B.Set({0,1}) | C" \
+"B" "[:B:]"
+
+test_script_expression datatype-complex-T-04 \
+"datatype T = A.{0..3} | B.Set({0,1}) | C" \
+"C" "[:C:]"
+
+test_script_expression datatype-ComplexColour-Black \
+"Gun = {0..15}
+datatype ComplexColour = RGB.Gun.Gun.Gun | Grey.Gun | Black | White
+
+make_colour(r.g.b) =
+  if r!=g or g!=b then RGB.r.g.b else
+  if r==0 then Black else
+  if r==15 then White else Grey.r" \
+"make_colour(0.0.0) == Black" "True"
+
+test_script_expression datatype-ComplexColour-Grey8 \
+"Gun = {0..15}
+datatype ComplexColour = RGB.Gun.Gun.Gun | Grey.Gun | Black | White
+
+make_colour(r.g.b) =
+  if r!=g or g!=b then RGB.r.g.b else
+  if r==0 then Black else
+  if r==15 then White else Grey.r" \
+"make_colour(8.8.8) == (Grey.8)" "True"
+
+test_script_expression datatype-ComplexColour-White \
+"Gun = {0..15}
+datatype ComplexColour = RGB.Gun.Gun.Gun | Grey.Gun | Black | White
+
+make_colour(r.g.b) =
+  if r!=g or g!=b then RGB.r.g.b else
+  if r==0 then Black else
+  if r==15 then White else Grey.r" \
+"make_colour(15.15.15) == White" "True"
+
+test_script_expression datatype-ComplexColour-RGB \
+"Gun = {0..15}
+datatype ComplexColour = RGB.Gun.Gun.Gun | Grey.Gun | Black | White
+
+make_colour(r.g.b) =
+  if r!=g or g!=b then RGB.r.g.b else
+  if r==0 then Black else
+  if r==15 then White else Grey.r" \
+"make_colour(1.2.3) == (RGB.1.2.3)" "True"

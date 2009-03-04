@@ -216,17 +216,22 @@ data Definition
     deriving (Eq, Ord, Show)
 
 data DConstructor
-    = DConstructor Identifier
+    = DSimpleConstructor Identifier
+    | DDataConstructor Identifier Expression
       deriving (Eq, Ord, Show)
 
 constructorValues :: DConstructor -> Expression
-constructorValues (DConstructor id) = ESLit [EConstructor id]
+constructorValues (DSimpleConstructor id)
+    = ESLit [EConstructor id]
+constructorValues (DDataConstructor id x)
+    = ESDotProduct (ESLit [EConstructor id]) x
 
 constructorsValues :: [DConstructor] -> Expression
 constructorsValues cs = ESDistUnion $ ESLit $ map constructorValues cs
 
 constructorBinding :: DConstructor -> Binding
-constructorBinding (DConstructor id) = Binding id $ EConstructor id
+constructorBinding (DSimpleConstructor id) = Binding id $ EConstructor id
+constructorBinding (DDataConstructor id _) = Binding id $ EConstructor id
 
 -- Expressions
 

@@ -184,7 +184,8 @@
 >                  PConstructor              { $1 ++ [$3] }
 
 > PConstructor :: { DConstructor }
-> PConstructor  : PId                        { DConstructor $1 }
+> PConstructor  : PId                        { DSimpleConstructor $1 }
+>               | PId "." PType              { DDataConstructor $1 $3 }
 
 > PPatterns :: { [Pattern] }
 > PPatterns  : PPattern                      { [$1] }
