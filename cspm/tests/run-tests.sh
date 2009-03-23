@@ -34,3 +34,4 @@ $TESTS/processes/test-hide.sh
 $TESTS/processes/test-rextchoice.sh
 $TESTS/processes/test-rintchoice.sh
 $TESTS/processes/test-bugs.sh
+$TESTS/processes/test-channels.sh

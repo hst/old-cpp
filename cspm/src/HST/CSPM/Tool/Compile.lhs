@@ -81,21 +81,23 @@
 >         (Just f, Nothing)  -> readFile f
 >         (Nothing, Just s)  -> return s
 
-> parseAndCompile :: Env -> String -> ScriptTransformer ()
-> parseAndCompile env expr
+> parseAndCompile ::
+>     ScriptContext BoundExpression -> String -> ScriptTransformer ()
+> parseAndCompile bcontext expr
 >     = case value of
 >         VProcess (ProcPair dest definer) -> definer
 >         _                                -> return ()
 >     where
->       value = evaluate env (parseExpr expr)
+>       value = evaluateRootExpression bcontext (parseExpr expr)
 
 > action_ args
 >     = do
 >       (opts, exprs) <- parseOptions args
 >       scriptText <- getScript opts
 >       let script   = parseFile scriptText
->           env      = createRootEnv script
->           definers = sequence $ map (parseAndCompile env) exprs
+>           context  = createScriptContext script
+>           bcontext = bindScriptContext context
+>           definers = sequence $ map (parseAndCompile bcontext) exprs
 >           csp0     = createScript definers
 >       putStr $ outputScript csp0
 >       return ()

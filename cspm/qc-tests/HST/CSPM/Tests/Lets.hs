@@ -36,5 +36,5 @@ prop_LetSingle = forAll (pair identifier expression) tester
       tester (id, x) = v0 == v1
           where
             e0 = ELet [DPatternDefn (PIdentifier id) x] (EVar id)
-            v0 = evaluate emptyRootEnv e0
-            v1 = evaluate emptyRootEnv x
+            v0 = evaluateRootExpression emptyScriptContext e0
+            v1 = evaluateRootExpression emptyScriptContext x

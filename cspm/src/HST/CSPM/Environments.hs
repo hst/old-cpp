@@ -42,6 +42,8 @@ instance Show Env where
 
 emptyRootEnv = rootEnv []
 
+emptyScriptContext = ScriptContext { env = emptyRootEnv, events = BSLit [] }
+
 lookupExpr :: Env -> Identifier -> Expression
 lookupExpr e id = 
     -- Try to find this id in the current symbol table first.

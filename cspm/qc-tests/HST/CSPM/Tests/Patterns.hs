@@ -73,14 +73,14 @@ prop_PatternWildcard = forAll expression tester
     where
       tester x = valueMatches PWildcard v == Just []
           where
-            v = evaluate emptyRootEnv x
+            v = evaluateRootExpression emptyScriptContext x
 
 prop_PatternIdentifier = forAll expression tester
     where
       tester x = valueMatches (PIdentifier id) v == Just [b]
           where
             id = Identifier "x"
-            v  = evaluate emptyRootEnv x
+            v  = evaluateRootExpression emptyScriptContext x
             b  = Binding id (EValue v)
 
 prop_PatternWildcardTuple = forAll (two expression) tester
@@ -88,24 +88,24 @@ prop_PatternWildcardTuple = forAll (two expression) tester
       tester (x1, x2) = valueMatches p vs == Just []
           where
             p  = PTuple [PWildcard, PWildcard]
-            vs = VTuple [evaluate emptyRootEnv x1,
-                         evaluate emptyRootEnv x2]
+            vs = VTuple [evaluateRootExpression emptyScriptContext x1,
+                         evaluateRootExpression emptyScriptContext x2]
 
 prop_PatternWildcardTupleTooLong = forAll (two expression) tester
     where
       tester (x1, x2) = valueMatches p vs == Nothing
           where
             p  = PTuple [PWildcard, PWildcard, PWildcard]
-            vs = VTuple [evaluate emptyRootEnv x1,
-                         evaluate emptyRootEnv x2]
+            vs = VTuple [evaluateRootExpression emptyScriptContext x1,
+                         evaluateRootExpression emptyScriptContext x2]
 
 prop_PatternWildcardTupleTooShort = forAll (two expression) tester
     where
       tester (x1, x2) = valueMatches p vs == Nothing
           where
             p  = PTuple [PWildcard]
-            vs = VTuple [evaluate emptyRootEnv x1,
-                         evaluate emptyRootEnv x2]
+            vs = VTuple [evaluateRootExpression emptyScriptContext x1,
+                         evaluateRootExpression emptyScriptContext x2]
 
 prop_PatternIdentifierTuple = forAll (two expression) tester
     where
@@ -115,8 +115,8 @@ prop_PatternIdentifierTuple = forAll (two expression) tester
             id1 = Identifier "x"
             id2 = Identifier "y"
             v   = VTuple [v1, v2]
-            v1  = evaluate emptyRootEnv x1
-            v2  = evaluate emptyRootEnv x2
+            v1  = evaluateRootExpression emptyScriptContext x1
+            v2  = evaluateRootExpression emptyScriptContext x2
             b1  = Binding id1 (EValue v1)
             b2  = Binding id2 (EValue v2)
 
@@ -125,24 +125,24 @@ prop_PatternWildcardSequence = forAll (two expression) tester
       tester (x1, x2) = valueMatches p vs == Just []
           where
             p  = PQLit [PWildcard, PWildcard]
-            vs = VSequence [evaluate emptyRootEnv x1,
-                            evaluate emptyRootEnv x2]
+            vs = VSequence [evaluateRootExpression emptyScriptContext x1,
+                            evaluateRootExpression emptyScriptContext x2]
 
 prop_PatternWildcardSequenceTooLong = forAll (two expression) tester
     where
       tester (x1, x2) = valueMatches p vs == Nothing
           where
             p  = PQLit [PWildcard, PWildcard, PWildcard]
-            vs = VSequence [evaluate emptyRootEnv x1,
-                            evaluate emptyRootEnv x2]
+            vs = VSequence [evaluateRootExpression emptyScriptContext x1,
+                            evaluateRootExpression emptyScriptContext x2]
 
 prop_PatternWildcardSequenceTooShort = forAll (two expression) tester
     where
       tester (x1, x2) = valueMatches p vs == Nothing
           where
             p  = PQLit [PWildcard]
-            vs = VSequence [evaluate emptyRootEnv x1,
-                            evaluate emptyRootEnv x2]
+            vs = VSequence [evaluateRootExpression emptyScriptContext x1,
+                            evaluateRootExpression emptyScriptContext x2]
 
 prop_PatternIdentifierSequence = forAll (two expression) tester
     where
@@ -152,8 +152,8 @@ prop_PatternIdentifierSequence = forAll (two expression) tester
             id1 = Identifier "x"
             id2 = Identifier "y"
             v   = VSequence [v1, v2]
-            v1  = evaluate emptyRootEnv x1
-            v2  = evaluate emptyRootEnv x2
+            v1  = evaluateRootExpression emptyScriptContext x1
+            v2  = evaluateRootExpression emptyScriptContext x2
             b1  = Binding id1 (EValue v1)
             b2  = Binding id2 (EValue v2)
 
@@ -165,8 +165,8 @@ prop_PatternConcat1 = forAll (two expression) tester
             id1 = Identifier "x"
             id2 = Identifier "y"
             v   = VSequence [v1, v2]
-            v1  = evaluate emptyRootEnv x1
-            v2  = evaluate emptyRootEnv x2
+            v1  = evaluateRootExpression emptyScriptContext x1
+            v2  = evaluateRootExpression emptyScriptContext x2
             b1  = Binding id1 (EValue v1)
             b2  = Binding id2 (EValue (VSequence [v2]))
 
@@ -180,9 +180,9 @@ prop_PatternConcat2 = forAll (three expression) tester
             id2 = Identifier "y"
             id3 = Identifier "z"
             v   = VSequence [v1, v2, v3]
-            v1  = evaluate emptyRootEnv x1
-            v2  = evaluate emptyRootEnv x2
-            v3  = evaluate emptyRootEnv x3
+            v1  = evaluateRootExpression emptyScriptContext x1
+            v2  = evaluateRootExpression emptyScriptContext x2
+            v3  = evaluateRootExpression emptyScriptContext x3
             b1  = Binding id1 (EValue v1)
             b2  = Binding id2 (EValue (VSequence [v2]))
             b3  = Binding id3 (EValue v3)
@@ -191,7 +191,7 @@ prop_PatternEmptySet = forAll eset tester
     where
       tester a = valueMatches PSEmpty v == result
           where
-            v = evaluate emptyRootEnv a
+            v = evaluateRootExpression emptyScriptContext a
             VSet vset = v
             result = case Sets.null vset of
                        True  -> Just []
@@ -201,7 +201,7 @@ prop_PatternSingletonSet = forAll eset tester
     where
       tester a = valueMatches (PSSingleton PWildcard) v == result
           where
-            v = evaluate emptyRootEnv a
+            v = evaluateRootExpression emptyScriptContext a
             VSet vset = v
             result = case Sets.toList vset of
                        [_] -> Just []

@@ -80,19 +80,20 @@
 >         (Just f, Nothing)  -> readFile f
 >         (Nothing, Just s)  -> return s
 
-> parseEvalAndPrint :: Env -> String -> IO ()
-> parseEvalAndPrint env expr
+> parseEvalAndPrint :: ScriptContext BoundExpression -> String -> IO ()
+> parseEvalAndPrint bcontext expr
 >     = do
 >       putStrLn (expr ++ " = " ++
->                 show (evaluate env (parseExpr expr)))
+>                 show (evaluateRootExpression bcontext (parseExpr expr)))
 
 > action_ args
 >     = do
 >       (opts, exprs) <- parseOptions args
 >       scriptText <- getScript opts
->       let script = parseFile scriptText
->           env    = createRootEnv script
->       sequence $ map (parseEvalAndPrint env) exprs
+>       let script   = parseFile scriptText
+>           context  = createScriptContext script
+>           bcontext = bindScriptContext context
+>       sequence $ map (parseEvalAndPrint bcontext) exprs
 >       return ()
 
 > header = "Usage: cspm evaluate [OPTIONS] EXPRESSIONS"

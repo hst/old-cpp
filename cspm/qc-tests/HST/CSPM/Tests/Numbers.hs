@@ -49,7 +49,7 @@ testAll = do
 
 prop_NumLiteral i = v1 == v2
     where
-      v1 = evaluate emptyRootEnv (ENLit i)
+      v1 = evaluateRootExpression emptyScriptContext (ENLit i)
       v2 = VNumber i
       types = i :: Int
 
@@ -57,61 +57,61 @@ prop_NumNeg = forAll enumber tester
     where
       tester n = i0 == negate i1
           where
-            i0 = evaluateWith evalAsNumber emptyRootEnv (ENNeg n)
-            i1 = evaluateWith evalAsNumber emptyRootEnv n
+            i0 = evaluateWith evalAsNumber emptyScriptContext (ENNeg n)
+            i1 = evaluateWith evalAsNumber emptyScriptContext n
 
 prop_NumSum = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 + i2
           where
-            i0 = evaluateWith evalAsNumber emptyRootEnv (ENSum n1 n2)
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            i0 = evaluateWith evalAsNumber emptyScriptContext (ENSum n1 n2)
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2
 
 prop_NumDiff = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 - i2
           where
-            i0 = evaluateWith evalAsNumber emptyRootEnv (ENDiff n1 n2)
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            i0 = evaluateWith evalAsNumber emptyScriptContext (ENDiff n1 n2)
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2
 
 prop_NumProd = forAll (two enumber) tester
     where
       tester (n1, n2) = i0 == i1 * i2
           where
-            i0 = evaluateWith evalAsNumber emptyRootEnv (ENProd n1 n2)
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            i0 = evaluateWith evalAsNumber emptyScriptContext (ENProd n1 n2)
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2
 
 prop_NumLT = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 < i2)
           where
-            b0 = evaluateWith evalAsBoolean emptyRootEnv (ELT n1 n2)
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            b0 = evaluateWith evalAsBoolean emptyScriptContext (ELT n1 n2)
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2
 
 prop_NumGT = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 > i2)
           where
-            b0 = evaluateWith evalAsBoolean emptyRootEnv (EGT n1 n2)
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            b0 = evaluateWith evalAsBoolean emptyScriptContext (EGT n1 n2)
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2
 
 prop_NumLTE = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 <= i2)
           where
-            b0 = evaluateWith evalAsBoolean emptyRootEnv (ELTE n1 n2)
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            b0 = evaluateWith evalAsBoolean emptyScriptContext (ELTE n1 n2)
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2
 
 prop_NumGTE = forAll (two enumber) tester
     where
       tester (n1, n2) = b0 == (i1 >= i2)
           where
-            b0 = evaluateWith evalAsBoolean emptyRootEnv (EGTE n1 n2)
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            b0 = evaluateWith evalAsBoolean emptyScriptContext (EGTE n1 n2)
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2

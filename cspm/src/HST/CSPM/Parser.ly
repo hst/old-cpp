@@ -173,10 +173,18 @@
 >              | PId "(" PPatterns0 ")"
 >                "=" PExpr                   { [DLambdaClause $1 $
 >                                              Clause (PTuple $3) $6] }
->              | channel PIds                { map DSimpleChannel $2 }
+>              | channel PChannels           { $2 }
 >              | nametype PId "=" PType      { [DNametype $2 $4] }
 >              | datatype PId "="
 >                PConstructors               { [DDatatype $2 $4] }
+
+> PChannels :: { [Definition] }
+> PChannels  : PChannel                      { [$1] }
+>            | PChannels "," PChannel        { $1 ++ [$3] }
+
+> PChannel :: { Definition }
+> PChannel  : PId                            { DSimpleChannel $1 }
+>           | PId ":" PType                  { DComplexChannel $1 $3 }
 
 > PConstructors :: { [DConstructor] }
 > PConstructors  : PConstructor              { [$1] }

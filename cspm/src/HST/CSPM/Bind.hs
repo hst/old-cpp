@@ -21,13 +21,15 @@
 ------------------------------------------------------------------------
 
 module HST.CSPM.Bind (
-                      bind
+                      bind,
+                      bindScriptContext,
+                      bindRootExpression
                      ) where
 
 import Control.Monad.State
 import qualified Data.Set as DS
 
-import HST.CSP0 hiding (processes)
+import HST.CSP0 hiding (events, processes)
 import HST.CSPM.Types
 import HST.CSPM.Environments
 import HST.CSPM.Definitions
@@ -43,6 +45,17 @@ instance HasProcessSet BindState where
 
 emptyState :: BindState
 emptyState = BindState $ ProcessSet DS.empty
+
+bindScriptContext ::
+    (ScriptContext Expression) -> (ScriptContext BoundExpression)
+bindScriptContext sc
+    = ScriptContext {
+        env    = env sc,
+        events = bindRootExpression (env sc) (events sc)
+      }
+
+bindRootExpression :: Env -> Expression -> BoundExpression
+bindRootExpression = bind "rootExpr"
 
 type Binder a = State BindState a
 
@@ -177,9 +190,9 @@ binder pfx e (EExtractMatch id p x) = do
 
 binder pfx e (EConstructor id) = return $ BConstructor id
 
--- Events
+-- Channels
 
-binder pfx e (EEvent a) = return $ BEvent a
+binder pfx e (EChannel id) = return $ BChannel id
 
 -- Processes
 

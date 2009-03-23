@@ -47,9 +47,9 @@ prop_SetLiteral = forAll (listOf enumber) tester
     where
       tester ns = s0 == s1
           where
-            s0 = run $ eval $ bind "" emptyRootEnv (ESLit ns)
+            s0 = evaluateRootExpression emptyScriptContext (ESLit ns)
             s1 = VSet $ Sets.fromList $
-                 (map (evaluate emptyRootEnv) ns)
+                 (map (evaluateRootExpression emptyScriptContext) ns)
 
 prop_SetClosedRange = forAll (two enumber) tester
     where
@@ -60,10 +60,10 @@ prop_SetClosedRange = forAll (two enumber) tester
       -- equality.
       tester (n1, n2) = (i2 - i1 <= 1000) ==> s0 == s1
           where
-            s0 = evaluate emptyRootEnv (ESClosedRange n1 n2)
+            s0 = evaluateRootExpression emptyScriptContext (ESClosedRange n1 n2)
             s1 = VSet $ Sets.fromList (map VNumber [i1 .. i2])
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2
 
 {-
 Can't test for equality on infinite sets.
@@ -72,21 +72,21 @@ prop_SetOpenRange = forAll enumber tester
     where
       tester n = s0 == s1
           where
-            s0 = evaluate emptyRootEnv (ESOpenRange n)
+            s0 = evaluateRootExpression emptyScriptContext (ESOpenRange n)
             s1 = VSet $ Sets.fromList $ map VNumber [i..]
-            i  = evaluateWith evalAsNumber emptyRootEnv n
+            i  = evaluateWith evalAsNumber emptyScriptContext n
 -}
 
 prop_SetUnionAssoc = forAll (two eset) tester
     where
       tester (es1, es2) = s1 == s2
           where
-            s1 = evaluate emptyRootEnv (ESUnion es1 es2)
-            s2 = evaluate emptyRootEnv (ESUnion es2 es1)
+            s1 = evaluateRootExpression emptyScriptContext (ESUnion es1 es2)
+            s2 = evaluateRootExpression emptyScriptContext (ESUnion es2 es1)
 
 prop_SetIntersectAssoc = forAll (two eset) tester
     where
       tester (es1, es2) = s1 == s2
           where
-            s1 = evaluate emptyRootEnv (ESIntersection es1 es2)
-            s2 = evaluate emptyRootEnv (ESIntersection es2 es1)
+            s1 = evaluateRootExpression emptyScriptContext (ESIntersection es1 es2)
+            s2 = evaluateRootExpression emptyScriptContext (ESIntersection es2 es1)

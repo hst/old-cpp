@@ -23,7 +23,6 @@
 > import Data.List
 > import Data.Maybe
 
-> import HST.CSP0
 > import qualified HST.CSPM.Sets as Sets
 > import HST.CSPM.Types
 > import HST.CSPM.Environments
@@ -47,9 +46,10 @@ currently the only definitions that can create multiple bindings.
 >     = [Binding id $ ELambda cs]
 
 > createBinding (DSimpleChannel id)
->     = [Binding id (EEvent (Event id'))]
->     where
->       Identifier id' = id
+>     = [Binding id (EChannel id)]
+
+> createBinding (DComplexChannel id x)
+>     = [Binding id (EChannel id)]
 
 > createBinding (DNametype id x)
 >     = [Binding id x]
@@ -81,12 +81,22 @@ use the merge and extract helper functions to create the new DLambdas.
 >       extract [] = []
 
 
+A ScriptContext consists of a root Environments and an Expression or
+BoundExpression that specifies all of the defined Events.
+
+> createScriptContext :: CSPMScript -> ScriptContext Expression
+> createScriptContext (CSPMScript defs)
+>     = ScriptContext {
+>         env    = createRootEnv defs,
+>         events = definitionsProductions defs
+>       }
+
 To create a root Environment for a list of Definitions, we first merge
 together all of the DLambdaClauses into DLambdas, and then use
 createBindings to create the contents of the new Environment.
 
-> createRootEnv :: CSPMScript -> Env
-> createRootEnv (CSPMScript defs) = rootEnv $ createBindings $ mergeLambdas defs
+> createRootEnv :: [Definition] -> Env
+> createRootEnv defs = rootEnv $ createBindings $ mergeLambdas defs
 
 
 To create a nested Environment for a list of Definitions, we follow

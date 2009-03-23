@@ -26,6 +26,7 @@ import Control.Monad.State
 import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
+import Data.Maybe (mapMaybe)
 
 import HST.CSP0
 import HST.CSPM.Sets (Set)
@@ -66,6 +67,13 @@ data Env
       }
     deriving (Eq, Ord)
 
+data ScriptContext a
+    = ScriptContext {
+        env    :: Env,
+        events :: a
+      }
+    deriving (Eq, Ord)
+
 -- Values
 
 data ProcPair = ProcPair Process (ScriptTransformer ())
@@ -98,7 +106,7 @@ data Value
     | VDot [Value]
     | VLambda String Env [LambdaClause]
     | VConstructor Identifier
-    | VEvent Event
+    | VChannel Identifier
     | VProcess ProcPair
     deriving (Eq, Ord)
 
@@ -112,7 +120,7 @@ instance Show Value where
     show (VDot d)           = intercalate "." (map show d)
     show (VLambda pfx e cs) = "\\ [" ++ show pfx ++ "] " ++ show cs
     show (VConstructor id)  = "[:" ++ show id ++ ":]"
-    show (VEvent a)         = show a
+    show (VChannel id)      = "<:" ++ show id ++ ":>"
 
     show (VProcess (ProcPair p _)) = "[proc " ++ show p ++ "]"
 
@@ -125,6 +133,19 @@ instance Show Value where
                       where
                         showl []     = id
                         showl (x:xs) = showChar ',' . shows x . showl xs
+
+eventNames :: [Value] -> String
+eventNames v = intercalate "." $ map eventName v
+
+eventName :: Value -> String
+eventName (VNumber i)       = show i
+eventName (VSequence l)     = eventNames l
+eventName (VSet s)          = eventNames $ Sets.toList s
+eventName (VBoolean b)      = show b
+eventName (VTuple l)        = eventNames l
+eventName (VDot l)          = eventNames l
+eventName (VConstructor id) = show id
+eventName (VChannel id)     = show id
 
 coerceNumber :: Value -> Int
 coerceNumber (VNumber i) = i
@@ -143,9 +164,6 @@ coerceTuple (VTuple t) = t
 
 coerceDot :: Value -> [Value]
 coerceDot (VDot d) = d
-
-coerceEvent :: Value -> Event
-coerceEvent (VEvent a) = a
 
 coerceProcess :: Value -> ProcPair
 coerceProcess (VProcess pp) = pp
@@ -211,6 +229,7 @@ data Definition
     | DLambdaClause Identifier LambdaClause
     | DLambda Identifier [LambdaClause]
     | DSimpleChannel Identifier
+    | DComplexChannel Identifier Expression
     | DNametype Identifier Expression
     | DDatatype Identifier [DConstructor]
     deriving (Eq, Ord, Show)
@@ -232,6 +251,18 @@ constructorsValues cs = ESDistUnion $ ESLit $ map constructorValues cs
 constructorBinding :: DConstructor -> Binding
 constructorBinding (DSimpleConstructor id) = Binding id $ EConstructor id
 constructorBinding (DDataConstructor id _) = Binding id $ EConstructor id
+
+definitionProductions :: Definition -> Maybe Expression
+definitionProductions (DSimpleChannel id)
+    = Just $ ESLit [EChannel id]
+definitionProductions (DComplexChannel id x)
+    = Just $ ESDotProduct (ESLit [EChannel id]) x
+definitionProductions _ = Nothing
+
+definitionsProductions :: [Definition] -> Expression
+definitionsProductions defs
+    = ESDistUnion $ ESLit $ mapMaybe definitionProductions defs
+
 
 -- Expressions
 
@@ -314,8 +345,8 @@ data Expression
     -- Expressions which evaluate to a constructor
     | EConstructor Identifier
 
-    -- Expressions which evaluate to an event
-    | EEvent Event
+    -- Expressions which evaluate to a channel
+    | EChannel Identifier
 
     -- Expressions which evaluate to a process
     | EStop
@@ -408,7 +439,7 @@ instance Show Expression where
 
     show (EConstructor id) = "[:" ++ show id ++ ":]"
 
-    show (EEvent a) = show a
+    show (EChannel id) = "<:" ++ show id ++ ":>"
 
     show EStop = "STOP"
     show ESkip = "SKIP"
@@ -516,8 +547,8 @@ data BoundExpression
     -- Expression which can evaluate to a constructor
     | BConstructor Identifier
 
-    -- Expression which can evaluate to an event
-    | BEvent Event
+    -- Expression which can evaluate to a channel
+    | BChannel Identifier
 
     -- Expression which can evaluate to a process
     | BStop
@@ -608,7 +639,7 @@ instance Show BoundExpression where
 
     show (BConstructor id) = "[:" ++ show id ++ ":]"
 
-    show (BEvent a) = show a
+    show (BChannel id) = "<:" ++ show id ++ ":>"
 
     show BStop = "STOP"
     show BSkip = "SKIP"
