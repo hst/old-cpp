@@ -63,6 +63,7 @@ echo ""
 echo Building C++ mode...
 
 make
+make doc
 
 echo ""
 echo Installing C++ code into bundle...
