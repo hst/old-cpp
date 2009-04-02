@@ -152,7 +152,7 @@ install_name_tool -change ${OLD_LIBHST_ID} ${LIBHST_ID} ${USR_DIR}/bin/csp0
 echo ""
 echo Building installation package...
 
-/Developer/usr/bin/packagemaker --doc HST.pmdoc -o HST.mpkg
+/Developer/usr/bin/packagemaker --doc HST.pmdoc -o HST.mpkg -i org.haskell.hst
 
 
 # Create the disk image.
