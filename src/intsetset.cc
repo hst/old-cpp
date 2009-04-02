@@ -26,6 +26,8 @@
 
 #include <hst/intsetset.hh>
 
+using namespace std;
+
 namespace hst
 {
     /**

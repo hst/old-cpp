@@ -45,6 +45,7 @@ set(LIBHST_SOURCES
   operators/hide.cc
   operators/rename.cc
   operators/replicated-extchoice.cc
+  operators/replicated-intchoice.cc
   parser/scanner.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/intset.tab.cc
   ${CMAKE_CURRENT_BINARY_DIR}/parser/intsetset.tab.cc

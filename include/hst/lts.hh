@@ -28,7 +28,8 @@
 #include <functional>
 #include <iostream>
 #include <string>
-#include <tr1/memory>
+
+#include <boost/shared_ptr.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
@@ -42,8 +43,6 @@
 #ifndef HST_LTS_DEBUG
 #define HST_LTS_DEBUG 0
 #endif
-
-using namespace std;
 
 namespace hst
 {
@@ -74,9 +73,9 @@ namespace hst
         /// The number of states in the LTS
         state_t  num_states;
 
-        typedef judy_map_l<state_t, string,
-                           state_t_hasher>    state_name_map_t;
-        typedef shared_ptr<state_name_map_t>  state_name_map_p;
+        typedef judy_map_l<state_t, std::string,
+                           state_t_hasher>           state_name_map_t;
+        typedef boost::shared_ptr<state_name_map_t>  state_name_map_p;
 
         /// The name of each LTS state
         state_name_map_t  state_names;
@@ -84,9 +83,9 @@ namespace hst
         /// The number of events in the LTS
         event_t  num_events;
 
-        typedef judy_map_l<event_t, string,
-                           event_t_hasher>    event_name_map_t;
-        typedef shared_ptr<event_name_map_t>  event_name_map_p;
+        typedef judy_map_l<event_t, std::string,
+                           event_t_hasher>           event_name_map_t;
+        typedef boost::shared_ptr<event_name_map_t>  event_name_map_p;
 
         /// The name of each LTS event
         event_name_map_t  event_names;
@@ -107,7 +106,7 @@ namespace hst
 
         typedef judy_map_l<state_t, event_stateset_map_p,
                            state_t_hasher>                 graph_t;
-        typedef shared_ptr<graph_t>                        graph_p;
+        typedef boost::shared_ptr<graph_t>                 graph_p;
 
         graph_t  graph;
 
@@ -148,7 +147,7 @@ namespace hst
 
         typedef judy_map_l<state_t, alphabet_set_p,
                            state_t_hasher>           acceptances_t;
-        typedef shared_ptr<acceptances_t>            acceptances_p;
+        typedef boost::shared_ptr<acceptances_t>     acceptances_p;
 
         acceptances_t  acceptances;
 
@@ -243,7 +242,7 @@ namespace hst
             return *this;
         }
 
-        state_t add_state(string name)
+        state_t add_state(std::string name)
         {
             state_t  state = num_states++;
             state_names.insert(make_pair(state, name));
@@ -255,7 +254,7 @@ namespace hst
             return num_states;
         }
 
-        string get_state_name(state_t state) const
+        std::string get_state_name(state_t state) const
         {
             state_name_map_t::const_iterator  it =
                 state_names.find(state);
@@ -268,7 +267,7 @@ namespace hst
             }
         }
 
-        event_t add_event(string name)
+        event_t add_event(std::string name)
         {
             event_t  event = num_events++;
             event_names.insert(make_pair(event, name));
@@ -280,7 +279,7 @@ namespace hst
             return num_events;
         }
 
-        string get_event_name(event_t event) const
+        std::string get_event_name(event_t event) const
         {
             event_name_map_t::const_iterator  it =
                 event_names.find(event);
@@ -311,7 +310,7 @@ namespace hst
          */
 
         struct from_state_evaluator:
-            public unary_function
+            public std::unary_function
             <graph_t::const_iterator::const_reference, state_t>
         {
             result_type operator () (argument_type it) const
@@ -428,12 +427,12 @@ namespace hst
         }
     };
 
-    typedef shared_ptr<lts_t>        lts_p;
-    typedef shared_ptr<const lts_t>  lts_cp;
+    typedef boost::shared_ptr<lts_t>        lts_p;
+    typedef boost::shared_ptr<const lts_t>  lts_cp;
 
     // Input and output operators for streams
-    istream &operator >> (istream &stream, lts_t &lts);
-    ostream &operator << (ostream &stream, const lts_t &lts);
+    std::istream &operator >> (std::istream &stream, lts_t &lts);
+    std::ostream &operator << (std::ostream &stream, const lts_t &lts);
 }
 
 #endif // HST_LTS_H

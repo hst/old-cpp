@@ -41,8 +41,8 @@ prop_SeqLiteral = forAll (listOf enumber) tester
     where
       tester ns = q0 == q1
           where
-            q0 = run $ eval $ bind "" emptyRootEnv (EQLit ns)
-            q1 = VSequence (map (run . eval . bind "" emptyRootEnv) ns)
+            q0 = evaluateRootExpression emptyScriptContext (EQLit ns)
+            q1 = VSequence (map (evaluateRootExpression emptyScriptContext) ns)
 
 prop_SeqClosedRange = forAll (two enumber) tester
     where
@@ -53,18 +53,18 @@ prop_SeqClosedRange = forAll (two enumber) tester
       -- equality.
       tester (n1, n2) = (i2 - i1 <= 1000) ==> q0 == q1
           where
-            q0 = run $ eval $ bind "" emptyRootEnv (EQClosedRange n1 n2)
+            q0 = evaluateRootExpression emptyScriptContext (EQClosedRange n1 n2)
             q1 = VSequence (map VNumber [i1 .. i2])
-            i1 = evaluateWith evalAsNumber emptyRootEnv n1
-            i2 = evaluateWith evalAsNumber emptyRootEnv n2
+            i1 = evaluateWith evalAsNumber emptyScriptContext n1
+            i2 = evaluateWith evalAsNumber emptyScriptContext n2
 
 prop_SeqConcat = forAll (two esequence) tester
     where
       tester (eq1, eq2) = v0 == v12
           where
-            v0 = run $ eval $ bind "" emptyRootEnv (EQConcat eq1 eq2)
-            q1 = evaluateWith evalAsSequence emptyRootEnv eq1
-            q2 = evaluateWith evalAsSequence emptyRootEnv eq2
+            v0 = evaluateRootExpression emptyScriptContext (EQConcat eq1 eq2)
+            q1 = evaluateWith evalAsSequence emptyScriptContext eq1
+            q2 = evaluateWith evalAsSequence emptyScriptContext eq2
             v12 = VSequence (q1 ++ q2)
 
 prop_SeqTail = forAll esequence tester
@@ -72,8 +72,8 @@ prop_SeqTail = forAll esequence tester
       tester eq = (length ns > 0) ==> v0 == v1
           where
             eq0 = EQTail eq
-            v0  = run $ eval $ bind "" emptyRootEnv eq0
+            v0  = evaluateRootExpression emptyScriptContext eq0
 
             EQLit ns = eq
             eq1      = EQLit (tail ns)
-            v1       = run $ eval $ bind "" emptyRootEnv eq1
+            v1       = evaluateRootExpression emptyScriptContext eq1

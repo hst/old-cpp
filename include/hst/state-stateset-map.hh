@@ -26,7 +26,8 @@
 
 #include <assert.h>
 #include <functional>
-#include <tr1/memory>
+
+#include <boost/shared_ptr.hpp>
 #include <boost/iterator/transform_iterator.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
@@ -35,8 +36,6 @@
 
 #include <hst/types.hh>
 
-using namespace std;
-
 namespace hst
 {
     class state_stateset_map_t
@@ -44,7 +43,7 @@ namespace hst
     protected:
         typedef judy_map_l<state_t, stateset_p,
                            state_t_hasher>       map_t;
-        typedef shared_ptr<map_t>                map_p;
+        typedef boost::shared_ptr<map_t>         map_p;
 
         map_t  map;
 
@@ -124,7 +123,7 @@ namespace hst
          */
 
         struct states_evaluator:
-            public unary_function
+            public std::unary_function
             <map_t::const_iterator::const_reference, event_t>
         {
             result_type operator () (argument_type it) const
@@ -252,8 +251,10 @@ namespace hst
 
     };
 
-    typedef shared_ptr<state_stateset_map_t>        state_stateset_map_p;
-    typedef shared_ptr<const state_stateset_map_t>  state_stateset_map_cp;
+    typedef boost::shared_ptr<state_stateset_map_t>
+        state_stateset_map_p;
+    typedef boost::shared_ptr<const state_stateset_map_t>
+        state_stateset_map_cp;
 }
 
 #endif // HST_STATE_STATESET_MAP_H

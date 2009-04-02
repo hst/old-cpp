@@ -202,3 +202,14 @@ Sequenceset
 > listSequenceset as = [[]] ++
 >                      (concat $ Prelude.map (\xs -> (Prelude.map (:xs) as))
 >                                  (listSequenceset as))
+
+
+Product Set
+
+> productSet :: (Ord a) => [Set a] -> [[a]]
+> productSet xs = listProductSet $ Prelude.map toList xs
+
+> listProductSet :: [[a]] -> [[a]]
+> listProductSet = foldr f [[]]
+>     where
+>       f x xs = [ x':xs' | x' <- x, xs' <- xs ]

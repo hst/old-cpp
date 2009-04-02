@@ -21,16 +21,18 @@
 ------------------------------------------------------------------------
 
 module HST.CSPM.Evaluate (
-                          evaluate, evaluateWith,
+                          evaluateRootExpression, evaluateWith,
                           eval, evalAsNumber, evalAsSequence,
-                          evalAsSet, evalAsBoolean, evalAsTuple, run,
+                          evalAsSet, evalAsBoolean, evalAsTuple,
                           processEval
                          ) where
 
 import Control.Monad.State
+import Data.Map (Map)
+import qualified Data.Map as Map
 import qualified Data.Set as DS
 
-import HST.CSP0
+import HST.CSP0 hiding (events)
 import HST.CSPM.Sets (Set)
 import qualified HST.CSPM.Sets as Sets
 import HST.CSPM.Types
@@ -40,6 +42,7 @@ import HST.CSPM.Patterns
 
 data EvalState
     = EvalState {
+        eventMap     :: Map Value Event,
         defined      :: ProcessSet,
         applications :: Int
       }
@@ -48,18 +51,32 @@ instance HasProcessSet EvalState where
     getProcessSet = defined
     putProcessSet s ps = s { defined = ps }
 
-emptyState :: EvalState
-emptyState = EvalState (ProcessSet DS.empty) 0
+initialState :: (ScriptContext BoundExpression) -> EvalState
+initialState sc
+    = state
+    where
+      state = EvalState em (ProcessSet DS.empty) 0
+      em = Map.fromList pairs
+      pairs = map makePair (Sets.toList values)
+      makePair value = (value, Event $ eventName value)
+      values = evalState (evalAsSet $ events sc) state
+
+interleaveList x y = concat $ zipWith pairToList x y
+    where
+      pairToList x y = [x,y]
 
 type Eval a = State EvalState a
 
-run :: Eval a -> a
-run = (flip evalState) emptyState
+evaluateRootExpression ::
+    (ScriptContext BoundExpression) -> Expression -> Value
+evaluateRootExpression = evaluateWith eval
 
-evaluateWith :: (BoundExpression -> Eval a) -> Env -> Expression -> a
-evaluateWith evaler e x = run $ evaler $ bind "rootExpr" e x
-
-evaluate = evaluateWith eval
+evaluateWith ::
+    (BoundExpression -> Eval a) ->
+    (ScriptContext BoundExpression) -> Expression -> a
+evaluateWith f sc x = evalState (f boundExpr) (initialState sc)
+    where
+      boundExpr = bindRootExpression (env sc) x
 
 evalAsNumber :: BoundExpression -> Eval Int
 evalAsNumber = (liftM coerceNumber) . eval
@@ -76,11 +93,25 @@ evalAsBoolean = (liftM coerceBoolean) . eval
 evalAsTuple :: BoundExpression -> Eval [Value]
 evalAsTuple = (liftM coerceTuple) . eval
 
-evalAsEvent :: BoundExpression -> Eval Event
-evalAsEvent = (liftM coerceEvent) . eval
-
 evalAsProcess :: BoundExpression -> Eval ProcPair
 evalAsProcess = (liftM coerceProcess) . eval
+
+getEvent :: Value -> Eval Event
+getEvent v = do
+  em <- liftM eventMap get
+  let Just event = Map.lookup v em
+  return event
+
+evalAsEvent :: BoundExpression -> Eval Event
+evalAsEvent x = do
+  x' <- eval x
+  getEvent x'
+
+evalAsAlphabet x = do
+  vs <- evalAsSet x
+  let vs' = Sets.toList vs
+  es' <- sequence $ map getEvent vs'
+  return $ Alphabet $ DS.fromList es'
 
 eval :: BoundExpression -> Eval Value
 
@@ -153,6 +184,14 @@ eval (BQTail s) = do
 
 -- Expressions that evaluate to a set
 
+eval BSBool = return $ VSet $ Sets.fromList [VBoolean True, VBoolean False]
+
+eval BSInt = return $ VSet $ Sets.fromList $ map VNumber ints
+    where
+      ints = 0 : interleaveList pos neg
+      pos  = [1..]
+      neg  = [-1,-2..]
+
 eval (BSLit xs) = do
   xs' <- sequence $ map eval xs
   return $ VSet $ Sets.fromList xs'
@@ -200,6 +239,16 @@ eval (BSPowerset a) = do
 eval (BSSequenceset a) = do
   a' <- evalAsSet a
   return $ VSet $ Sets.map VSequence $ Sets.sequenceset a'
+
+eval (BSTupleProduct xs) = do
+  xs' <- sequence $ map evalAsSet xs
+  return $ VSet $ Sets.fromList $ map VTuple $ Sets.productSet xs'
+
+eval (BSDotProduct xs ys) = do
+  xs' <- evalAsSet xs
+  ys' <- evalAsSet ys
+  return $ VSet $ Sets.fromList [ vDot x' y' | x' <- Sets.toList xs',
+                                               y' <- Sets.toList ys' ]
 
 -- Expressions that evaluate to a boolean
 
@@ -274,6 +323,14 @@ eval (BTLit xs) = do
   xs' <- sequence $ map eval xs
   return $ VTuple xs'
 
+-- Expressions that evaluate to a dot
+
+eval (BDot x y) = do
+  x' <- eval x
+  y' <- eval y
+  -- use the smart constructor to flatten nested dots
+  return $ vDot x' y'
+
 -- Expressions that evaluate to a lambda
 
 eval (BLambda pfx e cs) = return $ VLambda pfx e cs
@@ -321,9 +378,13 @@ eval (BExtractMatch id p x) = do
         finder (Binding id' _) = id == id'
         Binding _ (EValue boundValue) = binding
 
--- Expressions that can evaluate to an event
+-- Expressions that can evaluate to a constructor
 
-eval (BEvent a) = return $ VEvent a
+eval (BConstructor id) = return $ VConstructor id
+
+-- Expressions that can evaluate to a channel
+
+eval (BChannel id) = return $ VChannel id
 
 -- Expressions that can evaluate to a process
 
@@ -394,8 +455,7 @@ eval (BIParallel dest p alpha q) = do
   processEval dest $ do
     ProcPair pDest pDefine <- evalAsProcess p
     ProcPair qDest qDefine <- evalAsProcess q
-    alpha' <- evalAsSet alpha
-    let aAlpha = coerceAlphabet alpha'
+    aAlpha <- evalAsAlphabet alpha
     return $ defineProcess dest $ do
                                process dest
                                pDefine
@@ -406,10 +466,8 @@ eval (BAParallel dest p alpha beta q) = do
   processEval dest $ do
     ProcPair pDest pDefine <- evalAsProcess p
     ProcPair qDest qDefine <- evalAsProcess q
-    alpha' <- evalAsSet alpha
-    beta' <- evalAsSet beta
-    let aAlpha = coerceAlphabet alpha'
-        aBeta  = coerceAlphabet beta'
+    aAlpha <- evalAsAlphabet alpha
+    aBeta <- evalAsAlphabet beta
     return $ defineProcess dest $ do
                                process dest
                                pDefine
@@ -419,8 +477,7 @@ eval (BAParallel dest p alpha beta q) = do
 eval (BHide dest p alpha) = do
   processEval dest $ do
     ProcPair pDest pDefine <- evalAsProcess p
-    alpha' <- evalAsSet alpha
-    let aAlpha = coerceAlphabet alpha'
+    aAlpha <- evalAsAlphabet alpha
     return $ defineProcess dest $ do
                                process dest
                                pDefine
@@ -435,7 +492,14 @@ eval (BRExtChoice dest ps) = do
                                sequence $ pDefiners
                                rextchoice dest pDests
 
-coerceAlphabet = Alphabet . Sets.toSet . (Sets.map coerceEvent)
+eval (BRIntChoice dest ps) = do
+  processEval dest $ do
+    ps' <- evalAsSet ps
+    let (pDests, pDefiners) = coerceProcessSet ps'
+    return $ defineProcess dest $ do
+                               process dest
+                               sequence $ pDefiners
+                               rintchoice dest pDests
 
 coerceProcessSet ps =
     (ProcessSet $ Sets.toSet $ Sets.map getDest pairs,

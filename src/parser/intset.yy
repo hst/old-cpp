@@ -48,6 +48,9 @@ using namespace hst_parser;
 {
     // initialize the initial location object
     @$.begin.filename = @$.end.filename = &_filename;
+
+    // Bison 2.3 numbers columns from 0
+    @$.begin.column = @$.end.column = 1;
 };
 
 /*
@@ -110,6 +113,7 @@ using namespace hst_parser;
 %token RENAME     411 "rename"
 %token SEQCOMP    412 "seqcomp"
 %token REXTCHOICE 413 "rextchoice"
+%token RINTCHOICE 414 "rintchoice"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"

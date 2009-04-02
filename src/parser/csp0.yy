@@ -25,7 +25,7 @@ using namespace hst_parser;
  */
 %debug
 
-/* start symbol is named "intset" */
+/* start symbol is named "csp" */
 %start csp
 
 /* write out a header file containing the token defines */
@@ -46,6 +46,9 @@ using namespace hst_parser;
 {
     // initialize the initial location object
     @$.begin.filename = @$.end.filename = &_filename;
+
+    // Bison 2.3 numbers columns from 0
+    @$.begin.column = @$.end.column = 1;
 };
 
 /*
@@ -124,6 +127,7 @@ using namespace hst_parser;
 %token RENAME     411 "rename"
 %token SEQCOMP    412 "seqcomp"
 %token REXTCHOICE 413 "rextchoice"
+%token RINTCHOICE 414 "rintchoice"
 
 /* literals */
 %token <ul_val>   ULONG 500 "number"
@@ -157,7 +161,7 @@ using namespace hst_parser;
 %type  <dummy>       intchoice_stmt timeout_stmt seqcomp_stmt
 %type  <dummy>       interleave_stmt iparallel_stmt aparallel_stmt
 %type  <dummy>       hide_stmt rename_stmt alias_stmt
-%type  <dummy>       rextchoice_stmt
+%type  <dummy>       rextchoice_stmt rintchoice_stmt
 
 %{ /*** C/C++ Declarations in code file ***/
 #include <hst/parser/scanner.hh>
@@ -216,6 +220,8 @@ stmt
     | rename_stmt
     { $$ = $1; }
     | rextchoice_stmt
+    { $$ = $1; }
+    | rintchoice_stmt
     { $$ = $1; }
     ;
 
@@ -463,6 +469,22 @@ rextchoice_stmt
       BOX stateset SEMI
     {
         _result.replicated_extchoice($2, *$5);
+        delete $5;
+    }
+    ;
+
+rintchoice_stmt
+    : RINTCHOICE process_id EQUALS
+      CAP stateset SEMI
+    {
+        if ($5->size() <= 0)
+        {
+            // Can't use an empty set with replicated internal choice!
+            error(@1, "Cannot use replicated internal choice on empty set!");
+            YYERROR;
+        }
+
+        _result.replicated_intchoice($2, *$5);
         delete $5;
     }
     ;

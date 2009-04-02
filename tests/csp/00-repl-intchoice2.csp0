@@ -1,0 +1,14 @@
+# Basic operator test
+# P = |~| {(a -> STOP), (b -> STOP), (c -> STOP)}
+
+event a;
+event b;
+event c;
+process $t1;
+prefix $t1 = a -> STOP;
+process $t2;
+prefix $t2 = b -> STOP;
+process $t3;
+prefix $t3 = c -> STOP;
+process P;
+rintchoice P = |~| {$t1, $t2, $t3};

@@ -5,6 +5,13 @@
 test_expression bool-lit-01 "true" True
 test_expression bool-lit-02 "false" False
 
+test_expression bool-type-01 "member(true,Bool)" True
+test_expression bool-type-02 "member(false,Bool)" True
+test_expression bool-type-03 "member(0,Bool)" False
+test_expression bool-type-04 "member((true,false),Bool)" False
+test_expression bool-type-05 "member(0 == 0,Bool)" True
+test_expression bool-type-06 "member(0 != 0,Bool)" True
+
 test_expression bool-and-truth-table-01 "false and false" False
 test_expression bool-and-truth-table-02 "false and true" False
 test_expression bool-and-truth-table-03 "true and false" False

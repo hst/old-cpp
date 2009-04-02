@@ -21,13 +21,15 @@
 ------------------------------------------------------------------------
 
 module HST.CSPM.Bind (
-                      bind
+                      bind,
+                      bindScriptContext,
+                      bindRootExpression
                      ) where
 
 import Control.Monad.State
 import qualified Data.Set as DS
 
-import HST.CSP0 hiding (processes)
+import HST.CSP0 hiding (events, processes)
 import HST.CSPM.Types
 import HST.CSPM.Environments
 import HST.CSPM.Definitions
@@ -43,6 +45,17 @@ instance HasProcessSet BindState where
 
 emptyState :: BindState
 emptyState = BindState $ ProcessSet DS.empty
+
+bindScriptContext ::
+    (ScriptContext Expression) -> (ScriptContext BoundExpression)
+bindScriptContext sc
+    = ScriptContext {
+        env    = env sc,
+        events = bindRootExpression (env sc) (events sc)
+      }
+
+bindRootExpression :: Env -> Expression -> BoundExpression
+bindRootExpression = bind "rootExpr"
 
 type Binder a = State BindState a
 
@@ -102,6 +115,8 @@ binder pfx e (EQTail x)          = binder1 pfx BQTail e x
 
 -- Sets
 
+binder pfx e ESBool                 = return BSBool
+binder pfx e ESInt                  = return BSInt
 binder pfx e (ESLit xs)             = binderList pfx BSLit e xs
 binder pfx e (ESClosedRange x y)    = binder2 pfx BSClosedRange e x y
 binder pfx e (ESOpenRange x)        = binder1 pfx BSOpenRange e x
@@ -113,6 +128,8 @@ binder pfx e (ESDistIntersection x) = binder1 pfx BSDistIntersection e x
 binder pfx e (EQSet x)              = binder1 pfx BQSet e x
 binder pfx e (ESPowerset x)         = binder1 pfx BSPowerset e x
 binder pfx e (ESSequenceset x)      = binder1 pfx BSSequenceset e x
+binder pfx e (ESTupleProduct xs)    = binderList pfx BSTupleProduct e xs
+binder pfx e (ESDotProduct x y)     = binder2 pfx BSDotProduct e x y
 
 -- Booleans
 
@@ -135,6 +152,10 @@ binder pfx e (ESEmpty x)     = binder1 pfx BSEmpty e x
 -- Tuples
 
 binder pfx e (ETLit xs) = binderList pfx BTLit e xs
+
+-- Dots
+
+binder pfx e (EDot x y) = binder2 pfx BDot e x y
 
 -- Lambdas
 
@@ -165,9 +186,13 @@ binder pfx e (EExtractMatch id p x) = do
   x' <- binder pfx e x
   return $ BExtractMatch id p x'
 
--- Events
+-- Constructors
 
-binder pfx e (EEvent a) = return $ BEvent a
+binder pfx e (EConstructor id) = return $ BConstructor id
+
+-- Channels
+
+binder pfx e (EChannel id) = return $ BChannel id
 
 -- Processes
 
@@ -213,3 +238,7 @@ binder pfx e (EHide p alpha) = do
 binder pfx e (ERExtChoice ps) = do
   dest <- newProcess pfx
   binder1 pfx (BRExtChoice dest) e ps
+
+binder pfx e (ERIntChoice ps) = do
+  dest <- newProcess pfx
+  binder1 pfx (BRIntChoice dest) e ps

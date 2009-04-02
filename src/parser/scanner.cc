@@ -48,6 +48,9 @@ namespace hst_parser
             if (ch == '\n')
             {
                 loc->lines(1);
+
+                // Bison 2.3 numbers columns from 0
+                loc->end.column = 1;
             }
             loc->step();
 
@@ -67,6 +70,9 @@ namespace hst_parser
         if (ch == '\n')
         {
             loc->lines(1);
+
+            // Bison 2.3 numbers columns from 0
+            loc->end.column = 1;
         } else {
             loc->columns(1);
         }
@@ -381,6 +387,9 @@ namespace hst_parser
             } else if (*id == "rextchoice") {
                 delete id;
                 return token::REXTCHOICE;
+            } else if (*id == "rintchoice") {
+                delete id;
+                return token::RINTCHOICE;
             } else if (*id == "seqcomp") {
                 delete id;
                 return token::SEQCOMP;

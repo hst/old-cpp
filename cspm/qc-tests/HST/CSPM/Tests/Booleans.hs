@@ -39,24 +39,24 @@ prop_BoolAnd = forAll (two eboolean) tester
     where
       tester (eb1, eb2) = v0 == v12
           where
-            v0 = evaluate emptyRootEnv (EBAnd eb1 eb2)
-            b1 = evaluateWith evalAsBoolean emptyRootEnv eb1
-            b2 = evaluateWith evalAsBoolean emptyRootEnv eb2
+            v0 = evaluateRootExpression emptyScriptContext (EBAnd eb1 eb2)
+            b1 = evaluateWith evalAsBoolean emptyScriptContext eb1
+            b2 = evaluateWith evalAsBoolean emptyScriptContext eb2
             v12 = VBoolean (b1 && b2)
 
 prop_BoolOr = forAll (two eboolean) tester
     where
       tester (eb1, eb2) = v0 == v12
           where
-            v0 = evaluate emptyRootEnv (EBOr eb1 eb2)
-            b1 = evaluateWith evalAsBoolean emptyRootEnv eb1
-            b2 = evaluateWith evalAsBoolean emptyRootEnv eb2
+            v0 = evaluateRootExpression emptyScriptContext (EBOr eb1 eb2)
+            b1 = evaluateWith evalAsBoolean emptyScriptContext eb1
+            b2 = evaluateWith evalAsBoolean emptyScriptContext eb2
             v12 = VBoolean (b1 || b2)
 
 prop_BoolNot = forAll eboolean tester
     where
       tester eb1 = v0 == v1
           where
-            v0 = evaluate emptyRootEnv (EBNot eb1)
-            b1 = evaluateWith evalAsBoolean emptyRootEnv eb1
+            v0 = evaluateRootExpression emptyScriptContext (EBNot eb1)
+            b1 = evaluateWith evalAsBoolean emptyScriptContext eb1
             v1 = VBoolean (not b1)

@@ -23,11 +23,14 @@
 module HST.CSPM.Types where
 
 import Control.Monad.State
+import Data.List (intercalate)
 import Data.Map (Map)
 import qualified Data.Map as Map
+import Data.Maybe (mapMaybe)
 
 import HST.CSP0
 import HST.CSPM.Sets (Set)
+import qualified HST.CSPM.Sets as Sets
 
 -- Identifiers
 
@@ -64,6 +67,13 @@ data Env
       }
     deriving (Eq, Ord)
 
+data ScriptContext a
+    = ScriptContext {
+        env    :: Env,
+        events :: a
+      }
+    deriving (Eq, Ord)
+
 -- Values
 
 data ProcPair = ProcPair Process (ScriptTransformer ())
@@ -93,8 +103,10 @@ data Value
     | VSet (Set Value)
     | VBoolean Bool
     | VTuple [Value]
+    | VDot [Value]
     | VLambda String Env [LambdaClause]
-    | VEvent Event
+    | VConstructor Identifier
+    | VChannel Identifier
     | VProcess ProcPair
     deriving (Eq, Ord)
 
@@ -105,8 +117,10 @@ instance Show Value where
     show (VSet s)           = "{" ++ show s ++ "}"
     show (VBoolean b)       = show b
     show (VTuple t)         = "(" ++ show t ++ ")"
+    show (VDot d)           = intercalate "." (map show d)
     show (VLambda pfx e cs) = "\\ [" ++ show pfx ++ "] " ++ show cs
-    show (VEvent a)         = show a
+    show (VConstructor id)  = "[:" ++ show id ++ ":]"
+    show (VChannel id)      = "<:" ++ show id ++ ":>"
 
     show (VProcess (ProcPair p _)) = "[proc " ++ show p ++ "]"
 
@@ -119,6 +133,19 @@ instance Show Value where
                       where
                         showl []     = id
                         showl (x:xs) = showChar ',' . shows x . showl xs
+
+eventNames :: [Value] -> String
+eventNames v = intercalate "." $ map eventName v
+
+eventName :: Value -> String
+eventName (VNumber i)       = show i
+eventName (VSequence l)     = eventNames l
+eventName (VSet s)          = eventNames $ Sets.toList s
+eventName (VBoolean b)      = show b
+eventName (VTuple l)        = eventNames l
+eventName (VDot l)          = eventNames l
+eventName (VConstructor id) = show id
+eventName (VChannel id)     = show id
 
 coerceNumber :: Value -> Int
 coerceNumber (VNumber i) = i
@@ -135,11 +162,20 @@ coerceBoolean (VBoolean b) = b
 coerceTuple :: Value -> [Value]
 coerceTuple (VTuple t) = t
 
-coerceEvent :: Value -> Event
-coerceEvent (VEvent a) = a
+coerceDot :: Value -> [Value]
+coerceDot (VDot d) = d
 
 coerceProcess :: Value -> ProcPair
 coerceProcess (VProcess pp) = pp
+
+-- A smart constructor for VDots; ensures that dot values are
+-- “flattened”.
+
+vDot :: Value -> Value -> Value
+vDot (VDot d1) (VDot d2) = VDot (d1 ++ d2)
+vDot (VDot d1) y         = VDot (d1 ++ [y])
+vDot x         (VDot d2) = VDot (x : d2)
+vDot x         y         = VDot [x,y]
 
 -- Patterns
 
@@ -148,6 +184,7 @@ data Pattern
     | PWildcard
     | PIdentifier Identifier
     | PTuple [Pattern]
+    | PDot Pattern Pattern
     | PQLit [Pattern]
     | PQConcat Pattern Pattern
     | PSEmpty
@@ -162,6 +199,7 @@ instance Show Pattern where
     show (PWildcard)          = "_"
     show (PIdentifier id)     = show id
     show (PTuple pt)          = "(" ++ show pt ++ ")"
+    show (PDot p1 p2)         = show p1 ++ "." ++ show p2
     show (PQLit pq)           = "<" ++ show pq ++ ">"
     show (PQConcat p1 p2)     = show p1 ++ "^" ++ show p2
     show (PSEmpty)            = "{}"
@@ -191,7 +229,40 @@ data Definition
     | DLambdaClause Identifier LambdaClause
     | DLambda Identifier [LambdaClause]
     | DSimpleChannel Identifier
+    | DComplexChannel Identifier Expression
+    | DNametype Identifier Expression
+    | DDatatype Identifier [DConstructor]
     deriving (Eq, Ord, Show)
+
+data DConstructor
+    = DSimpleConstructor Identifier
+    | DDataConstructor Identifier Expression
+      deriving (Eq, Ord, Show)
+
+constructorValues :: DConstructor -> Expression
+constructorValues (DSimpleConstructor id)
+    = ESLit [EConstructor id]
+constructorValues (DDataConstructor id x)
+    = ESDotProduct (ESLit [EConstructor id]) x
+
+constructorsValues :: [DConstructor] -> Expression
+constructorsValues cs = ESDistUnion $ ESLit $ map constructorValues cs
+
+constructorBinding :: DConstructor -> Binding
+constructorBinding (DSimpleConstructor id) = Binding id $ EConstructor id
+constructorBinding (DDataConstructor id _) = Binding id $ EConstructor id
+
+definitionProductions :: Definition -> Maybe Expression
+definitionProductions (DSimpleChannel id)
+    = Just $ ESLit [EChannel id]
+definitionProductions (DComplexChannel id x)
+    = Just $ ESDotProduct (ESLit [EChannel id]) x
+definitionProductions _ = Nothing
+
+definitionsProductions :: [Definition] -> Expression
+definitionsProductions defs
+    = ESDistUnion $ ESLit $ mapMaybe definitionProductions defs
+
 
 -- Expressions
 
@@ -218,6 +289,8 @@ data Expression
     -- TODO: sequence comprehension
 
     -- Expressions which evaluate to a set
+    | ESBool
+    | ESInt
     | ESLit [Expression]
     | ESClosedRange Expression Expression
     | ESOpenRange Expression
@@ -229,6 +302,8 @@ data Expression
     | EQSet Expression
     | ESPowerset Expression
     | ESSequenceset Expression
+    | ESTupleProduct [Expression]
+    | ESDotProduct Expression Expression
     -- TODO: set comprehension
 
     -- Expressions which evaluate to a boolean
@@ -251,6 +326,9 @@ data Expression
     -- Expressions which evaluate to a tuple
     | ETLit [Expression]
 
+    -- Expressions which evaluate to a dot
+    | EDot Expression Expression
+
     -- Expressions which evaluate to a lambda
     | ELambda [LambdaClause]
 
@@ -264,8 +342,11 @@ data Expression
     | EValue Value
     | EExtractMatch Identifier Pattern Expression
 
-    -- Expressions which evaluate to an event
-    | EEvent Event
+    -- Expressions which evaluate to a constructor
+    | EConstructor Identifier
+
+    -- Expressions which evaluate to a channel
+    | EChannel Identifier
 
     -- Expressions which evaluate to a process
     | EStop
@@ -281,6 +362,7 @@ data Expression
     | EHide Expression Expression
     -- | ERename Expression Expression
     | ERExtChoice Expression
+    | ERIntChoice Expression
 
     deriving (Eq, Ord)
 
@@ -303,6 +385,8 @@ instance Show Expression where
     show (EQConcat s t)      = "concat(" ++ show s ++ ", " ++ show t ++ ")"
     show (EQTail s)          = "tail(" ++ show s ++ ")"
 
+    show ESBool                  = "Bool"
+    show ESInt                   = "Int"
     show (ESLit xs)              = "{" ++ show xs ++ "}"
     show (ESClosedRange m n)     = "{" ++ show m ++ ".." ++ show n ++ "}"
     show (ESOpenRange m)         = "{" ++ show m ++ "..}"
@@ -314,6 +398,8 @@ instance Show Expression where
     show (EQSet q0)              = "set(" ++ show q0 ++ ")"
     show (ESPowerset s1)         = "Set(" ++ show s1 ++ ")"
     show (ESSequenceset s1)      = "Seq(" ++ show s1 ++ ")"
+    show (ESTupleProduct xs)     = "(:" ++ show xs ++ ":)"
+    show (ESDotProduct x y)      = "(:" ++ show x ++ "." ++ show y ++ ":)"
 
     show EBTrue            = "true"
     show EBFalse           = "false"
@@ -333,6 +419,8 @@ instance Show Expression where
 
     show (ETLit xs) = "(" ++ show xs ++ ")"
 
+    show (EDot x y) = show x ++ "." ++ show y
+
     show (ELambda cs) = "\\ " ++ show cs
 
     show (EVar id) = show id
@@ -349,7 +437,9 @@ instance Show Expression where
     show (EExtractMatch id p x) = "<<extract " ++ show id ++ " from " ++
                                   show p ++ " = " ++ show x ++ ">>"
 
-    show (EEvent a) = show a
+    show (EConstructor id) = "[:" ++ show id ++ ":]"
+
+    show (EChannel id) = "<:" ++ show id ++ ":>"
 
     show EStop = "STOP"
     show ESkip = "SKIP"
@@ -365,6 +455,7 @@ instance Show Expression where
                                        " || " ++ show beta ++ "] " ++ show q
     show (EHide p alpha) = show p ++ " \\ " ++ show alpha
     show (ERExtChoice ps) = "[] " ++ show ps
+    show (ERIntChoice ps) = "|~| " ++ show ps
 
     -- We don't want to show the [] brackets when showing a list of
     -- expressions, since we're going to use different brackets
@@ -402,6 +493,8 @@ data BoundExpression
     -- TODO: sequence comprehension
 
     -- Expressions which evaluate to a set
+    | BSBool
+    | BSInt
     | BSLit [BoundExpression]
     | BSClosedRange BoundExpression BoundExpression
     | BSOpenRange BoundExpression
@@ -413,6 +506,8 @@ data BoundExpression
     | BQSet BoundExpression
     | BSPowerset BoundExpression
     | BSSequenceset BoundExpression
+    | BSTupleProduct [BoundExpression]
+    | BSDotProduct BoundExpression BoundExpression
     -- TODO: set comprehension
 
     -- Expressions which evaluate to a boolean
@@ -435,6 +530,9 @@ data BoundExpression
     -- Expressions which evaluate to a tuple
     | BTLit [BoundExpression]
 
+    -- Expressions which evaluate to a dot
+    | BDot BoundExpression BoundExpression
+
     -- Expressions which evaluate to a lambda
     | BLambda String Env [LambdaClause]  -- yep, that contains Expr, not BoundExpr
 
@@ -446,8 +544,11 @@ data BoundExpression
     | BValue Value
     | BExtractMatch Identifier Pattern BoundExpression
 
-    -- Expression which can evaluate to an event
-    | BEvent Event
+    -- Expression which can evaluate to a constructor
+    | BConstructor Identifier
+
+    -- Expression which can evaluate to a channel
+    | BChannel Identifier
 
     -- Expression which can evaluate to a process
     | BStop
@@ -463,6 +564,7 @@ data BoundExpression
     | BHide Process BoundExpression BoundExpression
     -- | BRename Process BoundExpression BoundExpression
     | BRExtChoice Process BoundExpression
+    | BRIntChoice Process BoundExpression
 
     deriving (Eq, Ord)
 
@@ -486,6 +588,8 @@ instance Show BoundExpression where
     show (BQConcat s t)      = "concat(" ++ show s ++ ", " ++ show t ++ ")"
     show (BQTail s)          = "tail(" ++ show s ++ ")"
 
+    show BSBool                  = "Bool"
+    show BSInt                   = "Int"
     show (BSLit xs)              = "{" ++ show xs ++ "}"
     show (BSClosedRange m n)     = "{" ++ show m ++ ".." ++ show n ++ "}"
     show (BSOpenRange m)         = "{" ++ show m ++ "..}"
@@ -497,6 +601,8 @@ instance Show BoundExpression where
     show (BQSet q0)              = "set(" ++ show q0 ++ ")"
     show (BSPowerset s1)         = "Set(" ++ show s1 ++ ")"
     show (BSSequenceset s1)      = "Seq(" ++ show s1 ++ ")"
+    show (BSTupleProduct xs)     = "(:" ++ show xs ++ ":)"
+    show (BSDotProduct x y)      = "(:" ++ show x ++ "." ++ show y ++ ":)"
 
     show BBTrue            = "true"
     show BBFalse           = "false"
@@ -516,6 +622,8 @@ instance Show BoundExpression where
 
     show (BTLit xs) = "(" ++ show xs ++ ")"
 
+    show (BDot x y) = show x ++ "." ++ show y
+
     show (BLambda pfx e cs) = "\\ [" ++ pfx ++ "] " ++ show cs
 
     show (BVar e id) = show id
@@ -529,7 +637,9 @@ instance Show BoundExpression where
     show (BExtractMatch id p x) = "<<extract " ++ show id ++ " from " ++
                                   show p ++ " = " ++ show x ++ ">>"
 
-    show (BEvent a) = show a
+    show (BConstructor id) = "[:" ++ show id ++ ":]"
+
+    show (BChannel id) = "<:" ++ show id ++ ":>"
 
     show BStop = "STOP"
     show BSkip = "SKIP"
@@ -555,6 +665,8 @@ instance Show BoundExpression where
                                 show p ++ " \\ " ++ show alpha ++ ")"
     show (BRExtChoice dest ps) = show dest ++ ": (" ++
                                  "[] " ++ show ps ++ ")"
+    show (BRIntChoice dest ps) = show dest ++ ": (" ++
+                                 "|~| " ++ show ps ++ ")"
 
     -- We don't want to show the [] brackets when showing a list of
     -- expressions, since we're going to use different brackets

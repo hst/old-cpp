@@ -7,7 +7,7 @@
 Use the usual main function from Cabal, with a hook for running our
 tests.
 
-> main = defaultMainWithHooks (defaultUserHooks {
+> main = defaultMainWithHooks (simpleUserHooks {
 >                                runTests = runHSTTests
 >                              })
 

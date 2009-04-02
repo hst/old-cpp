@@ -51,6 +51,7 @@ but (hopefully) more efficient.
 > patternIds PWildcard            = []
 > patternIds (PIdentifier id)     = [id]
 > patternIds (PTuple ps)          = concatMap patternIds ps
+> patternIds (PDot p1 p2)         = patternIds p1 ++ patternIds p2
 > patternIds (PQLit qs)           = concatMap patternIds qs
 > patternIds (PQConcat p1 p2)     = patternIds p1 ++ patternIds p2
 > patternIds PSEmpty              = []
@@ -98,6 +99,20 @@ the tuple match's bindings.
 >       zipper (p:ps) []     = [Nothing]
 >       zipper []     (v:vs) = [Nothing]
 >       zipper []     []     = []
+
+A dotted pattern matches a dotted value.  The LHS of the dotted
+pattern must match the “head” of the dotted value.  If the dotted
+value has only two elements, then the RHS of the dotted pattern must
+match the “last” of the dotted value.  Otherwise, it must match the
+“tail”.
+
+> valueMatches (PDot p1 p2) (VDot [v1, v2])
+>     = liftM concat $ sequence [valueMatches p1 v1,
+>                                valueMatches p2 v2]
+
+> valueMatches (PDot p1 p2) (VDot (v1:v2))
+>     = liftM concat $ sequence [valueMatches p1 v1,
+>                                valueMatches p2 (VDot v2)]
 
 A sequence pattern matches a sequence value, but only if all of the
 sub-patterns match all of the respective sub-values.  If the sequences

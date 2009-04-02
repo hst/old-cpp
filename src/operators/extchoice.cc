@@ -29,7 +29,6 @@
 #include <hst/types.hh>
 #include <hst/lts.hh>
 #include <hst/csp.hh>
-#include <hst/csp-macros.hh>
 
 using namespace std;
 

@@ -84,6 +84,7 @@
 >   "[="         { TRefinedBy $$ }
 >   and          { TAnd }
 >   assert       { TAssert }
+>   bool         { TBool }
 >   card         { TCard }
 >   channel      { TChannel }
 >   chaos        { TChaos }
@@ -98,10 +99,12 @@
 >   false        { TFalse }
 >   head         { THead }
 >   if           { TIf }
+>   int          { TInt }
 >   inter        { TInter }
 >   length       { TLength }
 >   let          { TLet }
 >   member       { TMember }
+>   nametype     { TNametype }
 >   not          { TNot }
 >   null         { TNull }
 >   or           { TOr }
@@ -161,16 +164,36 @@
 >             | PNewlines                    { () }
 
 > PDefinitions :: { [Definition] }
-> PDefinitions  : PDefinition                { [$1] }
+> PDefinitions  : PDefinition                { $1 }
 >               | PDefinitions PNewlines
->                 PDefinition                { $1 ++ [$3] }
+>                 PDefinition                { $1 ++ $3 }
 
-> PDefinition :: { Definition }
-> PDefinition  : PPattern "=" PExpr          { DPatternDefn $1 $3 }
+> PDefinition :: { [Definition] }
+> PDefinition  : PPattern "=" PExpr          { [DPatternDefn $1 $3] }
 >              | PId "(" PPatterns0 ")"
->                "=" PExpr                   { DLambdaClause $1 $
->                                              Clause (PTuple $3) $6 }
->              | channel PId                 { DSimpleChannel $2 }
+>                "=" PExpr                   { [DLambdaClause $1 $
+>                                              Clause (PTuple $3) $6] }
+>              | channel PChannels           { $2 }
+>              | nametype PId "=" PType      { [DNametype $2 $4] }
+>              | datatype PId "="
+>                PConstructors               { [DDatatype $2 $4] }
+
+> PChannels :: { [Definition] }
+> PChannels  : PChannel                      { [$1] }
+>            | PChannels "," PChannel        { $1 ++ [$3] }
+
+> PChannel :: { Definition }
+> PChannel  : PId                            { DSimpleChannel $1 }
+>           | PId ":" PType                  { DComplexChannel $1 $3 }
+
+> PConstructors :: { [DConstructor] }
+> PConstructors  : PConstructor              { [$1] }
+>                | PConstructors "|"
+>                  PConstructor              { $1 ++ [$3] }
+
+> PConstructor :: { DConstructor }
+> PConstructor  : PId                        { DSimpleConstructor $1 }
+>               | PId "." PType              { DDataConstructor $1 $3 }
 
 > PPatterns :: { [Pattern] }
 > PPatterns  : PPattern                      { [$1] }
@@ -186,6 +209,7 @@
 >           | PId                            { PIdentifier $1 }
 >           | "(" PPattern ","
 >             PPatterns0 ")"                 { PTuple ($2:$4) }
+>           | PPattern "." PPattern          { PDot $1 $3 }
 >           | "<" PPatterns0 ">"             { PQLit $2 }
 >           | PPattern "^" PPattern          { PQConcat $1 $3 }
 >           | "{" "}"                        { PSEmpty }
@@ -221,6 +245,7 @@
 >        | PSet_                             { $1 }
 >        | PBoolean_                         { $1 }
 >        | PTuple_                           { $1 }
+>        | PDot_                             { $1 }
 >        | PLambda_                          { $1 }
 >        | PProc_                            { $1 }
 >        | PAny_                             { $1 }
@@ -245,7 +270,9 @@
 >             | tail "(" PExpr ")"           { EQTail $3 }
 
 > PSet_ :: { Expression }
-> PSet_  : "{" PExprs0 "}"                   { ESLit $2 }
+> PSet_  : bool                              { ESBool }
+>        | int                               { ESInt }
+>        | "{" PExprs0 "}"                   { ESLit $2 }
 >        | "{" PExpr ".." PExpr "}"          { ESClosedRange $2 $4 }
 >        | "{" PExpr ".." "}"                { ESOpenRange $2 }
 >        | union "(" PExpr "," PExpr ")"     { ESUnion $3 $5 }
@@ -278,6 +305,9 @@
 > PTuple_ :: { Expression }
 > PTuple_  : "(" PExpr "," PExprs0 ")"       { ETLit ($2:$4) }
 
+> PDot_ :: { Expression }
+> PDot_  : PExpr "." PExpr                   { EDot $1 $3 }
+
 > PLambda_ :: { Expression }
 > PLambda_  : "\\" PIds "@" PExpr
 >             { ELambda [Clause (PTuple $ map PIdentifier $2) $4] }
@@ -296,6 +326,7 @@
 >           PExpr "]" PExpr                  { EAParallel $1 $3 $5 $7 }
 >         | PExpr "\\" PExpr                 { EHide $1 $3 }
 >         | "[]" PExpr                       { ERExtChoice $2 }
+>         | "|~|" PExpr                      { ERIntChoice $2 }
 
 > PAny_ :: { Expression }
 > PAny_  : PId                               { EVar $1 }
@@ -304,6 +335,29 @@
 >        | PExpr "(" PExprs0 ")"             { EApply $1 $3 }
 >        | head "(" PExpr ")"                { EQHead $3 }
 >        | if PExpr then PExpr else PExpr    { EIfThenElse $2 $4 $6 }
+
+> PType :: { Expression }
+> PType  : bool                              { ESBool }
+>        | int                               { ESInt }
+>        | "{" PExprs0 "}"                   { ESLit $2 }
+>        | "{" PExpr ".." PExpr "}"          { ESClosedRange $2 $4 }
+>        | "{" PExpr ".." "}"                { ESOpenRange $2 }
+>        | "(" PType "," PTypes ")"          { ESTupleProduct ($2:$4) }
+>        | PType "." PType                   { ESDotProduct $1 $3 }
+>        | union "(" PType "," PType ")"     { ESUnion $3 $5 }
+>        | inter "(" PType "," PType ")"     { ESIntersection $3 $5 }
+>        | diff "(" PType "," PType ")"      { ESDifference $3 $5 }
+>        | dunion "(" PType ")"              { ESDistUnion $3 }
+>        | dinter "(" PType ")"              { ESDistIntersection $3 }
+>        | set "(" PType ")"                 { EQSet $3 }
+>        | powerset "(" PType ")"            { ESPowerset $3 }
+>        | sequenceset "(" PType ")"         { ESSequenceset $3 }
+>        | PId                               { EVar $1 }
+>        | PId "(" PTypes ")"                { EApply (EVar $1) $3 }
+
+> PTypes :: { [Expression] }
+> PTypes  : PType                            { [$1] }
+>         | PTypes "," PType                 { $1 ++ [$3] }
 
 > PSimpleDefns :: { [Definition] }
 > PSimpleDefns  : PSimpleDefn                { [$1] }

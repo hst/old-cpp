@@ -44,8 +44,6 @@
 
 #define HST_INITIAL_KEY_ARRAY_SIZE  16
 
-using namespace std;
-
 namespace hst
 {
     typedef unsigned long  zobrist_key_t;
@@ -85,7 +83,7 @@ namespace hst
         zobrist_key_t get_key(const unsigned long element);
     };
 
-    void print_zobrist_key(ostream &stream, const zobrist_key_t key);
+    void print_zobrist_key(std::ostream &stream, const zobrist_key_t key);
 }
 
 #endif // HST_ZOBRIST_HH

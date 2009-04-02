@@ -26,6 +26,8 @@
 
 #include <hst/intset.hh>
 
+using namespace std;
+
 namespace hst
 {
     zobrist_t intset_t::hash_keys;

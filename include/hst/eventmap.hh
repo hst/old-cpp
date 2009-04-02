@@ -26,7 +26,8 @@
 
 #include <assert.h>
 #include <iostream>
-#include <tr1/memory>
+
+#include <boost/shared_ptr.hpp>
 
 #include <judyarray/judy_funcs_wrappers.h>
 #include <judy_set_cell.h>
@@ -38,20 +39,17 @@
 #define HST_EVENTMAP_DEBUG 0
 #endif
 
-using namespace std;
-
 namespace hst
 {
-
-    typedef pair<event_t, event_t>   eventpair_t;
-    typedef shared_ptr<eventpair_t>  eventpair_p;
+    typedef std::pair<event_t, event_t>   eventpair_t;
+    typedef boost::shared_ptr<eventpair_t>  eventpair_p;
 
     class eventmap_t
     {
     protected:
         typedef judy_map_l<event_t, alphabet_p,
                            event_t_hasher>       map_t;
-        typedef shared_ptr<map_t>                map_p;
+        typedef boost::shared_ptr<map_t>                map_p;
 
         map_t  map;
 
@@ -265,11 +263,13 @@ namespace hst
         }
     };
 
-    typedef shared_ptr<eventmap_t>        eventmap_p;
-    typedef shared_ptr<const eventmap_t>  eventmap_cp;
+    typedef boost::shared_ptr<eventmap_t>        eventmap_p;
+    typedef boost::shared_ptr<const eventmap_t>  eventmap_cp;
 
-    istream &operator >> (istream &stream, eventmap_t &map);
-    ostream &operator << (ostream &stream, const eventmap_t &map);
+    std::istream &operator >> (std::istream &stream,
+                   eventmap_t &map);
+    std::ostream &operator << (std::ostream &stream,
+                   const eventmap_t &map);
 }
 
 #endif // HST_EVENTMAP_H

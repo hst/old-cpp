@@ -43,5 +43,5 @@ prop_LambdaSum = forAll enumber tester
             e02 = EApply (EVar f) [en]
             e0 = ELet [DPatternDefn (PIdentifier f) e01] e02
             e1 = ENSum en (ENLit 5)
-            v0 = evaluate emptyRootEnv e0
-            v1 = evaluate emptyRootEnv e1
+            v0 = evaluateRootExpression emptyScriptContext e0
+            v1 = evaluateRootExpression emptyScriptContext e1

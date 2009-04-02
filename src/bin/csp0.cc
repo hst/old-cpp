@@ -28,12 +28,13 @@
 #include <fstream>
 #include <iostream>
 
-#include <tr1/memory>
+#include <boost/shared_ptr.hpp>
 
 #include <hst/csp.hh>
 #include <hst/assertions.hh>
 
 using namespace std;
+using namespace boost;
 using namespace hst;
 
 /*
