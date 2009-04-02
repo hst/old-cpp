@@ -1,0 +1,26 @@
+Douglas Creager (24):
+      Adding scripts for creating Mac OS X installation package
+      Including “cspm” in Mac OS X installation package
+      Mac OS X packaging script creates disk image
+      Merge branch 'master' into rel
+      Updating CSPM libraries to work with GHC 6.10 and Cabal 1.6
+      Single-line comments
+      Block comments
+      Use shared_ptr from Boost instead of from the TR1 standard
+      Removing “doc” target from “make all”
+      Remove tabs from source files
+      Using Markdown for documentation
+      Include error messages in expected CSP₀ test outputs
+      Replicated internal choice
+      Int and Bool built-in types
+      “nametype” statements
+      Product types
+      Multiple channels
+      Fixed column numbers when using Bison 2.3
+      Dotted values
+      Dotted values in “nametype” statements
+      Dotted values in patterns
+      Simple datatypes
+      Complex datatypes
+      Complex channels
+

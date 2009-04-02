@@ -1,7 +1,7 @@
 #!/bin/bash
 
 MAJOR_VERSION="1.0"
-VERSION="1.0-α3"
+VERSION="1.0-α4"
 
 PACKAGING_DIR=$PWD
 ROOT_DIR=$PWD/../..
