@@ -16,11 +16,16 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-bisimulate test-bisimulate.cc)
-target_link_libraries(test-bisimulate hst)
+add_executable(bisimulate/roundtrip test-bisimulate.cc)
+set_target_properties(
+  bisimulate/roundtrip
+  PROPERTIES
+  OUTPUT_NAME test-bisimulate
+)
+target_link_libraries(bisimulate/roundtrip hst)
 foreach(_test ${TESTS})
   add_test(
-    bisimulate:${_test}
+    bisimulate:roundtrip:${_test}
     bash -c "./test-bisimulate < ${_test}.input | cmp - ${_test}.output"
   )
 endforeach(_test)

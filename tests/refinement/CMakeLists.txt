@@ -26,8 +26,13 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-traces-refinement test-traces-refinement.cc)
-target_link_libraries(test-traces-refinement hst)
+add_executable(refinement/traces test-traces-refinement.cc)
+set_target_properties(
+  refinement/traces
+  PROPERTIES
+  OUTPUT_NAME test-traces-refinement
+)
+target_link_libraries(refinement/traces hst)
 foreach(_test ${TESTS})
   add_test(
     refinement:traces:${_test}
@@ -36,8 +41,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-failures-refinement test-failures-refinement.cc)
-target_link_libraries(test-failures-refinement hst)
+add_executable(refinement/failures test-failures-refinement.cc)
+set_target_properties(
+  refinement/failures
+  PROPERTIES
+  OUTPUT_NAME test-failures-refinement
+)
+target_link_libraries(refinement/failures hst)
 foreach(_test ${TESTS})
   add_test(
     refinement:failures:${_test}

@@ -19,8 +19,13 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-eventmap-count test-eventmap-count.cc)
-target_link_libraries(test-eventmap-count hst)
+add_executable(eventmap/count test-eventmap-count.cc)
+set_target_properties(
+  eventmap/count
+  PROPERTIES
+  OUTPUT_NAME test-eventmap-count
+)
+target_link_libraries(eventmap/count hst)
 foreach(_test ${TESTS})
   add_test(
     eventmap:count:${_test}
@@ -28,8 +33,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-eventmap-pairs test-eventmap-pairs.cc)
-target_link_libraries(test-eventmap-pairs hst)
+add_executable(eventmap/pairs test-eventmap-pairs.cc)
+set_target_properties(
+  eventmap/pairs
+  PROPERTIES
+  OUTPUT_NAME test-eventmap-pairs
+)
+target_link_libraries(eventmap/pairs hst)
 foreach(_test ${TESTS})
   add_test(
     eventmap:pairs:${_test}

@@ -16,8 +16,13 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-intsetset test-intsetset.cc)
-target_link_libraries(test-intsetset hst)
+add_executable(intsetset/intsetset test-intsetset.cc)
+target_link_libraries(intsetset/intsetset hst)
+set_target_properties(
+  intsetset/intsetset
+  PROPERTIES
+  OUTPUT_NAME test-intsetset
+)
 foreach(_test ${TESTS})
   add_test(
     intsetset:roundtrip:${_test}
@@ -25,8 +30,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-difference test-difference.cc)
-target_link_libraries(test-difference hst)
+add_executable(intsetset/difference test-difference.cc)
+set_target_properties(
+  intsetset/difference
+  PROPERTIES
+  OUTPUT_NAME test-difference
+)
+target_link_libraries(intsetset/difference hst)
 foreach(_test ${TESTS})
   add_test(
     intsetset:difference:${_test}
@@ -34,8 +44,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-intersection test-intersection.cc)
-target_link_libraries(test-intersection hst)
+add_executable(intsetset/intersection test-intersection.cc)
+set_target_properties(
+  intsetset/intersection
+  PROPERTIES
+  OUTPUT_NAME test-intersection
+)
+target_link_libraries(intsetset/intersection hst)
 foreach(_test ${TESTS})
   add_test(
     intsetset:intersection:${_test}
@@ -43,8 +58,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-overlap test-overlap.cc)
-target_link_libraries(test-overlap hst)
+add_executable(intsetset/overlap test-overlap.cc)
+set_target_properties(
+  intsetset/overlap
+  PROPERTIES
+  OUTPUT_NAME test-overlap
+)
+target_link_libraries(intsetset/overlap hst)
 foreach(_test ${TESTS})
   add_test(
     intsetset:overlap:${_test}
@@ -52,8 +72,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-union test-union.cc)
-target_link_libraries(test-union hst)
+add_executable(intsetset/union test-union.cc)
+set_target_properties(
+  intsetset/union
+  PROPERTIES
+  OUTPUT_NAME test-union
+)
+target_link_libraries(intsetset/union hst)
 foreach(_test ${TESTS})
   add_test(
     intsetset:union:${_test}

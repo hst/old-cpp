@@ -84,8 +84,13 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-csp0 test-csp0.cc)
-target_link_libraries(test-csp0 hst)
+add_executable(csp/compile test-csp0.cc)
+set_target_properties(
+  csp/compile
+  PROPERTIES
+  OUTPUT_NAME test-csp0
+)
+target_link_libraries(csp/compile hst)
 foreach(_test ${TESTS})
   add_test(
     csp:compile:${_test}
@@ -93,8 +98,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-prenormalize test-prenormalize.cc)
-target_link_libraries(test-prenormalize hst)
+add_executable(csp/prenormalize test-prenormalize.cc)
+set_target_properties(
+  csp/prenormalize
+  PROPERTIES
+  OUTPUT_NAME test-prenormalize
+)
+target_link_libraries(csp/prenormalize hst)
 foreach(_test ${TESTS})
   add_test(
     csp:prenormalize-t:${_test}
@@ -108,8 +118,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-normalize test-normalize.cc)
-target_link_libraries(test-normalize hst)
+add_executable(csp/normalize test-normalize.cc)
+set_target_properties(
+  csp/normalize
+  PROPERTIES
+  OUTPUT_NAME test-normalize
+)
+target_link_libraries(csp/normalize hst)
 foreach(_test ${TESTS})
   add_test(
     csp:normalize-t:${_test}

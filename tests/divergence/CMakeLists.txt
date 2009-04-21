@@ -16,8 +16,13 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-divergence test-divergence.cc)
-target_link_libraries(test-divergence hst)
+add_executable(normalization/divergence test-divergence.cc)
+set_target_properties(
+  normalization/divergence
+  PROPERTIES
+  OUTPUT_NAME test-divergence
+)
+target_link_libraries(normalization/divergence hst)
 foreach(_test ${TESTS})
   add_test(
     normalization:divergence:${_test}

@@ -17,8 +17,13 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-intset test-intset.cc)
-target_link_libraries(test-intset hst)
+add_executable(intset/intset test-intset.cc)
+set_target_properties(
+  intset/intset
+  PROPERTIES
+  OUTPUT_NAME test-intset
+)
+target_link_libraries(intset/intset hst)
 foreach(_test ${TESTS})
   add_test(
     intset:roundtrip:${_test}
@@ -26,8 +31,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-difference test-difference.cc)
-target_link_libraries(test-difference hst)
+add_executable(intset/difference test-difference.cc)
+set_target_properties(
+  intset/difference
+  PROPERTIES
+  OUTPUT_NAME test-difference
+)
+target_link_libraries(intset/difference hst)
 foreach(_test ${TESTS})
   add_test(
     intset:difference:${_test}
@@ -35,8 +45,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-intersection test-intersection.cc)
-target_link_libraries(test-intersection hst)
+add_executable(intset/intersection test-intersection.cc)
+set_target_properties(
+  intset/intersection
+  PROPERTIES
+  OUTPUT_NAME test-intersection
+)
+target_link_libraries(intset/intersection hst)
 foreach(_test ${TESTS})
   add_test(
     intset:intersection:${_test}
@@ -44,8 +59,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-overlap test-overlap.cc)
-target_link_libraries(test-overlap hst)
+add_executable(intset/overlap test-overlap.cc)
+set_target_properties(
+  intset/overlap
+  PROPERTIES
+  OUTPUT_NAME test-overlap
+)
+target_link_libraries(intset/overlap hst)
 foreach(_test ${TESTS})
   add_test(
     intset:overlap:${_test}
@@ -53,8 +73,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-union test-union.cc)
-target_link_libraries(test-union hst)
+add_executable(intset/union test-union.cc)
+set_target_properties(
+  intset/union
+  PROPERTIES
+  OUTPUT_NAME test-union
+)
+target_link_libraries(intset/union hst)
 foreach(_test ${TESTS})
   add_test(
     intset:union:${_test}
@@ -62,8 +87,13 @@ foreach(_test ${TESTS})
   )
 endforeach(_test)
 
-add_executable(test-superset test-superset.cc)
-target_link_libraries(test-superset hst)
+add_executable(intset/superset test-superset.cc)
+set_target_properties(
+  intset/superset
+  PROPERTIES
+  OUTPUT_NAME test-superset
+)
+target_link_libraries(intset/superset hst)
 foreach(_test ${TESTS})
   add_test(
     intset:superset:${_test}

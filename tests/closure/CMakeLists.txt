@@ -16,8 +16,13 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-closure test-closure.cc)
-target_link_libraries(test-closure hst)
+add_executable(normalization/closure test-closure.cc)
+set_target_properties(
+  normalization/closure
+  PROPERTIES
+  OUTPUT_NAME test-closure
+)
+target_link_libraries(normalization/closure hst)
 foreach(_test ${TESTS})
   add_test(
     normalization:closure:${_test}

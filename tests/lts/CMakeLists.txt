@@ -18,8 +18,13 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-lts test-lts.cc)
-target_link_libraries(test-lts hst)
+add_executable(lts/read test-lts.cc)
+set_target_properties(
+  lts/read
+  PROPERTIES
+  OUTPUT_NAME test-lts
+)
+target_link_libraries(lts/read hst)
 foreach(_test ${TESTS})
   add_test(
     lts:read:${_test}

@@ -20,11 +20,16 @@ endforeach(_test)
 
 # Finally, add compilation targets for all of the test executables.
 
-add_executable(test-equivalences test-equivalences.cc)
-target_link_libraries(test-equivalences hst)
+add_executable(equivalences/roundtrip test-equivalences.cc)
+set_target_properties(
+  equivalences/roundtrip
+  PROPERTIES
+  OUTPUT_NAME test-equivalences
+)
+target_link_libraries(equivalences/roundtrip hst)
 foreach(_test ${TESTS})
   add_test(
-    equivalences:${_test}
+    equivalences:roundtrip:${_test}
     bash -c "./test-equivalences < ${_test}.input | cmp - ${_test}.output"
   )
 endforeach(_test)
