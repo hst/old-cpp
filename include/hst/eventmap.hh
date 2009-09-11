@@ -49,7 +49,7 @@ namespace hst
     protected:
         typedef judy_map_l<event_t, alphabet_p,
                            event_t_hasher>       map_t;
-        typedef boost::shared_ptr<map_t>                map_p;
+        typedef boost::shared_ptr<map_t>         map_p;
 
         map_t  map;
 
@@ -117,7 +117,7 @@ namespace hst
             before = alphabet->size();
 
 #if HST_EVENTMAP_DEBUG
-            cerr << "old size " << _size << "/" << before << endl;
+            std::cerr << "old size " << _size << "/" << before << std::endl;
 #endif
 
             *alphabet += pair.second;
@@ -125,7 +125,7 @@ namespace hst
             _size = _size - before + after;
 
 #if HST_EVENTMAP_DEBUG
-            cerr << "new size " << _size << "/" << after << endl;
+            std::cerr << "new size " << _size << "/" << after << std::endl;
 #endif
         }
 

@@ -161,9 +161,9 @@ namespace hst
             }
 
 #if HST_INTSETSET_DEBUG
-            cerr << "  Adding element " << element << ", hash now ";
-            print_zobrist_key(cerr, _hash);
-            cerr << endl;
+            std::cerr << "  Adding element " << element << ", hash now ";
+            print_zobrist_key(std::cerr, _hash);
+            std::cerr << std::endl;
 #endif
 
             return *this;
@@ -178,7 +178,7 @@ namespace hst
             unsigned long  element_hash = element.hash();
 
 #if HST_INTSETSET_DEBUG
-            cerr << "  Removing element " << element;
+            std::cerr << "  Removing element " << element;
 #endif
 
             // If element comes from within the container, then it
@@ -198,9 +198,9 @@ namespace hst
             }
 
 #if HST_INTSETSET_DEBUG
-            cerr << ", hash now ";
-            print_zobrist_key(cerr, _hash);
-            cerr << endl;
+            std::cerr << ", hash now ";
+            print_zobrist_key(std::cerr, _hash);
+            std::cerr << std::endl;
 #endif
 
             return *this;

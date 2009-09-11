@@ -285,9 +285,9 @@ namespace hst
             }
 
 #if HST_INTSET_DEBUG
-            cerr << "  Adding element " << element << ", hash now ";
-            print_zobrist_key(cerr, _hash);
-            cerr << endl;
+            std::cerr << "  Adding element " << element << ", hash now ";
+            print_zobrist_key(std::cerr, _hash);
+            std::cerr << std::endl;
 #endif
 
             return *this;
@@ -313,9 +313,9 @@ namespace hst
             }
 
 #if HST_INTSET_DEBUG
-            cerr << "  Removing element " << element << ", hash now ";
-            print_zobrist_key(cerr, _hash);
-            cerr << endl;
+            std::cerr << "  Removing element " << element << ", hash now ";
+            print_zobrist_key(std::cerr, _hash);
+            std::cerr << std::endl;
 #endif
 
             return *this;

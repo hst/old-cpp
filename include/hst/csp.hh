@@ -1,6 +1,6 @@
 /*----------------------------------------------------------------------
  *
- *  Copyright © 2007, 2008 Douglas Creager
+ *  Copyright © 2007-2009 Douglas Creager
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -240,13 +240,13 @@ namespace hst
         state_t add_process(const std::string &name)
         {
 #if HST_CSP_DEBUG
-            cerr << "Adding process " << name;
+            std::cerr << "Adding process " << name;
 #endif
 
             state_t state = _lts.add_state(name);
 
 #if HST_CSP_DEBUG
-            cerr << " = " << state << endl;
+            std::cerr << " = " << state << std::endl;
 #endif
 
             _state_symbol_table.insert(make_pair(name, state));
@@ -256,8 +256,8 @@ namespace hst
         void alias_process(const std::string &name, state_t process)
         {
 #if HST_CSP_DEBUG
-            cerr << "Aliasing process " << name
-                 << " = " << process << endl;
+            std::cerr << "Aliasing process " << name
+                 << " = " << process << std::endl;
 #endif
 
             _state_symbol_table.insert(make_pair(name, process));
@@ -266,13 +266,13 @@ namespace hst
         event_t add_event(const std::string &name)
         {
 #if HST_CSP_DEBUG
-            cerr << "Adding event " << name;
+            std::cerr << "Adding event " << name;
 #endif
 
             event_t event = _lts.add_event(name);
 
 #if HST_CSP_DEBUG
-            cerr << " = " << event << endl;
+            std::cerr << " = " << event << std::endl;
 #endif
 
             _event_symbol_table.insert(make_pair(name, event));
@@ -282,7 +282,7 @@ namespace hst
         state_t get_process(const std::string &name) const
         {
 #if HST_CSP_DEBUG
-            cerr << "Retrieving process " << name;
+            std::cerr << "Retrieving process " << name;
 #endif
 
             state_name_map_t::const_iterator  it =
@@ -291,12 +291,12 @@ namespace hst
             if (it == _state_symbol_table.end())
             {
 #if HST_CSP_DEBUG
-                cerr << ", not found" << endl;
+                std::cerr << ", not found" << std::endl;
 #endif
                 return HST_ERROR_STATE;
             } else {
 #if HST_CSP_DEBUG
-                cerr << " = " << it->second << endl;
+                std::cerr << " = " << it->second << std::endl;
 #endif
                 return it->second;
             }
@@ -305,7 +305,7 @@ namespace hst
         event_t get_event(const std::string &name) const
         {
 #if HST_CSP_DEBUG
-            cerr << "Retrieving event " << name;
+            std::cerr << "Retrieving event " << name;
 #endif
 
             event_name_map_t::const_iterator  it =
@@ -314,12 +314,12 @@ namespace hst
             if (it == _event_symbol_table.end())
             {
 #if HST_CSP_DEBUG
-                cerr << ", not found" << endl;
+                std::cerr << ", not found" << std::endl;
 #endif
                 return HST_ERROR_EVENT;
             } else {
 #if HST_CSP_DEBUG
-                cerr << " = " << it->second << endl;
+                std::cerr << " = " << it->second << std::endl;
 #endif
                 return it->second;
             }
